@@ -33,7 +33,7 @@
       </div>
     </div>
     <div class="left-scroll">
-      <leftNav class="left-nav" :navList="creatData.navList" :userInfo="userInfo"></leftNav>
+      <leftNav class="left-nav" ref="leftNav" :navList="creatData.navList" :userInfo="userInfo"></leftNav>
     </div>
     <div class="main-body">
       <router-view></router-view>
@@ -55,17 +55,17 @@ export default {
       active: 0,
       searchData: "",
       creatData: null,
-      userInfo:'',
+      userInfo: ""
     };
   },
-  computed:{
+  computed: {
     // ...mapState('.page',["userInfo"])
   },
   methods: {
     ...mapActions(["getUserInfo"]),
     channel(val) {
       ipc.send(val);
-    }
+    },
   },
   async beforeCreate() {
     this.creatData = await import("./js/main.json");

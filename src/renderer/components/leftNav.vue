@@ -1,6 +1,6 @@
 <template>
   <div class="nav-body">
-    <div class="user-box" @click="showUserDetail = !showUserDetail">
+    <div class="user-box" @click.stop="showUserDetail = !showUserDetail">
       <img
         :src="userInfo.profile.avatarUrl||'https://dss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3256100974,305075936&fm=26&gp=0.jpg'"
         alt
@@ -12,7 +12,7 @@
       class="title-box"
       v-for="(item,index) in navList"
       :key="index"
-      @click="selectPage(index)"
+      @click="selectPage(item.nav,index)"
       :class="['item',{'item-hover':item.nav},{active:active === index}]"
     >
       <div>
@@ -20,7 +20,8 @@
         <p :class="[item.nav?'nav':'title']">{{item.nav?item.nav:item.title}}</p>
       </div>
     </div>
-    <div class="user-detail-box" v-if="showUserDetail">
+    <div class="user-detail-box cloud-pop-box" v-ownShow="showUserDetail">
+      <!-- v-if="showUserDetail" -->
       <div class="user-top">
         <div @click="toList">
           <p>{{userInfo.profile.eventCount}}</p>
@@ -56,26 +57,51 @@ export default {
     };
   },
   methods: {
-    selectPage(index) {
+    selectPage(check, index) {
+      if (!check) return;
       this.active = index;
       if (index === 0) {
         this.$router.push("mainPage");
       }
     },
     toList() {
-      console.log('',);
       this.$router.push({
-        name:"userPage",
-        params:{
-          userId:this.userInfo.profile.userId
+        name: "userPage",
+        params: {
+          userId: this.userInfo.profile.userId
         }
       });
     },
-    openDetail(){}
+    openDetail() {}
   },
-  mounted() {
-    console.log("", this.userInfo);
-  }
+  directives: {
+    ownShow: {
+      bind: function(el, binding, vnode) {
+        el.style.display = binding.value ? "block" : "none";
+      },
+      update: function(el, binding, vnode) {
+        let _this = vnode.context,
+          value = binding.value,
+          bindData = binding.expression;
+        if (!value) {
+          el.style.display = "none";
+          _this[bindData] = false;
+        } else {
+          el.style.display = "block";
+          _this[bindData] = true;
+          let handFn = function(e) {
+            if (!el.contains(e.target)) {
+              el.style.display = "none";
+              _this[bindData] = false;
+              document.body.removeEventListener("click", handFn, false);
+            }
+          };
+          document.body.addEventListener("click", handFn);
+        }
+      }
+    }
+  },
+  mounted() {}
 };
 </script>
 
