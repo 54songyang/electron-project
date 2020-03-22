@@ -1,8 +1,8 @@
 <template>
-  <div class="nav-body">
+  <div class="nav-body" v-if="userInfo">
     <div class="user-box" @click="showUserDetail = !showUserDetail">
       <img
-        :src="userInfo.profile.avatarUrl||'https://dss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3256100974,305075936&fm=26&gp=0.jpg'"
+        :src="avatarUrl"
         alt
       />
       <p class="user-name">{{userInfo.profile.nickname}}</p>
@@ -54,6 +54,12 @@ export default {
       active: 0,
       showUserDetail: false
     };
+  },
+  computed:{
+    avatarUrl(){
+      if(!this.userInfo) return ''
+      return this.userInfo.profile.avatarUrl;
+    }
   },
   methods: {
     selectPage(index) {
