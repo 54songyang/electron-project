@@ -18,7 +18,7 @@ const actions = {
         "login/cellphone?phone=13522499772&password=s459992561"
     })
       .then(res => {
-        console.log("res", res);
+        console.log("用户登录", res);
         if (res.status === 200) {
           commit("SET_USERINFO", res.data)
         }
