@@ -9,34 +9,43 @@
   ],
   "navList": [
     {
-      "nav": "发现音乐"
+      "nav": "发现音乐",
+      "name":"mainPage"
     },
     {
-      "nav": "私人FM"
+      "nav": "私人FM",
+      "name":"ownFm"
     },
     {
-      "nav": "视频"
+      "nav": "视频",
+      "name":"videoNav"
     },
     {
-      "nav": "朋友"
+      "nav": "朋友",
+      "name":"friendNav"
     },
     {
       "title": "我的音乐"
     },
     {
-      "nav": "iTunes音乐"
+      "nav": "iTunes音乐",
+      "name":"itunesNav"
     },
     {
-      "nav": "下载管理"
+      "nav": "下载管理",
+      "name":"downLoadNav"
     },
     {
-      "nav": "我的音乐云盘"
+      "nav": "我的音乐云盘",
+      "name":"cloudNav"
     },
     {
-      "nav": "我的电台"
+      "nav": "我的电台",
+      "name":"radioNav"
     },
     {
-      "nav": "我的收藏"
+      "nav": "我的收藏",
+      "name":"collectionNav"
     },
     {
       "title": "创建的歌单"

@@ -1,10 +1,7 @@
 <template>
   <div class="nav-body">
-    <div class="user-box" @click="showUserDetail = !showUserDetail">
-      <img
-        :src="avatarUrl"
-        alt
-      />
+    <div class="user-box" @click.stop="showUserDetail = !showUserDetail">
+      <img :src="avatarUrl" alt />
       <p class="user-name">{{userInfo.profile.nickname}}</p>
       <i class="user-detail" @click="openDetail"></i>
     </div>
@@ -12,8 +9,8 @@
       class="title-box"
       v-for="(item,index) in navList"
       :key="index"
-      @click="selectPage(item.nav,index)"
-      :class="['item',{'item-hover':item.nav},{active:active === index}]"
+      @click="selectPage(item,index)"
+      :class="['item',{'item-hover':item.nav},[$route.meta.pageNav === index?'active':'']]"
     >
       <div>
         <Icon v-if="item.nav" type="ios-people" />
@@ -21,17 +18,16 @@
       </div>
     </div>
     <div class="user-detail-box cloud-pop-box" v-ownShow="showUserDetail">
-      <!-- v-if="showUserDetail" -->
       <div class="user-top">
-        <div @click="toList">
+        <div @click="toList('event','动态')">
           <p>{{userInfo.profile.eventCount}}</p>
           <span>动态</span>
         </div>
-        <div @click="toList">
+        <div @click="toList('follows','关注')">
           <p>{{userInfo.profile.follows}}</p>
           <span>关注</span>
         </div>
-        <div @click="toList">
+        <div @click="toList('followeds','粉丝')">
           <p>{{userInfo.profile.followeds}}</p>
           <span>粉丝</span>
         </div>
@@ -56,24 +52,23 @@ export default {
       showUserDetail: false
     };
   },
-  computed:{
-    avatarUrl(){
-      if(!this.userInfo) return ''
+  computed: {
+    avatarUrl() {
+      if (!this.userInfo) return "";
       return this.userInfo.profile.avatarUrl;
     }
   },
   methods: {
-    selectPage(check, index) {
-      if (!check) return;
-      this.active = index;
-      if (index === 0) {
-        this.$router.push("mainPage");
-      }
+    selectPage(item, index) {
+      if (!item) return;
+      this.$router.push(item.name);
     },
-    toList() {
+    toList(from,name) {
       this.$router.push({
         name: "userPage",
-        params: {
+        query: {
+          from,
+          name,
           userId: this.userInfo.profile.userId
         }
       });
@@ -96,7 +91,10 @@ export default {
           el.style.display = "block";
           _this[bindData] = true;
           let handFn = function(e) {
-            if (!el.contains(e.target)) {
+            if (
+              document.querySelector(".user-top").contains(e.target) ||
+              !el.contains(e.target)
+            ) {
               el.style.display = "none";
               _this[bindData] = false;
               document.body.removeEventListener("click", handFn, false);

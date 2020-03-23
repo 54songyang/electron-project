@@ -11,12 +11,17 @@
         <img class="prev" src="@/assets/images/prev1.png" alt />
       </div>
       <div class="top-tool">
-        <div
-          v-for="(item,index) in creatData.topList"
-          :key="index"
-          @click="active=index"
-          :class="{'active-nav':active===index}"
-        >{{item}}</div>
+        <div class="main-page-top" v-if="$route.path === '/mainPage'">
+          <div
+            v-for="(item,index) in creatData.topList"
+            :key="index"
+            @click="active=index"
+            :class="{'active-nav':active===index}"
+          >{{item}}</div>
+        </div>
+        <div class="user-page-title" v-if="$route.path === '/userPage'">
+          <p>{{userInfo.profile.nickname}}</p>的{{$route.query.name}}
+        </div>
       </div>
       <div class="search-box">
         <div class="input-box">
@@ -36,7 +41,7 @@
       <leftNav class="left-nav" ref="leftNav" :navList="creatData.navList" :userInfo="userInfo"></leftNav>
     </div>
     <div class="main-body">
-      <router-view></router-view>
+      <router-view :ref="$route.name"></router-view>
     </div>
     <player />
   </div>
@@ -58,14 +63,11 @@ export default {
       userInfo: ""
     };
   },
-  computed: {
-    // ...mapState('.page',["userInfo"])
-  },
   methods: {
     ...mapActions(["getUserInfo"]),
     channel(val) {
       ipc.send(val);
-    },
+    }
   },
   async beforeCreate() {
     this.creatData = await import("./js/main.json");
@@ -86,7 +88,8 @@ export default {
 }
 
 body {
-  font-family: "Source Sans Pro", sans-serif;
+  // font-family: "Source Sans Pro", sans-serif;
+  font-family: PingFangSC-Regular, sans-serif;
   cursor: pointer;
 }
 #wrapper {
@@ -181,18 +184,32 @@ body {
     align-items: center;
     width: calc(100vw - 600px);
     margin: 0 40px 0 20px;
-    div {
-      flex: 1;
-      text-align: center;
-      color: rgb(134, 134, 134);
-      &:hover {
-        color: rgb(181, 181, 181);
+    .main-page-top {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+      div {
+        flex: 1;
+        text-align: center;
+        color: rgb(134, 134, 134);
+        &:hover {
+          color: rgb(181, 181, 181);
+        }
+      }
+      .active-nav {
+        color: rgb(255, 255, 255);
+        &:hover {
+          color: rgb(255, 255, 255);
+        }
       }
     }
-    .active-nav {
-      color: rgb(255, 255, 255);
-      &:hover {
-        color: rgb(255, 255, 255);
+    .user-page-title {
+      font-size: 14px;
+      color: #fff;
+      p {
+        display: inline-block;
+        color: rgb(126, 126, 126);
       }
     }
   }
@@ -240,6 +257,7 @@ body {
   }
 }
 .left-scroll {
+  position: absolute;
   overflow-y: auto;
   overflow-x: hidden;
   height: calc(100vh - 60px);
@@ -249,14 +267,12 @@ body {
   }
 }
 .main-body {
-  position: absolute;
-  left: 196px;
-  top: 60px;
-  width: calc(100vw - 196px);
   height: calc(100vh - 120px);
-  background: rgb(37, 37, 37);
+  background: #252525;
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 0;
+  margin-left: 196px;
+  margin-top: 60px;
 }
 </style>

@@ -7,8 +7,10 @@
         :key="index"
         :class="setClass(index)"
         @click="onClick(index)"
-        :style="{backgroundImage: 'url(' + item + ')' }"
-      ></div>
+        :style="{backgroundImage: 'url(' + item.imageUrl + ')' }"
+      >
+        <div class="banner-tag">{{item.typeTitle}}</div>
+      </div>
       <i v-show="arrow" class="iconfont icon-left" @click="prev()"></i>
       <i v-show="arrow" class="iconfont icon-right" @click="next()"></i>
     </div>
@@ -35,22 +37,12 @@ export default {
   },
   props: {
     list: {
-      required: true,
+      // required: true,
       type: Array,
       default() {
         return [];
       }
     },
-    // width: {
-    //   type: String
-    // },
-    // height: {
-    //   type: String
-    // },
-    // imgType: {
-    //   type: String,
-    //   default: "percentage"
-    // },
     autoPlay: {
       type: Boolean,
       default: true
@@ -75,17 +67,6 @@ export default {
       type: String,
       default: "#e03938"
     }
-  },
-  computed: {
-    // sliderStyle() {
-    //   return {
-    //     width: this.width ? this.width + "px" : "100%",
-    //     height: this.height ? this.height + "px" : "100%",
-    //     perspective: this.width + "px",
-    //     backgroundSize:
-    //       this.imgType == "percentage" ? "100% 100%" : this.imgType
-    //   };
-    // }
   },
   mounted() {
     this.sliderDomList = this.$refs.slider.querySelectorAll("div.slider");
@@ -165,7 +146,7 @@ export default {
   .slider-content {
     position: relative;
     width: 100%;
-    height: calc(100% - 20px);
+    height: calc(100% - 5px);
     left: 0%;
     top: 0%;
     margin: 0px;
@@ -177,14 +158,14 @@ export default {
       padding: 0;
       top: 0;
       left: 50%;
-      width: 65%;
+      width: 70%;
       height: 100%;
       transition: 500ms all ease-in-out;
       background-color: #fff;
       border-radius: 8px;
       background-repeat: no-repeat;
       background-position: center;
-      background-size: inherit;
+      background-size: 100% 100%;
       transform: translate3d(-50%, 0, -80px);
       opacity: 0;
       z-index: 1;
@@ -211,13 +192,13 @@ export default {
 
       &.prev {
         opacity: 1;
-        transform: scaleY(0.8) translate3d(-75%, 0, -100px);
+        transform: scale(0.85) translate3d(-90%, 0, 100px);
         z-index: 19;
       }
 
       &.next {
         opacity: 1;
-        transform: scaleY(0.8) translate3d(-25%, 0, -100px);
+        transform: scale(0.85) translate3d(-25%, 0, -100px);
         z-index: 18;
       }
     }
@@ -256,6 +237,17 @@ export default {
           &:before {
             background-color: rgba(0, 0, 0, 0.5);
           }
+        }
+        .banner-tag {
+          position: absolute;
+          right: 0;
+          bottom: 0;
+          padding:0 10px;
+          background: rgb(198, 83, 89);
+          font-size: 12px;
+          color: #fff;
+          border-radius: 8px 0;
+          line-height:21px;
         }
       }
     }
