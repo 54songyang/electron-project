@@ -25,7 +25,7 @@ export default {
       if(!this.params.userId) this.$router.push('mainPage')
       this.$axios({
         type: "get",
-        url: `http://localhost:3000/user/follows?uid=${this.params.userId}`
+        url: `user/follows?uid=${this.params.userId}`
       })
         .then(res => {
           console.log("res", res);

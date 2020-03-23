@@ -15,6 +15,8 @@ Vue.config.productionTip = false
 Vue.use(ViewUI);
 Vue.use(VueAplayer);
 
+axios.defaults.baseURL = "http://www.request.pipicong.top/";
+
 /* eslint-disable no-new */
 new Vue({
   components: { App },

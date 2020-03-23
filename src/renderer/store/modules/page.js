@@ -15,7 +15,7 @@ const actions = {
     axios({
       type: "get",
       url:
-        "http://localhost:3000/login/cellphone?phone=13522499772&password=s459992561"
+        "login/cellphone?phone=13522499772&password=s459992561"
     })
       .then(res => {
         console.log("res", res);
