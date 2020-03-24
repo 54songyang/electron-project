@@ -23,7 +23,7 @@ function createWindow() {
     width: 1002,
     transparent: false,
     frame: false, // PS:隐藏窗口菜单
-    resizable: false,
+    resizable: true,
     movable: true,
     webPreferences: {
       nodeIntegration: true
@@ -36,19 +36,32 @@ function createWindow() {
     mainWindow = null
   })
 }
+// 退出
+// ipcMain.on('window-all-closed', () => {
+//   app.quit()
+// })
+// 最大化
+// ipcMain.on('show-window', () => {
+//   mainWindow.maximize()
+// })
+// // 还原
+// ipcMain.on('orignal-window', () => {
+//   mainWindow.unmaximize()
+// })
+
 //登录窗口最小化
-ipcMain.on('min', function () {
+ipcMain.on('min', () => {
   mainWindow.minimize();
 })
 //登录窗口最大化
-ipcMain.on('max', function () {
+ipcMain.on('max', () => {
   if (mainWindow.isMaximized()) {
-    mainWindow.restore();
+    mainWindow.unmaximize();
   } else {
     mainWindow.maximize();
   }
 })
-ipcMain.on('close', function () {
+ipcMain.on('close', () => {
   mainWindow.close();
 })
 

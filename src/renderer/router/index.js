@@ -80,7 +80,23 @@ export default new Router({
           name: 'collectionNav',
           component: require('@/view/navPage/collectionNav').default,
           meta: {
-            pageNav: 10
+            pageNav: 9
+          }
+        },
+        {
+          path: '/loveList',
+          name: 'loveList',
+          component: require('@/view/navPage/loveList').default,
+          meta: {
+            pageNav: 11
+          }
+        },
+        {
+          path: '/setInfo',
+          name: 'setInfo',
+          component: require('@/view/navPage/setInfo').default,
+          meta: {
+            pageNav: ''
           }
         },
         {

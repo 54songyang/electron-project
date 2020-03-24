@@ -1,10 +1,11 @@
 <template>
   <div id="wrapper" v-if="creatData">
+    <div class="top-cli" @click="channel('max')"></div>
     <div class="top-nav">
       <div class="tool-box">
         <div class="close" @click="channel('close')"></div>
         <div class="min" @click="channel('min')"></div>
-        <div class="max" @click="channel('max')"></div>
+        <div class="max" @click="channel('full')"></div>
       </div>
       <div class="btn-box">
         <img class="next" src="@/assets/images/next1.png" alt />
@@ -20,8 +21,10 @@
           >{{item}}</div>
         </div>
         <div class="user-page-title" v-if="$route.path === '/userPage'">
-          <p>{{userInfo.profile.nickname}}</p>的{{$route.query.name}}
+          <p>{{userInfo.profile.nickname}}</p>
+          的{{$route.query.name}}
         </div>
+        <div class="user-page-title" v-if="$route.path === '/setInfo'">编辑个人信息</div>
       </div>
       <div class="search-box">
         <div class="input-box">
@@ -38,9 +41,15 @@
       </div>
     </div>
     <div class="left-scroll">
-      <leftNav class="left-nav" ref="leftNav" :navList="creatData.navList" :userInfo="userInfo"></leftNav>
+      <leftNav
+        class="left-nav"
+        ref="leftNav"
+        @logout="logout"
+        :navList="creatData.navList"
+        :userInfo="userInfo"
+      ></leftNav>
     </div>
-    <div class="main-body">
+    <div class="main-body" @click="dayList">
       <router-view :ref="$route.name"></router-view>
     </div>
     <player />
@@ -50,8 +59,7 @@
 <script>
 import leftNav from "@/components/leftNav";
 import player from "@/components/player";
-const { ipcRenderer: ipc } = require("electron");
-import { mapActions, mapMutations, mapState } from "vuex";
+import { mapActions, mapState } from "vuex";
 export default {
   name: "home",
   components: { leftNav, player },
@@ -60,21 +68,55 @@ export default {
       active: 0,
       searchData: "",
       creatData: null,
-      userInfo: ""
+      userInfo: {}
     };
   },
   methods: {
-    ...mapActions(["getUserInfo"]),
+    ...mapActions(["renderData", "clearData"]),
     channel(val) {
-      ipc.send(val);
+      this.$electron.ipcRenderer.send(val);
+    },
+    dayList() {
+      //每日歌单推荐
+      this.$axios({
+        type: "get",
+        url: "/recommend/songs"
+      })
+        .then(res => {
+          console.log("ewe", res);
+          if (res.status === 200) {
+            console.log("res", res.data);
+          }
+        })
+        .catch(err => {
+          console.log("err", err);
+        });
+    },
+    logout() {
+      this.$axios({
+        type: "get",
+        url: "/logout"
+      })
+        .then(res => {
+          console.log("退出登录", res);
+          if (res.status === 200) {
+            localStorage.removeItem("userInfo");
+            this.clearData();
+            this.userInfo = this.$store.state.page.userInfo;
+          }
+        })
+        .catch(err => {
+          console.log("err", err);
+        });
     }
   },
   async beforeCreate() {
     this.creatData = await import("./js/main.json");
   },
-  mounted() {
-    this.getUserInfo();
+  async mounted() {
+    await this.renderData();
     this.userInfo = this.$store.state.page.userInfo;
+    console.log("this.userInfo", this.userInfo);
   }
 };
 </script>
@@ -101,6 +143,14 @@ body {
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  .top-cli {
+    position: fixed;
+    width: 100%;
+    height: 15px;
+    top: 0;
+    right: 0;
+    z-index: 1000;
+  }
 }
 .search-box {
   display: flex;

@@ -1,9 +1,12 @@
 <template>
   <div class="nav-body">
-    <div class="user-box" @click.stop="showUserDetail = !showUserDetail">
-      <img :src="avatarUrl" alt />
-      <p class="user-name">{{userInfo.profile.nickname}}</p>
-      <i class="user-detail" @click="openDetail"></i>
+    <div class="user-box-top">
+      <div class="user-box" @click.stop="showUserDetail = !showUserDetail">
+        <img v-if="Object.keys(userInfo).length>0" :src="avatarUrl" alt />
+        <img v-else src="@/assets/images/person.png" alt />
+        <p class="user-name">{{Object.keys(userInfo).length>0?userInfo.profile.nickname:'未登录'}}</p>
+        <i class="user-detail" @click="openDetail"></i>
+      </div>
     </div>
     <div
       class="title-box"
@@ -13,11 +16,15 @@
       :class="['item',{'item-hover':item.nav},[$route.meta.pageNav === index?'active':'']]"
     >
       <div>
-        <Icon v-if="item.nav" type="ios-people" />
+        <i :class="['item-icon',`icon-${item.name}`]" v-if="item.nav"></i>
         <p :class="[item.nav?'nav':'title']">{{item.nav?item.nav:item.title}}</p>
       </div>
     </div>
-    <div class="user-detail-box cloud-pop-box" v-ownShow="showUserDetail">
+    <div
+      class="user-detail-box cloud-pop-box"
+      v-if="Object.keys(userInfo).length>0"
+      v-ownShow="showUserDetail"
+    >
       <div class="user-top">
         <div @click="toList('event','动态')">
           <p>{{userInfo.profile.eventCount}}</p>
@@ -38,6 +45,33 @@
           <p>签到</p>
         </div>
       </div>
+      <div class="border"></div>
+      <div class="btn-list">
+        <div class="btn-item" @click="$electron.shell.openExternal('http://baidu.com')">
+          <div class="btn-title vip">会员中心</div>
+          <div class="btn-right">{{userInfo.profile.vipType==0?'未订购':userInfo.profile.vipType}}</div>
+        </div>
+        <div class="btn-item" @click="$electron.shell.openExternal('http://baidu.com')">
+          <div class="btn-title grade">等级</div>
+          <div class="btn-right">未订购</div>
+        </div>
+        <div class="btn-item" @click="$electron.shell.openExternal('http://baidu.com')">
+          <div class="btn-title shopping">商城</div>
+        </div>
+        <div class="border"></div>
+        <div class="btn-item" @click="$router.push('setInfo')">
+          <div class="btn-title setting">个人信息设置</div>
+          <div class="btn-right">未订购</div>
+        </div>
+        <div class="btn-item">
+          <div class="btn-title phone">绑定社交账号</div>
+          <div class="btn-right">未订购</div>
+        </div>
+        <div class="border"></div>
+        <div class="btn-item">
+          <div class="btn-title switch" @click="$emit('logout')">退出登录</div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -54,7 +88,7 @@ export default {
   },
   computed: {
     avatarUrl() {
-      if (!this.userInfo) return "";
+      if (JSON.stringify(this.userInfo) === "{}") return "";
       return this.userInfo.profile.avatarUrl;
     }
   },
@@ -63,7 +97,7 @@ export default {
       if (!item) return;
       this.$router.push(item.name);
     },
-    toList(from,name) {
+    toList(from, name) {
       this.$router.push({
         name: "userPage",
         query: {
@@ -73,7 +107,7 @@ export default {
         }
       });
     },
-    openDetail() {}
+    openDetail() {},
   },
   directives: {
     ownShow: {
@@ -91,14 +125,17 @@ export default {
           el.style.display = "block";
           _this[bindData] = true;
           let handFn = function(e) {
-            if (
-              document.querySelector(".user-top").contains(e.target) ||
-              !el.contains(e.target)
-            ) {
-              el.style.display = "none";
+            el.style.display = "none";
               _this[bindData] = false;
               document.body.removeEventListener("click", handFn, false);
-            }
+            // if (
+            //   document.querySelector(".user-top").contains(e.target) ||
+            //   !el.contains(e.target)
+            // ) {
+            //   el.style.display = "none";
+            //   _this[bindData] = false;
+            //   document.body.removeEventListener("click", handFn, false);
+            // }
           };
           document.body.addEventListener("click", handFn);
         }
@@ -117,41 +154,48 @@ export default {
   background: rgb(32, 32, 32);
   min-height: 100vh;
   color: rgb(177, 177, 177);
-  .user-box {
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    img {
-      display: block;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-    }
-    .user-name {
-      font-size: 14px;
-      line-height: 18px;
-      margin-left: 10px;
-    }
-    .user-detail {
-      display: block;
-      background: url(~@/assets/images/user.png) no-repeat;
-      background-size: 100% 100%;
-      width: 6px;
-      height: 10px;
-      margin-left: 10px;
+  .user-box-top {
+    position: relative;
+    height: 70px;
+    .user-box {
+      position: fixed;
+      top: 60px;
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      background: rgb(32, 32, 32);
+      width: 196px;
+      z-index: 10;
+      height: 70px;
+      img {
+        display: block;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+      }
+      .user-name {
+        font-size: 14px;
+        line-height: 18px;
+        margin-left: 10px;
+        cursor:default;
+      }
+      .user-detail {
+        display: block;
+        background: url(~@/assets/images/user.png) no-repeat;
+        background-size: 100% 100%;
+        width: 6px;
+        height: 10px;
+        margin-left: 10px;
+      }
     }
   }
   .title {
     font-size: 12px;
     padding-left: 15px;
   }
-  .active {
-    background: rgb(27, 27, 27);
-    color: red;
-  }
   .title-box {
     line-height: 36px;
-    font-size: 14px;
+    font-size: 13px;
     padding-left: 15px;
     & > div {
       display: flex;
@@ -161,15 +205,91 @@ export default {
       flex: 1;
       margin-left: 10px;
     }
+    .item-icon {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      filter: brightness(1.5);
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+    .icon-mainPage {
+      background-image: url(~@/assets/images/cloud-music.png);
+    }
+    .icon-ownFm {
+      background-image: url(~@/assets/images/guangbo.png);
+    }
+    .icon-videoNav {
+      background-image: url(~@/assets/images/video.png);
+    }
+    .icon-friendNav {
+      background-image: url(~@/assets/images/friend-nav.png);
+    }
+    .icon-itunesNav {
+      background-image: url(~@/assets/images/music.png);
+    }
+    .icon-downLoadNav {
+      background-image: url(~@/assets/images/download.png);
+    }
+    .icon-cloudNav {
+      background-image: url(~@/assets/images/cloud.png);
+    }
+    .icon-radioNav {
+      background-image: url(~@/assets/images/radio-nav.png);
+    }
+    .icon-collectionNav {
+      background-image: url(~@/assets/images/collection.png);
+    }
+    .icon-loveList {
+      background-image: url(~@/assets/images/heart.png);
+    }
+  }
+  .active {
+    .icon-mainPage {
+      background-image: url(~@/assets/images/cloud-music1.png);
+    }
+    .icon-ownFm {
+      background-image: url(~@/assets/images/guangbo1.png);
+    }
+    .icon-videoNav {
+      background-image: url(~@/assets/images/video1.png);
+    }
+    .icon-friendNav {
+      background-image: url(~@/assets/images/friend-nav1.png);
+    }
+    .icon-itunesNav {
+      background-image: url(~@/assets/images/music1.png);
+    }
+    .icon-downLoadNav {
+      background-image: url(~@/assets/images/download1.png);
+    }
+    .icon-cloudNav {
+      background-image: url(~@/assets/images/cloud1.png);
+    }
+    .icon-radioNav {
+      background-image: url(~@/assets/images/radio-nav1.png);
+    }
+    .icon-collectionNav {
+      background-image: url(~@/assets/images/collection1.png);
+    }
+    .icon-loveList {
+      background-image: url(~@/assets/images/heart1.png);
+    }
   }
   .item-hover:hover {
     background: rgb(27, 27, 27);
+  }
+  .border {
+    display: block;
+    height: 1px;
+    width: 100%;
+    background: rgb(67, 67, 67);
   }
   .user-detail-box {
     position: fixed;
     top: 10vh;
     left: 15vw;
-    width: 30vw;
+    width: 32vw;
     height: 58vh;
     background: rgb(54, 54, 54);
     z-index: 99;
@@ -183,6 +303,7 @@ export default {
         border-right: 1px solid rgb(51, 51, 51);
         p {
           font-size: 30px;
+          height: 45px;
         }
         span {
           display: block;
@@ -198,7 +319,7 @@ export default {
       justify-content: center;
       align-items: center;
       font-size: 13px;
-      margin-top: 15px;
+      margin: 15px 0;
       .user-sign {
         padding: 4px 20px;
         border-radius: 15px;
@@ -219,6 +340,107 @@ export default {
           p {
             filter: brightness(2.3);
           }
+        }
+      }
+    }
+    .btn-list {
+      .btn-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #c3c3c3;
+        padding: 0 10px 0 20px;
+        &:hover {
+          background: rgb(66, 66, 66);
+        }
+        .btn-title {
+          position: relative;
+          padding-left: 30px;
+          line-height: 40px;
+        }
+        .vip::before {
+          content: "";
+          position: absolute;
+          background: url(~@/assets/images/vip.png) no-repeat;
+          background-size: 100% 100%;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 20px;
+          height: 20px;
+        }
+        .grade::before {
+          content: "";
+          position: absolute;
+          background: url(~@/assets/images/grade.png) no-repeat;
+          background-size: 100% 100%;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 20px;
+          height: 20px;
+        }
+        .shopping::before {
+          content: "";
+          position: absolute;
+          background: url(~@/assets/images/shopping.png) no-repeat;
+          background-size: 100% 100%;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 20px;
+          height: 20px;
+        }
+        .setting::before {
+          content: "";
+          position: absolute;
+          background: url(~@/assets/images/setting.png) no-repeat;
+          background-size: 100% 100%;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 20px;
+          height: 20px;
+        }
+        .phone::before {
+          content: "";
+          position: absolute;
+          background: url(~@/assets/images/phone.png) no-repeat;
+          background-size: 100% 100%;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 20px;
+          height: 20px;
+        }
+        .switch::before {
+          content: "";
+          position: absolute;
+          background: url(~@/assets/images/switch.png) no-repeat;
+          background-size: 100% 100%;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 20px;
+          height: 20px;
+        }
+      }
+      .btn-right {
+        position: relative;
+        padding-right: 18px;
+        color: rgb(92, 92, 92);
+        font-size: 12px;
+        &::after {
+          content: "";
+          position: absolute;
+          right: -4px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: url(~@/assets/images/next.png) no-repeat;
+          background-size: 100% 100%;
+          width: 12px;
+          filter: brightness(2.3);
+          height: 12px;
         }
       }
     }

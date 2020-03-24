@@ -29,21 +29,21 @@ export default {
   data() {
     return {
       imgShow: true,
-      bannerList:[],
+      bannerList: []
     };
   },
-  mounted(){
+  mounted() {
     this.$axios({
-        type: "get",
-        url: `banner?type=0`
+      type: "get",
+      url: `banner?type=0`
+    })
+      .then(res => {
+        console.log("banners", res.data.banners);
+        if (res.status === 200) this.bannerList = res.data.banners;
       })
-        .then(res => {
-          console.log('banners',res.data.banners);
-          if (res.status === 200) this.bannerList = res.data.banners;
-        })
-        .catch(err => {
-          console.log("err", err);
-        });
+      .catch(err => {
+        console.log("err", err);
+      });
   }
 };
 </script>
@@ -54,7 +54,7 @@ export default {
   .swiper-box {
     width: calc(100vw - 226px);
     height: 34.18vh;
-    margin-top:15px;
+    margin-top: 15px;
   }
 }
 </style>

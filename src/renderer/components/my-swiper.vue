@@ -7,8 +7,9 @@
         :key="index"
         :class="setClass(index)"
         @click="onClick(index)"
-        :style="{backgroundImage: 'url(' + item.imageUrl + ')' }"
       >
+        <!-- :style="{backgroundImage: 'url(' + item.imageUrl + ')' }" -->
+        <img :src="item.imageUrl" alt />
         <div class="banner-tag">{{item.typeTitle}}</div>
       </div>
       <i v-show="arrow" class="iconfont icon-left" @click="prev()"></i>
@@ -160,16 +161,37 @@ export default {
       left: 50%;
       width: 70%;
       height: 100%;
+      border-radius: 8px;
       transition: 500ms all ease-in-out;
       background-color: #fff;
-      border-radius: 8px;
       background-repeat: no-repeat;
       background-position: center;
       background-size: 100% 100%;
       transform: translate3d(-50%, 0, -80px);
       opacity: 0;
       z-index: 1;
+      img {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+        overflow: hidden;
+          background-color: rgb(30, 30, 30);
 
+        &::after {
+          content: url(~@/assets/images/sing.png);
+          position: absolute;
+          z-index: 2;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%,-50%);
+          width: 120px;
+          height: 120px;
+          background-size: 100% 100%;
+          border-radius: 8px;
+        }
+      }
       &:before {
         position: absolute;
         content: "";
@@ -242,12 +264,12 @@ export default {
           position: absolute;
           right: 0;
           bottom: 0;
-          padding:0 10px;
+          padding: 0 10px;
           background: rgb(198, 83, 89);
           font-size: 12px;
           color: #fff;
           border-radius: 8px 0;
-          line-height:21px;
+          line-height: 21px;
         }
       }
     }
