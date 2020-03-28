@@ -9,7 +9,7 @@
           <p class="user-name">{{item.nickname}}</p>
           <div class="user-des">{{item.signature}}</div>
           <div class="user-own">
-            <span class="menu">歌单：{{item.playlistCount}}</span>
+            <span class="menu-list">歌单：{{item.playlistCount}}</span>
             <span class="follows">粉丝：{{item.followeds}}</span>
           </div>
         </div>
@@ -47,7 +47,6 @@ export default {
         url: `user/${this.query.from}?uid=${this.query.userId}`
       })
         .then(res => {
-          // console.log("userlist", res);
           if (res.status === 200) {
             if (this.query.from === "follows") this.list = res.data.follow;
             if (this.query.from === "followeds") this.list = res.data.followeds;
@@ -105,7 +104,7 @@ export default {
           white-space: nowrap; /*不换行*/
           text-overflow: ellipsis; /*超出部分文字以...显示*/
         }
-        .menu {
+        .menu-list {
           border-right: 1px solid rgb(63, 63, 63);
           padding-right: 15px;
           line-height: 12px;

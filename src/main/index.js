@@ -8,20 +8,23 @@ if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 
-let mainWindow
+let winType = 'mainWin', mainWindow, miniWindow
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
-  : `file://${__dirname}/index.html`
+  : `file://${__dirname}/index.html`;
 
 function createWindow() {
   /**
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 670,
-    useContentSize: true,
     width: 1002,
+    height: 670,
+    minWidth: 1002,
+    minHeight: 670,
+    useContentSize: true,
     transparent: false,
+    // titleBarStyle: 'hiddenInset',
     frame: false, // PS:隐藏窗口菜单
     resizable: true,
     movable: true,
@@ -36,18 +39,34 @@ function createWindow() {
     mainWindow = null
   })
 }
-// 退出
-// ipcMain.on('window-all-closed', () => {
-//   app.quit()
-// })
-// 最大化
-// ipcMain.on('show-window', () => {
-//   mainWindow.maximize()
-// })
-// // 还原
-// ipcMain.on('orignal-window', () => {
-//   mainWindow.unmaximize()
-// })
+//开启小窗口
+function openMiniWin() {
+  miniWindow = new BrowserWindow({
+    width: 334,
+    height: 52,
+    x: 1002,
+    y: 100,
+    title: '云音乐',
+    parent: miniWindow,
+    hasShadow: false,
+    show: false,
+    resizable: false,
+    useContentSize: true,
+    transparent: false,
+    frame: false,
+    resizable: true,
+    movable: true,
+    backgroundColor: 'rgb(43,43,43)',
+    webPreferences: {
+      nodeIntegration: true
+    }
+  });
+  miniWindow.loadURL(winURL + "/#/miniPage")
+
+  miniWindow.on('closed', () => {
+    miniWindow = null;
+  })
+}
 
 //登录窗口最小化
 ipcMain.on('min', () => {
@@ -62,10 +81,29 @@ ipcMain.on('max', () => {
   }
 })
 ipcMain.on('close', () => {
-  mainWindow.close();
+  mainWindow.hide();
 })
 
-app.on('ready', createWindow)
+ipcMain.on('mini', () => {
+  winType = 'miniWin'
+  miniWindow.show();
+  mainWindow.hide();
+})
+
+ipcMain.on('closeMini', () => {
+  miniWindow.hide();
+})
+
+ipcMain.on('showMain', () => {
+  winType = 'mainWin'
+  mainWindow.show();
+  miniWindow.hide();
+})
+
+app.on('ready', () => {
+  createWindow();
+  openMiniWin();
+})
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -74,8 +112,15 @@ app.on('window-all-closed', () => {
 })
 
 app.on('activate', () => {
+  console.log('winType', winType);
+  console.log('main', mainWindow.isVisible());
+  console.log('mini', miniWindow.isVisible());
   if (mainWindow === null) {
     createWindow()
+  } else if (winType === 'miniWin') {
+    if (!miniWindow.isVisible()) miniWindow.show();
+  } else if (winType === 'mainWin') {
+    if (!mainWindow.isVisible()) mainWindow.show();
   }
 })
 

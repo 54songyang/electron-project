@@ -14,9 +14,11 @@ export default new Router({
         {
           path: '/mainPage',
           name: 'mainPage',
-          component: require('@/view/navPage/mainPage').default,
+          component: require('@/view/navPage/mainPage/mainPage').default,
           meta: {
-            pageNav: 0
+            pageNav: 0,
+            topNav: 0,
+            topName:'mainPageTop'
           }
         },
         {
@@ -48,7 +50,8 @@ export default new Router({
           name: 'itunesNav',
           component: require('@/view/navPage/itunesNav').default,
           meta: {
-            pageNav: 5
+            pageNav: 5,
+            pageTitle:'iTunes音乐'
           }
         },
         {
@@ -64,7 +67,8 @@ export default new Router({
           name: 'cloudNav',
           component: require('@/view/navPage/cloudNav').default,
           meta: {
-            pageNav: 7
+            pageNav: 7,
+            pageTitle:'我的音乐云盘'
           }
         },
         {
@@ -72,7 +76,8 @@ export default new Router({
           name: 'radioNav',
           component: require('@/view/navPage/radioNav').default,
           meta: {
-            pageNav: 8
+            pageNav: 8,
+            pageTitle:'我的电台'
           }
         },
         {
@@ -96,7 +101,8 @@ export default new Router({
           name: 'setInfo',
           component: require('@/view/navPage/setInfo').default,
           meta: {
-            pageNav: ''
+            pageNav: '',
+            pageTitle:'编辑个人信息'
           }
         },
         {
@@ -104,16 +110,91 @@ export default new Router({
           name: 'userPage',
           component: require('@/view/userPage').default,
           meta: {
-            pageNav: ''
+            pageNav: '',
           }
         },
-
+        //首页详情
+        {
+          path: '/songSheet',
+          name: 'songSheet',
+          component: require('@/view/navPage/songSheet').default,
+          meta: {
+            pageNav: 0,
+            topNav: 1,
+            topName:'mainPageTop'
+          }
+        },
+        {
+          path: '/recommend',
+          name: 'recommend',
+          component: require('@/view/navPage/recommend').default,
+          meta: {
+            pageNav: '',
+            pageTitle:'独家放送'
+          }
+        },
+        {
+          path: '/newsong',
+          name: 'newsong',
+          component: require('@/view/navPage/newsong').default,
+          meta: {
+            pageNav: 0,
+            topNav: 5,
+            topName:'mainPageTop'
+          }
+        },
+        {
+          path: '/personalizedMv',
+          name: 'personalizedMv',
+          component: require('@/view/navPage/personalizedMv').default,
+          meta: {
+            pageNav: 2
+          }
+        },
+        {
+          path: '/djprogram',
+          name: 'djprogram',
+          component: require('@/view/navPage/djprogram').default,
+          meta: {
+            pageNav: 0,
+            topNav: 2,
+            topName:'mainPageTop'
+          }
+        },
+        {
+          path: '/rankingList',
+          name: 'rankingList',
+          component: require('@/view/navPage/rankingList').default,
+          meta: {
+            pageNav: 0,
+            topNav: 3,
+            topName:'mainPageTop'
+          }
+        },
+        {
+          path: '/singer',
+          name: 'singer',
+          component: require('@/view/navPage/singer').default,
+          meta: {
+            pageNav: 0,
+            topNav: 4,
+            topName:'mainPageTop'
+          }
+        },
         {
           path: '/test',
           name: 'test',
           component: require('@/view/test').default,
         }
       ]
+    },
+    {
+      path: '/miniPage',
+      name: 'miniPage',
+      component: require('@/view/miniPage').default,
+      meta: {
+        pageNav: ''
+      }
     },
     {
       path: '*',

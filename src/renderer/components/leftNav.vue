@@ -13,7 +13,7 @@
       v-for="(item,index) in navList"
       :key="index"
       @click="selectPage(item,index)"
-      :class="['item',{'item-hover':item.nav},[$route.meta.pageNav === index?'active':'']]"
+      :class="['item',{'item-hover':item.nav},{active:$route.meta.pageNav === index}]"
     >
       <div>
         <i :class="['item-icon',`icon-${item.name}`]" v-if="item.nav"></i>
@@ -94,7 +94,7 @@ export default {
   },
   methods: {
     selectPage(item, index) {
-      if (!item) return;
+      if (!item.name) return;
       this.$router.push(item.name);
     },
     toList(from, name) {
@@ -107,7 +107,7 @@ export default {
         }
       });
     },
-    openDetail() {},
+    openDetail() {}
   },
   directives: {
     ownShow: {
@@ -126,8 +126,8 @@ export default {
           _this[bindData] = true;
           let handFn = function(e) {
             el.style.display = "none";
-              _this[bindData] = false;
-              document.body.removeEventListener("click", handFn, false);
+            _this[bindData] = false;
+            document.body.removeEventListener("click", handFn, false);
             // if (
             //   document.querySelector(".user-top").contains(e.target) ||
             //   !el.contains(e.target)
@@ -156,17 +156,17 @@ export default {
   color: rgb(177, 177, 177);
   .user-box-top {
     position: relative;
-    height: 70px;
+    height: 60px;
     .user-box {
       position: fixed;
-      top: 60px;
+      top: 47px;
       display: flex;
       align-items: center;
-      padding: 15px;
+      padding: 5px 15px 0 15px;
       background: rgb(32, 32, 32);
       width: 196px;
       z-index: 10;
-      height: 70px;
+      height: 60px;
       img {
         display: block;
         width: 40px;
@@ -177,7 +177,7 @@ export default {
         font-size: 14px;
         line-height: 18px;
         margin-left: 10px;
-        cursor:default;
+        cursor: default;
       }
       .user-detail {
         display: block;
@@ -195,7 +195,7 @@ export default {
   }
   .title-box {
     line-height: 36px;
-    font-size: 13px;
+    font-size: 13.5px;
     padding-left: 15px;
     & > div {
       display: flex;
@@ -245,6 +245,8 @@ export default {
     }
   }
   .active {
+    color: #e63b2a;
+    background: rgb(27, 27, 27);
     .icon-mainPage {
       background-image: url(~@/assets/images/cloud-music1.png);
     }

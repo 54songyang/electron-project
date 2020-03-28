@@ -1,70 +1,71 @@
 <template>
-  <div id="wrapper" v-if="creatData">
-    <div class="top-cli" @click="channel('max')"></div>
-    <div class="top-nav">
-      <div class="tool-box">
-        <div class="close" @click="channel('close')"></div>
-        <div class="min" @click="channel('min')"></div>
-        <div class="max" @click="channel('full')"></div>
-      </div>
-      <div class="btn-box">
-        <img class="next" src="@/assets/images/next1.png" alt />
-        <img class="prev" src="@/assets/images/prev1.png" alt />
-      </div>
-      <div class="top-tool">
-        <div class="main-page-top" v-if="$route.path === '/mainPage'">
-          <div
-            v-for="(item,index) in creatData.topList"
-            :key="index"
-            @click="active=index"
-            :class="{'active-nav':active===index}"
-          >{{item}}</div>
+  <div>
+    <div id="wrapper" v-if="creatData">
+      <div class="top-cli" @dblclick="channel('max')"></div>
+      <div class="top-nav">
+        <div class="tool-box">
+          <div class="close" @click="channel('close')"></div>
+          <div class="min" @click="channel('min')"></div>
+          <div class="max" @click="channel('full')"></div>
         </div>
-        <div class="user-page-title" v-if="$route.path === '/userPage'">
-          <p>{{userInfo.profile.nickname}}</p>
-          的{{$route.query.name}}
+        <div class="btn-box">
+          <img class="next" src="@/assets/images/next1.png" alt />
+          <img class="prev" src="@/assets/images/prev1.png" alt />
         </div>
-        <div class="user-page-title" v-if="$route.path === '/setInfo'">编辑个人信息</div>
+        <div class="top-tool">
+          <div class="user-page-title" v-if="$route.meta.pageTitle">{{$route.meta.pageTitle}}</div>
+          <component
+            v-else-if="$route.meta.topName"
+            :is="$route.meta.topName"
+            :userInfo="`<p>${userInfo.profile.nickname}</p>的${$route.query.name}`"
+          ></component>
+          <div class="user-page-title" v-if="$route.path === '/userPage'">
+            <p>{{userInfo.profile.nickname}}</p>
+            的{{$route.query.name}}
+          </div>
+        </div>
+        <div class="search-box">
+          <div class="input-box">
+            <i class="search-icon"></i>
+            <input placeholder="搜索" v-model="searchData" type="text" />
+            <i class="search-clear" @click="searchData = ''"></i>
+          </div>
+          <div class="main-set">
+            <img class="setting" src="@/assets/images/set.png" alt />
+            <img class="email" src="@/assets/images/email.png" alt />
+            <img class="skin" src="@/assets/images/skin.png" alt />
+            <img @click="toMini" class="small" src="@/assets/images/small.png" alt />
+          </div>
+        </div>
       </div>
-      <div class="search-box">
-        <div class="input-box">
-          <i class="search-icon"></i>
-          <input placeholder="搜索" v-model="searchData" type="text" />
-          <i class="search-clear" @click="searchData = ''"></i>
-        </div>
-        <div class="main-set">
-          <img class="setting" src="@/assets/images/set.png" alt />
-          <img class="email" src="@/assets/images/email.png" alt />
-          <img class="skin" src="@/assets/images/skin.png" alt />
-          <img class="small" src="@/assets/images/small.png" alt />
-        </div>
+      <div class="left-scroll">
+        <leftNav
+          class="left-nav"
+          ref="leftNav"
+          @logout="logout"
+          :navList="creatData.navList"
+          :userInfo="userInfo"
+        ></leftNav>
       </div>
+      <div class="main-body">
+        <router-view :ref="$route.name"></router-view>
+      </div>
+      <player />
     </div>
-    <div class="left-scroll">
-      <leftNav
-        class="left-nav"
-        ref="leftNav"
-        @logout="logout"
-        :navList="creatData.navList"
-        :userInfo="userInfo"
-      ></leftNav>
-    </div>
-    <div class="main-body" @click="dayList">
-      <router-view :ref="$route.name"></router-view>
-    </div>
-    <player />
   </div>
 </template>
 
 <script>
 import leftNav from "@/components/leftNav";
 import player from "@/components/player";
+import mainPageTop from "@/components/mainPageTop";
 import { mapActions, mapState } from "vuex";
 export default {
   name: "home",
-  components: { leftNav, player },
+  components: { leftNav, player, mainPageTop },
   data() {
     return {
+      activeSize: [],
       active: 0,
       searchData: "",
       creatData: null,
@@ -76,22 +77,22 @@ export default {
     channel(val) {
       this.$electron.ipcRenderer.send(val);
     },
-    dayList() {
-      //每日歌单推荐
-      this.$axios({
-        type: "get",
-        url: "/recommend/songs"
-      })
-        .then(res => {
-          console.log("ewe", res);
-          if (res.status === 200) {
-            console.log("res", res.data);
-          }
-        })
-        .catch(err => {
-          console.log("err", err);
-        });
-    },
+    // dayList() {
+    //   //每日歌单推荐
+    //   this.$axios({
+    //     type: "get",
+    //     url: "/recommend/songs"
+    //   })
+    //     .then(res => {
+    //       console.log("ewe", res);
+    //       if (res.status === 200) {
+    //         console.log("res", res.data);
+    //       }
+    //     })
+    //     .catch(err => {
+    //       console.log("err", err);
+    //     });
+    // },
     logout() {
       this.$axios({
         type: "get",
@@ -108,6 +109,9 @@ export default {
         .catch(err => {
           console.log("err", err);
         });
+    },
+    toMini() {
+      this.$electron.ipcRenderer.send("mini");
     }
   },
   async beforeCreate() {
@@ -116,10 +120,14 @@ export default {
   async mounted() {
     await this.renderData();
     this.userInfo = this.$store.state.page.userInfo;
-    console.log("this.userInfo", this.userInfo);
   }
 };
 </script>
+<style lang="scss">
+.hover-bright:hover {
+  filter: brightness(2.3);
+}
+</style>
 <style lang="scss" scoped>
 @import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro");
 
@@ -149,7 +157,8 @@ body {
     height: 15px;
     top: 0;
     right: 0;
-    z-index: 1000;
+    z-index: 100000;
+    -webkit-app-region: drag;
   }
 }
 .search-box {
@@ -213,8 +222,7 @@ body {
   display: flex;
   z-index: 99;
   background: rgb(45, 45, 45);
-  height: 60px;
-  -webkit-app-region: drag;
+  height: 51px;
   .btn-box {
     display: flex;
     flex-direction: row-reverse;
@@ -234,29 +242,10 @@ body {
     align-items: center;
     width: calc(100vw - 600px);
     margin: 0 40px 0 20px;
-    .main-page-top {
-      display: flex;
-      align-items: center;
-      height: 100%;
-      width: 100%;
-      div {
-        flex: 1;
-        text-align: center;
-        color: rgb(134, 134, 134);
-        &:hover {
-          color: rgb(181, 181, 181);
-        }
-      }
-      .active-nav {
-        color: rgb(255, 255, 255);
-        &:hover {
-          color: rgb(255, 255, 255);
-        }
-      }
-    }
     .user-page-title {
       font-size: 14px;
       color: #fff;
+      font-weight: bold;
       p {
         display: inline-block;
         color: rgb(126, 126, 126);
@@ -267,15 +256,14 @@ body {
     display: flex;
     position: fixed;
     top: 0;
-    left: 0;
+    left: 4px;
     z-index: 999;
     font-size: 20px;
     margin-top: 15px;
     div {
-      width: 15px;
-      height: 15px;
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
-      // background: #dbdbdb;
       margin: 0 5px;
     }
     .close {
@@ -310,19 +298,19 @@ body {
   position: absolute;
   overflow-y: auto;
   overflow-x: hidden;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 51px);
   width: 196px;
   .left-nav {
-    margin-top: 60px;
+    margin-top: 51px;
   }
 }
 .main-body {
-  height: calc(100vh - 120px);
+  height: calc(100vh - 111px);
   background: #252525;
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 0;
   margin-left: 196px;
-  margin-top: 60px;
+  margin-top: 51px;
 }
 </style>

@@ -83,7 +83,7 @@ body .player-box {
     }
     background: rgb(37, 37, 37);
     margin: 0;
-    font-size: #fff;
+    color: #fff;
     .aplayer-info {
       height: 60px;
       padding: 0;
