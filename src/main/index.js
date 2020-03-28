@@ -61,7 +61,7 @@ function openMiniWin() {
       nodeIntegration: true
     }
   });
-  miniWindow.loadURL(winURL + "/#/miniPage")
+  miniWindow.loadURL(winURL + "#/miniPage")
 
   miniWindow.on('closed', () => {
     miniWindow = null;
