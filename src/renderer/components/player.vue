@@ -1,6 +1,6 @@
 <template>
   <div class="player-box">
-    <aplayer :music="videoUpload.music" :shuffle="typeData == 2" :repeat="playRepeat" ref="player"></aplayer>
+    <!-- <aplayer :music="videoUpload.music" :shuffle="typeData == 2" :repeat="playRepeat" ref="player"></aplayer> -->
     <div class="control-middle"></div>
     <div class="control-right">
       <div class="play-btn play-tree"></div>
@@ -15,10 +15,10 @@
 </template>
 
 <script>
-import aplayer from "vue-aplayer";
+// import aplayer from "vue-aplayer";
 export default {
   name: "player",
-  components: { aplayer },
+  // components: { aplayer },
   data() {
     return {
       videoUpload: {

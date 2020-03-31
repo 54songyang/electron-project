@@ -1,204 +1,70 @@
 import Vue from 'vue'
-import Router from 'vue-router'
+import VueRouter from 'vue-router'
+import { routers } from './router'
 
-Vue.use(Router)
+Vue.use(VueRouter)
 
-export default new Router({
-  routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: require('@/view/home').default,
-      redirect: '/mainPage',
-      children: [
-        {
-          path: '/mainPage',
-          name: 'mainPage',
-          component: require('@/view/navPage/mainPage/mainPage').default,
-          meta: {
-            pageNav: 0,
-            topNav: 0,
-            topName:'mainPageTop'
-          }
-        },
-        {
-          path: '/ownFm',
-          name: 'ownFm',
-          component: require('@/view/navPage/ownFm').default,
-          meta: {
-            pageNav: 1
-          }
-        },
-        {
-          path: '/videoNav',
-          name: 'videoNav',
-          component: require('@/view/navPage/videoNav').default,
-          meta: {
-            pageNav: 2
-          }
-        },
-        {
-          path: '/friendNav',
-          name: 'friendNav',
-          component: require('@/view/navPage/friendNav').default,
-          meta: {
-            pageNav: 3
-          }
-        },
-        {
-          path: '/itunesNav',
-          name: 'itunesNav',
-          component: require('@/view/navPage/itunesNav').default,
-          meta: {
-            pageNav: 5,
-            pageTitle:'iTunes音乐'
-          }
-        },
-        {
-          path: '/downLoadNav',
-          name: 'downLoadNav',
-          component: require('@/view/navPage/downLoadNav').default,
-          meta: {
-            pageNav: 6
-          }
-        },
-        {
-          path: '/cloudNav',
-          name: 'cloudNav',
-          component: require('@/view/navPage/cloudNav').default,
-          meta: {
-            pageNav: 7,
-            pageTitle:'我的音乐云盘'
-          }
-        },
-        {
-          path: '/radioNav',
-          name: 'radioNav',
-          component: require('@/view/navPage/radioNav').default,
-          meta: {
-            pageNav: 8,
-            pageTitle:'我的电台'
-          }
-        },
-        {
-          path: '/collectionNav',
-          name: 'collectionNav',
-          component: require('@/view/navPage/collectionNav').default,
-          meta: {
-            pageNav: 9
-          }
-        },
-        {
-          path: '/loveList',
-          name: 'loveList',
-          component: require('@/view/navPage/loveList').default,
-          meta: {
-            pageNav: 11
-          }
-        },
-        {
-          path: '/setInfo',
-          name: 'setInfo',
-          component: require('@/view/navPage/setInfo').default,
-          meta: {
-            pageNav: '',
-            pageTitle:'编辑个人信息'
-          }
-        },
-        {
-          path: '/userPage',
-          name: 'userPage',
-          component: require('@/view/userPage').default,
-          meta: {
-            pageNav: '',
-          }
-        },
-        //首页详情
-        {
-          path: '/songSheet',
-          name: 'songSheet',
-          component: require('@/view/navPage/songSheet').default,
-          meta: {
-            pageNav: 0,
-            topNav: 1,
-            topName:'mainPageTop'
-          }
-        },
-        {
-          path: '/recommend',
-          name: 'recommend',
-          component: require('@/view/navPage/recommend').default,
-          meta: {
-            pageNav: '',
-            pageTitle:'独家放送'
-          }
-        },
-        {
-          path: '/newsong',
-          name: 'newsong',
-          component: require('@/view/navPage/newsong').default,
-          meta: {
-            pageNav: 0,
-            topNav: 5,
-            topName:'mainPageTop'
-          }
-        },
-        {
-          path: '/personalizedMv',
-          name: 'personalizedMv',
-          component: require('@/view/navPage/personalizedMv').default,
-          meta: {
-            pageNav: 2
-          }
-        },
-        {
-          path: '/djprogram',
-          name: 'djprogram',
-          component: require('@/view/navPage/djprogram').default,
-          meta: {
-            pageNav: 0,
-            topNav: 2,
-            topName:'mainPageTop'
-          }
-        },
-        {
-          path: '/rankingList',
-          name: 'rankingList',
-          component: require('@/view/navPage/rankingList').default,
-          meta: {
-            pageNav: 0,
-            topNav: 3,
-            topName:'mainPageTop'
-          }
-        },
-        {
-          path: '/singer',
-          name: 'singer',
-          component: require('@/view/navPage/singer').default,
-          meta: {
-            pageNav: 0,
-            topNav: 4,
-            topName:'mainPageTop'
-          }
-        },
-        {
-          path: '/test',
-          name: 'test',
-          component: require('@/view/test').default,
-        }
-      ]
-    },
-    {
-      path: '/miniPage',
-      name: 'miniPage',
-      component: require('@/view/miniPage').default,
-      meta: {
-        pageNav: ''
-      }
-    },
-    {
-      path: '*',
-      redirect: '/'
-    }
-  ]
+const RouterConfig = {
+  mode: 'hash',
+  routes: routers,
+  scrollBehavior(to, from, savedPosition) {
+    return { x: 0, y: 0 }
+  }
+}
+var backFlag = false;
+const router = new VueRouter(RouterConfig);
+router.historyRecord = {
+  _history: [], // 历史记录堆栈
+  _index: -1,
+  push(path) {
+    this._history.push({
+      path,
+      index: this._index++
+    });
+  },
+  slice(sta, end) {
+    console.log('123',this._history.slice(sta, end));
+    this._history = this._history.slice(sta, end);
+  },
+  // canBack() {
+  //   return this._history[this._index].index === this._index;
+  // },
+  // canNext() {
+  //   return this._history.length;
+  // }
+}
+router.goBack = function () {
+  backFlag = true;
+  const his = this.historyRecord._history;
+  const ind = this.historyRecord._index;
+  if (this.historyRecord._index == 0) return;
+  this.isBack = true;
+  this.historyRecord._index--;
+  if (!his[ind - 1]) return;
+  router.push(his[ind - 1].path);
+}
+router.goNext = function () {
+  const his = this.historyRecord._history;
+  const ind = this.historyRecord._index;
+  if (!his[ind + 1]) return;
+  this.isNext = true;
+  router.push(his[ind + 1].path);
+  this.historyRecord._index++;
+}
+
+router.afterEach((to, from) => {
+  const ind = router.historyRecord._index;
+  if (router.isBack) {
+    router.isBack = false;
+  } else if (router.isNext) {
+    router.isNext = false;
+  } else if (backFlag) {
+    backFlag = false;
+    router.historyRecord.slice(0, ind + 1);
+    router.historyRecord.push(to.path);
+  } else {
+    router.historyRecord.push(to.path);
+  }
 })
+
+export default router

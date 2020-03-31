@@ -1,22 +1,20 @@
 import Vue from 'vue'
 import axios from 'axios'
 import ViewUI from 'view-design';
-import './assets/css/base.scss';
+import './assets/scss/base.scss';
 import 'view-design/dist/styles/iview.css';
 import App from './App'
-import router from './router'
+import router from './router/index.js';
 import store from './store'
 import utils from './assets/js/utils'
 import clampy from '@clampy-js/vue-clampy';
 import VueLazyload from 'vue-lazyload';
 
-import VueAplayer from 'vue-aplayer'
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.prototype.$axios = axios
 Vue.prototype.$utils = utils
 Vue.config.productionTip = false
 Vue.use(ViewUI);
-Vue.use(VueAplayer);
 Vue.use(clampy);
 Vue.use(VueLazyload);
 

@@ -1,15 +1,15 @@
 <template>
   <div>
-    <aplayer :music="videoUpload.music"></aplayer>
+    <!-- <aplayer :music="videoUpload.music"></aplayer> -->
   </div>
 </template>
 
 <script>
-import aplayer from "vue-aplayer";
+// import aplayer from "vue-aplayer";
 export default {
   name: "test",
   components: {
-    aplayer
+    // aplayer
   },
   data() {
     return {

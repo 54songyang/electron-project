@@ -32,8 +32,7 @@ export default {
   .main-page-top {
     display: flex;
     align-items: center;
-    height: 100%;
-    width: 100%;
+    width: 427px;
     div {
       flex: 1;
       text-align: center;

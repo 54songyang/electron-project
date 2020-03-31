@@ -9,16 +9,22 @@
           <div class="max" @click="channel('full')"></div>
         </div>
         <div class="btn-box">
-          <img class="next" src="@/assets/images/next1.png" alt />
-          <img class="prev" src="@/assets/images/prev1.png" alt />
+          <img
+            @click="toNext"
+            :class="['next','unCli']"
+            src="@/assets/images/prev1.png"
+            alt
+          />
+          <img
+            @click="toPrev"
+            :class="['prev','unCli']"
+            src="@/assets/images/next1.png"
+            alt
+          />
         </div>
         <div class="top-tool">
           <div class="user-page-title" v-if="$route.meta.pageTitle">{{$route.meta.pageTitle}}</div>
-          <component
-            v-else-if="$route.meta.topName"
-            :is="$route.meta.topName"
-            :userInfo="`<p>${userInfo.profile.nickname}</p>的${$route.query.name}`"
-          ></component>
+          <component v-else-if="$route.meta.topName" :is="$route.meta.topName"></component>
           <div class="user-page-title" v-if="$route.path === '/userPage'">
             <p>{{userInfo.profile.nickname}}</p>
             的{{$route.query.name}}
@@ -28,7 +34,7 @@
           <div class="input-box">
             <i class="search-icon"></i>
             <input placeholder="搜索" v-model="searchData" type="text" />
-            <i class="search-clear" @click="searchData = ''"></i>
+            <i v-show="searchData.length>0" class="search-clear" @click="searchData = ''"></i>
           </div>
           <div class="main-set">
             <img class="setting" src="@/assets/images/set.png" alt />
@@ -59,6 +65,7 @@
 import leftNav from "@/components/leftNav";
 import player from "@/components/player";
 import mainPageTop from "@/components/mainPageTop";
+
 import { mapActions, mapState } from "vuex";
 export default {
   name: "home",
@@ -112,12 +119,21 @@ export default {
     },
     toMini() {
       this.$electron.ipcRenderer.send("mini");
+    },
+    toNext() {
+      this.$router.back();return
+      this.$router.goNext()
+    },
+    toPrev() {
+      this.$router.back();return
+      this.$router.goBack()
     }
   },
   async beforeCreate() {
     this.creatData = await import("./js/main.json");
   },
   async mounted() {
+    // console.log('123',this.$router.historyRecord);
     await this.renderData();
     this.userInfo = this.$store.state.page.userInfo;
   }
@@ -127,21 +143,13 @@ export default {
 .hover-bright:hover {
   filter: brightness(2.3);
 }
+body {
+  font-family: PingFangSC-Semibold, sans-serif;
+  cursor: pointer;
+}
 </style>
 <style lang="scss" scoped>
 @import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro");
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  // font-family: "Source Sans Pro", sans-serif;
-  font-family: PingFangSC-Regular, sans-serif;
-  cursor: pointer;
-}
 #wrapper {
   background: radial-gradient(
     ellipse at top left,
@@ -164,21 +172,23 @@ body {
 .search-box {
   display: flex;
   align-items: center;
-
   .input-box {
     display: flex;
     align-items: center;
     background: rgb(75, 75, 75);
     border-radius: 15px;
     height: 25px;
+    width: 149px;
     line-height: 25px;
     font-size: 13px;
     input {
       display: block;
-      flex: 1;
+      width: 107px;
       background: none;
       outline: none;
       border: none;
+      font-size: 12px;
+      line-height: 15px;
       caret-color: rgb(165, 165, 165);
       color: rgb(182, 182, 182);
     }
@@ -186,30 +196,39 @@ body {
       display: block;
       background: url(~@/assets/images/search.png) no-repeat;
       background-size: 100% 100%;
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
       margin: 0 5px;
     }
     .search-clear {
       display: block;
       background: url(~@/assets/images/clear.png) no-repeat;
       background-size: 100% 100%;
-      width: 14px;
-      height: 14px;
-      margin-right: 8px;
+      width: 12px;
+      height: 12px;
+      margin-right: 6px;
     }
   }
   .main-set {
     display: flex;
-    margin-left: 10px;
+    justify-content: space-between;
+    width: 128px;
+    margin: 0 12px 0 23px;
     img {
       display: block;
-      width: 16px;
-      height: 16px;
-      margin: 0 12px;
+      width: 16.5px;
+      height: 16.5px;
+    }
+    .email {
+      width: 22px;
+      height: 20px;
+    }
+    .skin {
+      width: 18px;
+      height: 20px;
     }
     .small {
-      width: 18px;
+      width: 20px;
       height: 18px;
     }
   }
@@ -220,6 +239,7 @@ body {
   left: 0;
   width: 100vw;
   display: flex;
+  justify-content: space-between;
   z-index: 99;
   background: rgb(45, 45, 45);
   height: 51px;
@@ -236,14 +256,18 @@ body {
     .next {
       margin-left: 20px;
     }
+    .unCli {
+      filter: brightness(0.5);
+    }
   }
   .top-tool {
     display: flex;
     align-items: center;
-    width: calc(100vw - 600px);
-    margin: 0 40px 0 20px;
+    flex: 1;
+    margin-left: 27px;
+    font-family: PingFangSC-Semibold, sans-serif;
     .user-page-title {
-      font-size: 14px;
+      font-size: 14.5px;
       color: #fff;
       font-weight: bold;
       p {
@@ -264,7 +288,7 @@ body {
       width: 12px;
       height: 12px;
       border-radius: 50%;
-      margin: 0 5px;
+      margin: 0 4px;
     }
     .close {
       background: rgb(250, 100, 94);

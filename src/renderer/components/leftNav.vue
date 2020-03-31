@@ -40,9 +40,10 @@
         </div>
       </div>
       <div class="sign-box">
-        <div class="user-sign">
+        <div class="user-sign" @click="signin">
           <i></i>
           <p>签到</p>
+          <!-- <p>已签到</p> -->
         </div>
       </div>
       <div class="border"></div>
@@ -106,6 +107,21 @@ export default {
           userId: this.userInfo.profile.userId
         }
       });
+    },
+    signin() {
+      this.$axios({
+        type: "get",
+        url: "/daily_signin"
+      })
+        .then(res => {
+          if (res.status === 200) {
+            console.log('userInfo',this.userInfo);
+            console.log("签到res", res.data);
+          }
+        })
+        .catch(err => {
+          console.log("err", err);
+        });
     },
     openDetail() {}
   },

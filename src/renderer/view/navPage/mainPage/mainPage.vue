@@ -35,7 +35,7 @@
         </template>
 
         <template #recommend>
-          <div class="recommend-title hover-bright">
+          <div class="recommend-title">
             <span class="hover-bright" @click="$router.push('recommend')">独家放送</span>
           </div>
           <div class="main-item">
@@ -56,7 +56,7 @@
         </template>
 
         <template #newsong>
-          <div class="recommend-title hover-bright">
+          <div class="recommend-title">
             <span class="hover-bright" @click="$router.push('newsong')">最新音乐</span>
           </div>
           <div class="newsong-flex-box">
@@ -116,7 +116,7 @@
         </template>
 
         <template #personalizedMv>
-          <div class="recommend-title hover-bright">
+          <div class="recommend-title">
             <span class="hover-bright" @click="$router.push('personalizedMv')">推荐MV</span>
           </div>
           <div class="main-item">
@@ -135,7 +135,7 @@
         </template>
 
         <template #djprogram>
-          <div class="recommend-title hover-bright">
+          <div class="recommend-title">
             <span class="hover-bright" @click="$router.push('djprogram')">主播电台</span>
           </div>
           <div class="main-item">
@@ -627,7 +627,7 @@ export default {
       border-radius: 15px;
       height: 30px;
       font-size: 13px;
-      line-height: 30px;
+      line-height: 29px;
       color: rgb(193, 70, 58);
       border: 1px solid rgb(193, 70, 58);
       margin: 0 auto;
