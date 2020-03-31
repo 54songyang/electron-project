@@ -1,8 +1,8 @@
 <template>
   <div class="player-box">
-    <!-- <aplayer :music="videoUpload.music" :shuffle="typeData == 2" :repeat="playRepeat" ref="player"></aplayer> -->
+    <aplayer :music="videoUpload.music" :shuffle="typeData == 2" :repeat="playRepeat" ref="player"></aplayer>
     <div class="control-middle"></div>
-    <div class="control-right">
+    <!-- <div class="control-right">
       <div class="play-btn play-tree"></div>
       <div class="play-btn play-type1" v-show="typeData == 0" @click="typeData=1"></div>
       <div class="play-btn play-type2" v-show="typeData == 1" @click="typeData=2"></div>
@@ -10,30 +10,31 @@
       <div class="play-btn play-lb"></div>
       <div class="play-btn play-gc"></div>
       <div class="play-btn play-yl"></div>
-    </div>
+    </div> -->
   </div>
 </template>
 
 <script>
-// import aplayer from "vue-aplayer";
+import aplayer from "./vuePlayer/vue-aplayer";
 export default {
   name: "player",
-  // components: { aplayer },
+  components: { aplayer },
   data() {
     return {
       videoUpload: {
         progress: false,
         progressPercent: 0,
         successPercent: 0,
+        theme:'#c3463a',
         music: {
-          title: "Preparation",
-          artist: "Hans Zimmer/Richard Harvey",
+          title: "산다는 건 (Cheer Up)",
+          artist: "洪真英",
           list: [
-            "https://m801.music.126.net/20200319185848/d38ded5cbe230d057bdef76e442cfcf9/jdyyaac/015c/0f5c/005d/6639bdcc3286aeca31da7742bdc68331.m4a",
-            "https://m801.music.126.net/20200319185848/d38ded5cbe230d057bdef76e442cfcf9/jdyyaac/015c/0f5c/005d/6639bdcc3286aeca31da7742bdc68331.m4a"
+            "http://m7.music.126.net/20200331143830/2409975d77e43d766b2185638fd3b64a/ymusic/0fd6/4f65/43ed/a8772889f38dfcb91c04da915b301617.mp3",
+            "http://m7.music.126.net/20200331143830/5a9d937047191d1c1a04b2d8bfe9d6dc/ymusic/f3fb/235e/a216/2f95cb16b58562445a95eadda702952d.mp3"
           ],
           src:
-            "https://m801.music.126.net/20200319185848/d38ded5cbe230d057bdef76e442cfcf9/jdyyaac/015c/0f5c/005d/6639bdcc3286aeca31da7742bdc68331.m4a",
+            "http://m7.music.126.net/20200331143830/5a9d937047191d1c1a04b2d8bfe9d6dc/ymusic/f3fb/235e/a216/2f95cb16b58562445a95eadda702952d.mp3",
           pic:
             "https://dss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3675415932,4054970339&fm=26&gp=0.jpg",
           lrc: "[00:00.00]lrc here\n[00:01.00]aplayer"
@@ -59,67 +60,10 @@ export default {
 
 <style lang="scss">
 body .player-box {
-  position: relative;
-  .aplayer {
-    position: relative;
-    .aplayer-pic {
-      position: initial;
-      width: 40px;
-      height: 40px;
-      top: 2px;
-      z-index: 999;
-      margin: 10px 0 0 10px;
-      .aplayer-play {
-        border: none;
-        background: rgb(195, 70, 58);
-        width: 40px;
-        height: 40px;
-        .aplayer-icon-play {
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-        }
-      }
-    }
-    background: rgb(37, 37, 37);
-    margin: 0;
-    color: #fff;
-    .aplayer-info {
-      height: 60px;
-      padding: 0;
-      .aplayer-controller {
-        display: block;
-        position: absolute;
-        top: -4px;
-        left: 0;
-        width: 100%;
-        height: 60px;
-        .aplayer-bar-wrap {
-          margin-left: 0;
-        }
-        .aplayer-bar {
-          background: rgb(37, 37, 37);
-        }
-        .aplayer-played {
-          background: rgb(224, 57, 56) !important;
-          .aplayer-thumb {
-            opacity: 0;
-          }
-        }
-        .aplayer-time {
-          margin-top: 30px;
-          margin-left: 73px;
-        }
-        .aplayer-loaded {
-          background: none;
-        }
-      }
-    }
-    .aplayer-volume-wrap,
-    .aplayer-icon-mode {
-      display: none;
-    }
-  }
+  position: fixed;
+  border-top: 1px solid rgb(35, 35, 35);
+  z-index: 100;
+  width: 100%;
   .control-right {
     position: absolute;
     top: 0;

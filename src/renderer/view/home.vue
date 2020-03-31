@@ -9,18 +9,8 @@
           <div class="max" @click="channel('full')"></div>
         </div>
         <div class="btn-box">
-          <img
-            @click="toNext"
-            :class="['next','unCli']"
-            src="@/assets/images/prev1.png"
-            alt
-          />
-          <img
-            @click="toPrev"
-            :class="['prev','unCli']"
-            src="@/assets/images/next1.png"
-            alt
-          />
+          <img @click="toNext" :class="['next','unCli']" src="@/assets/images/prev1.png" alt />
+          <img @click="toPrev" :class="['prev','unCli']" src="@/assets/images/next1.png" alt />
         </div>
         <div class="top-tool">
           <div class="user-page-title" v-if="$route.meta.pageTitle">{{$route.meta.pageTitle}}</div>
@@ -65,7 +55,6 @@
 import leftNav from "@/components/leftNav";
 import player from "@/components/player";
 import mainPageTop from "@/components/mainPageTop";
-
 import { mapActions, mapState } from "vuex";
 export default {
   name: "home",
@@ -121,12 +110,14 @@ export default {
       this.$electron.ipcRenderer.send("mini");
     },
     toNext() {
-      this.$router.back();return
-      this.$router.goNext()
+      this.$router.back();
+      return;
+      this.$router.goNext();
     },
     toPrev() {
-      this.$router.back();return
-      this.$router.goBack()
+      this.$router.back();
+      return;
+      this.$router.goBack();
     }
   },
   async beforeCreate() {
@@ -322,7 +313,7 @@ body {
   position: absolute;
   overflow-y: auto;
   overflow-x: hidden;
-  height: calc(100vh - 51px);
+  height: calc(100vh - 60px);
   width: 196px;
   .left-nav {
     margin-top: 51px;

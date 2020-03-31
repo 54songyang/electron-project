@@ -16,7 +16,7 @@
 </template>
 
 <script>
-  import {parseLrc} from '../utils'
+  import {parseLrc} from '../js/utils'
 
   export default {
     props: {
@@ -97,7 +97,7 @@
   }
 </script>
 <style lang="scss">
-  @import "../scss/variables";
+  @import "../scss/variables.scss";
 
   .aplayer-lrc {
     position: relative;
