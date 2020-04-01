@@ -34,7 +34,7 @@
         />-->
         <div class="play-btn play-tree"></div>
         <div :class="['play-btn',repeat]" @click="$emit('nextmode')"></div>
-        <div class="play-btn play-lb"></div>
+        <div class="play-btn play-lb" @click="$emit('togglelist')"></div>
         <div class="play-btn play-gc"></div>
         <volume
           v-if="!$parent.isMobile"

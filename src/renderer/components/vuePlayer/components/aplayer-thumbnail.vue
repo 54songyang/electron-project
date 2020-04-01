@@ -114,7 +114,7 @@ export default {
     width: 40px;
     height: 40px;
     bottom: 50%;
-    right: 50%;
+    right: calc(50% + 30px);
     margin: 0 -15px -15px 0;
     background-color: rgb(195, 70, 58);
     div {

@@ -110,12 +110,19 @@ export default {
 .aplayer-bar-wrap {
   cursor: pointer;
   flex: 1;
-
+  position: fixed;
+  height: 3px;
+  width: 100vw;
+  left: 0;
+  &:hover {
+    .aplayer-bar .aplayer-played .aplayer-thumb {
+      opacity: 1;
+    }
+  }
   .aplayer-bar {
     position: relative;
     height: 3px;
     width: 100%;
-
     .aplayer-loaded {
       position: absolute;
       left: 0;
@@ -138,21 +145,19 @@ export default {
 
       .aplayer-thumb {
         position: absolute;
-        top: 0;
+        top: 1px;
         right: 5px;
         margin-top: -5px;
         margin-right: -10px;
         width: 10px;
         height: 10px;
-        border: 1px solid;
         transform: scale(0.8);
         will-change: transform;
         transition: transform 300ms, background-color 0.3s, border-color 0.3s;
         border-radius: 50%;
-        background: #fff;
-        opacity: 0;
+        background: rgb(195, 70, 58);
         cursor: pointer;
-
+        opacity: 0;
         &:hover {
           transform: scale(1);
         }

@@ -64,7 +64,25 @@
       :theme="currentTheme"
       @selectsong="onSelectSong"
     />
-    <div :class="['lyrics-box',{'lyrics-top':lyricsShow}]"></div>
+    <div :class="['lyrics-box',{'lyrics-top':lyricsShow}]">
+    <!-- <div class="lyrics-box lyrics-top"> -->
+      <div :class="['lyrics-player',isPlaying?'pointer-play':'pointer-end']">
+        <div class="pointer">
+          <i class="lyrics-raido"></i>
+          <img src="@/assets/images/pointer.png" alt />
+        </div>
+        <div class="dish">
+          <img :src="currentMusic.pic" />
+        </div>
+        <div class="lyrics-btn-box">
+          <div class="sc"></div>
+          <div class="tj"></div>
+          <div class="xz"></div>
+          <div class="fx"></div>
+        </div>
+      </div>
+      <div class="lyrics-info"></div>
+    </div>
   </div>
 </template>
 <script type="text/babel">
@@ -686,6 +704,9 @@ const VueAPlayer = {
       this.audioVolume = this.audio.volume;
       this.isAudioMuted = this.audio.muted;
     },
+    /**
+     * 播放顺序
+     */
     onAudioEnded() {
       // determine next song according to shuffle and repeat
       if (this.repeatMode === REPEAT.REPEAT_ALL) {
@@ -917,6 +938,7 @@ export default VueAPlayer;
     height: 60px;
     justify-content: center;
     align-items: center;
+    background: rgb(37, 37, 37);
     .blur-box {
       overflow: hidden;
       img {
@@ -958,10 +980,141 @@ export default VueAPlayer;
     position: fixed;
     width: 100%;
     height: calc(100vh - 110px);
-    background: rgb(60, 60, 60);
+    background: #2d2d2d;
     top: 60px;
     transition: all 0.3s linear;
     z-index: 99;
+    opacity: 0.99;
+    display: flex;
+    .lyrics-player {
+      flex: 1;
+      .pointer {
+        position: absolute;
+        top: 12px;
+        left: 255px;
+        transform-origin: left top;
+        z-index: 1;
+        img {
+          width: 160px;
+          height: 92;
+        }
+        .lyrics-raido {
+          position: absolute;
+          top: -12.5px;
+          left: -12.5px;
+          width: 25px;
+          height: 25px;
+          background: white;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          &::after {
+            content: "";
+            width: 8px;
+            height: 8px;
+            background: rgb(223, 223, 223);
+            border-radius: 50%;
+          }
+        }
+      }
+      .dish {
+        position: absolute;
+        top: 70px;
+        left: 100px;
+        background: url(~@/assets/images/dish.png) no-repeat;
+        background-size: 100% 100%;
+        width: 333px;
+        height: 333px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        img {
+          display: block;
+          border-radius: 50%;
+          width: 210px;
+          height: 210px;
+          animation: rotate 50s linear infinite;
+          animation-play-state: paused;
+          @keyframes rotate {
+            100% {
+              transform: rotate(360deg);
+            }
+          }
+        }
+      }
+      .lyrics-btn-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: absolute;
+        left: 128px;
+        width: 283px;
+        bottom: 100px;
+        div {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background-color: rgb(54, 54, 54);
+        }
+        .sc {
+          background-image: url(~@/assets/images/sc.png);
+          background-position: center center;
+          background-repeat: no-repeat;
+          background-size: 20px 20px;
+        }
+        .tj {
+          background-image: url(~@/assets/images/tj.png);
+          background-position: center center;
+          background-repeat: no-repeat;
+          background-size: 20px 20px;
+        }
+        .xz {
+          background-image: url(~@/assets/images/xz.png);
+          background-position: center center;
+          background-repeat: no-repeat;
+          background-size: 20px 20px;
+        }
+        .fx {
+          background-image: url(~@/assets/images/fx.png);
+          background-position: center center;
+          background-repeat: no-repeat;
+          background-size: 20px 20px;
+        }
+      }
+    }
+    .pointer-play {
+      .pointer {
+        animation: play 0.5s linear forwards;
+        @keyframes play {
+          100% {
+            transform: rotate(32deg);
+          }
+        }
+      }
+      .dish {
+        img {
+          animation-play-state: running;
+        }
+      }
+    }
+    .pointer-end {
+      .pointer {
+        animation: play1 0.5s linear forwards;
+        @keyframes play1 {
+          0% {
+            transform: rotate(32deg);
+          }
+          100% {
+            transform: rotate(0deg);
+          }
+        }
+      }
+    }
+    .lyrics-info {
+      flex: 1;
+      background: white;
+    }
   }
   .lyrics-top {
     top: -560px;

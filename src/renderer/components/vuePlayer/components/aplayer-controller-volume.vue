@@ -76,21 +76,22 @@ export default {
   position: relative;
   cursor: pointer;
   z-index: 0;
+  top:-5px;
 
   &:hover .aplayer-volume-bar-wrap {
     display: block;
   }
   .aplayer-icon-volume-down {
     width: 20px;
-    height: 20px;
-    background: url(~@/assets/images/yl.png) no-repeat;
-    background-size: 100% 100%;
+    height: 30px;
+    background: url(~@/assets/images/yl.png) bottom no-repeat;
+    background-size: 20px 20px;
   }
   .aplayer-icon-volume-off {
-    background: url(~@/assets/images/jy.png) no-repeat;
-    background-size: 100% 100%;
-    width: 18px;
-    height: 18px;
+    background: url(~@/assets/images/jy.png) bottom no-repeat;
+    background-size: 20px 20px;
+    width: 20px;
+    height: 30px;
   }
   .aplayer-volume-bar-wrap {
     display: none;
