@@ -124,16 +124,16 @@ export default {
       transform: translate(-50%, -50%);
     }
     .aplayer-icon-play {
-      width: 22px;
-      height: 22px;
-      background: url(~@/assets/images/play-btn.png) no-repeat;
-      background-size: 100% 100%;
+      width: 100%;
+      height: 100%;
+      background: url(~@/assets/images/play-btn.png) center center no-repeat;
+      background-size: 22px 22px;
     }
     .aplayer-icon-pause {
       width: 22px;
       height: 22px;
-      background: url(~@/assets/images/end-btn.png) no-repeat;
-      background-size: 100% 100%;
+      background: url(~@/assets/images/end-btn.png) center center no-repeat;
+      background-size: 22px 22px;
     }
   }
 }

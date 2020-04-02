@@ -49,9 +49,9 @@
             class="aplayer-author"
           >-{{ currentMusic.artist || currentMusic.author || 'Unknown' }}</span>
         </div>
-        <slot name="display" :current-music="currentMusic" :play-stat="playStat">
-          <lyrics :current-music="currentMusic" :play-stat="playStat" v-if="shouldShowLrc" />
-        </slot>
+        <!-- <slot name="display" :current-music="currentMusic" :play-stat="playStat"> -->
+          <!-- <lyrics :current-music="currentMusic" :play-stat="playStat" v-if="shouldShowLrc" /> -->
+        <!-- </slot> -->
       </div>
     </div>
     <audio ref="audio"></audio>
@@ -81,7 +81,34 @@
           <div class="fx"></div>
         </div>
       </div>
-      <div class="lyrics-info"></div>
+      <div class="lyrics-info">
+        <lyrics :current-music="currentMusic" :play-stat="playStat" />
+        <!-- <div class="lyrics-wrapper">
+          <ul class="content">
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
+          </ul>
+        </div> -->
+      </div>
     </div>
   </div>
 </template>
@@ -1113,7 +1140,28 @@ export default VueAPlayer;
     }
     .lyrics-info {
       flex: 1;
-      background: white;
+      .lyrics-wrapper {
+        position: absolute;
+        top: 120px;
+        width: 377px;
+        height: 350px;
+        overflow: hidden;
+        .content {
+          font-size: 14px;
+          line-height: 20px;
+          color: rgb(140, 140, 140);
+          li {
+            margin-top: 20px;
+            &:first-child {
+              padding-top: 10px;
+              margin-top: 0;
+            }
+            &:last-child {
+              padding-bottom: 20px;
+            }
+          }
+        }
+      }
     }
   }
   .lyrics-top {
