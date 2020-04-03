@@ -8,18 +8,22 @@
           <div class="min" @click="channel('min')"></div>
           <div class="max" @click="channel('full')"></div>
         </div>
-        <div class="btn-box">
+        <div class="btn-box" v-show="!showLrcPop">
           <img @click="toNext" :class="['next','unCli']" src="@/assets/images/prev1.png" alt />
           <img @click="toPrev" :class="['prev','unCli']" src="@/assets/images/next1.png" alt />
         </div>
-        <div class="top-tool">
-          <div class="user-page-title" v-if="$route.meta.pageTitle">{{$route.meta.pageTitle}}</div>
-          <component v-else-if="$route.meta.topName" :is="$route.meta.topName"></component>
-          <div class="user-page-title" v-if="$route.path === '/userPage'">
-            <p>{{userInfo.profile.nickname}}</p>
-            的{{$route.query.name}}
+        <div v-show="showLrcPop" class="close-lrc" @click="changeLrcPop(false)"></div>
+        <div class="top-tool-box">
+          <div class="top-tool" v-show="!showLrcPop">
+            <div class="user-page-title" v-if="$route.meta.pageTitle">{{$route.meta.pageTitle}}</div>
+            <component v-else-if="$route.meta.topName" :is="$route.meta.topName"></component>
+            <div class="user-page-title" v-if="$route.path === '/userPage'">
+              <p>{{userInfo.profile.nickname}}</p>
+              的{{$route.query.name}}
+            </div>
           </div>
         </div>
+
         <div class="search-box">
           <div class="input-box">
             <i class="search-icon"></i>
@@ -68,8 +72,13 @@ export default {
       userInfo: {}
     };
   },
+  computed: {
+    showLrcPop() {
+      return this.$store.state.page.showLrcPop;
+    }
+  },
   methods: {
-    ...mapActions(["renderData", "clearData"]),
+    ...mapActions(["renderData", "clearData","changeLrcPop"]),
     channel(val) {
       this.$electron.ipcRenderer.send(val);
     },
@@ -251,19 +260,30 @@ body {
       filter: brightness(0.5);
     }
   }
-  .top-tool {
+  .close-lrc{
+    margin:14px 0 0 80px;
+    background:url(~@/assets/images/xl.png) no-repeat;
+    background-size: 100% 100%;
+    width:16px;
+    height: 16px;
+  }
+  .top-tool-box {
+    margin-left: 27px;
+    flex: 1;
+    font-family: PingFangSC-Semibold, sans-serif;
     display: flex;
     align-items: center;
-    flex: 1;
-    margin-left: 27px;
-    font-family: PingFangSC-Semibold, sans-serif;
-    .user-page-title {
-      font-size: 14.5px;
-      color: #fff;
-      font-weight: bold;
-      p {
-        display: inline-block;
-        color: rgb(126, 126, 126);
+    .top-tool {
+      display: flex;
+      align-items: center;
+      .user-page-title {
+        font-size: 14.5px;
+        color: #fff;
+        font-weight: bold;
+        p {
+          display: inline-block;
+          color: rgb(126, 126, 126);
+        }
       }
     }
   }

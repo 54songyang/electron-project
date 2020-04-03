@@ -10,8 +10,8 @@
     }"
     :style="floatStyleObj"
   >
-    <div class="img-box" @click="lyricsShow=!lyricsShow">
-      <i :class="[lyricsShow?'retract-pop':'open-pop']"></i>
+    <div class="img-box" @click="lyricsChannel">
+      <i :class="[showLrcPop?'retract-pop':'open-pop']"></i>
       <div class="blur-box">
         <img :src="currentMusic.pic" alt />
       </div>
@@ -50,7 +50,7 @@
           >-{{ currentMusic.artist || currentMusic.author || 'Unknown' }}</span>
         </div>
         <!-- <slot name="display" :current-music="currentMusic" :play-stat="playStat"> -->
-          <!-- <lyrics :current-music="currentMusic" :play-stat="playStat" v-if="shouldShowLrc" /> -->
+        <!-- <lyrics :current-music="currentMusic" :play-stat="playStat" v-if="shouldShowLrc" /> -->
         <!-- </slot> -->
       </div>
     </div>
@@ -64,8 +64,8 @@
       :theme="currentTheme"
       @selectsong="onSelectSong"
     />
-    <div :class="['lyrics-box',{'lyrics-top':lyricsShow}]">
-    <!-- <div class="lyrics-box lyrics-top"> -->
+    <div :class="['lyrics-box',{'lyrics-top':showLrcPop}]">
+      <!-- <div class="lyrics-box lyrics-top"> -->
       <div :class="['lyrics-player',isPlaying?'pointer-play':'pointer-end']">
         <div class="pointer">
           <i class="lyrics-raido"></i>
@@ -83,31 +83,6 @@
       </div>
       <div class="lyrics-info">
         <lyrics :current-music="currentMusic" :play-stat="playStat" />
-        <!-- <div class="lyrics-wrapper">
-          <ul class="content">
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-            <li>队伍诶u为i额u哦i无i哦额深刻的记住那些那么难吗</li>
-          </ul>
-        </div> -->
       </div>
     </div>
   </div>
@@ -119,6 +94,7 @@ import MusicList from "./components/aplayer-list.vue";
 import Controls from "./components/aplayer-controller.vue";
 import Lyrics from "./components/aplayer-lrc.vue";
 import { deprecatedProp, versionCompare, warn } from "./js/utils";
+import { mapActions } from "vuex";
 
 let versionBadgePrinted = false;
 const canUseSync = versionCompare(Vue.version, "2.3.0") >= 0;
@@ -335,7 +311,6 @@ const VueAPlayer = {
   },
   data() {
     return {
-      lyricsShow: false,
       internalMusic: this.music,
       isPlaying: false,
       isSeeking: false,
@@ -381,6 +356,9 @@ const VueAPlayer = {
     };
   },
   computed: {
+    showLrcPop(){
+      return this.$store.state.page.showLrcPop;
+    },
     // alias for $refs.audio
     audio() {
       return this.$refs.audio;
@@ -517,6 +495,7 @@ const VueAPlayer = {
     }
   },
   methods: {
+    ...mapActions(['changeLrcPop']),
     // Float mode
 
     onDragBegin() {
@@ -841,6 +820,9 @@ const VueAPlayer = {
       } else {
         this.selfAdaptingTheme = null;
       }
+    },
+    lyricsChannel() {
+      this.changeLrcPop(!this.showLrcPop)
     }
   },
   watch: {
@@ -1139,25 +1121,86 @@ export default VueAPlayer;
       }
     }
     .lyrics-info {
+      &:before {
+        position: absolute;
+        top: 118px;
+        z-index: 1;
+        display: block;
+        overflow: hidden;
+        width: 100%;
+        height: 5%;
+        content: " ";
+        pointer-events: none;
+        background: -moz-linear-gradient(
+          top,
+          rgba(45, 45, 45, 1) 0%,
+          rgba(45, 45, 45, 0) 100%
+        );
+        background: -webkit-linear-gradient(
+          top,
+          rgba(45, 45, 45, 1) 0%,
+          rgba(45, 45, 45, 0) 100%
+        );
+        background: linear-gradient(
+          to bottom,
+          rgba(45, 45, 45, 1) 0%,
+          rgba(45, 45, 45, 0) 100%
+        );
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#00ffffff', GradientType=0);
+      }
+      &:after {
+        position: absolute;
+        bottom: 89px;
+        z-index: 1;
+        display: block;
+        overflow: hidden;
+        width: 100%;
+        height: 5%;
+        content: " ";
+        pointer-events: none;
+        background: -moz-linear-gradient(
+          top,
+          rgba(45, 45, 45, 0) 0%,
+          rgba(45, 45, 45, 0.8) 100%
+        );
+        background: -webkit-linear-gradient(
+          top,
+          rgba(45, 45, 45, 0) 0%,
+          rgba(45, 45, 45, 0.8) 100%
+        );
+        background: linear-gradient(
+          to bottom,
+          rgba(45, 45, 45, 0) 0%,
+          rgba(45, 45, 45, 0.8) 100%
+        );
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00ffffff', endColorstr='#ccffffff', GradientType=0);
+      }
       flex: 1;
       .lyrics-wrapper {
         position: absolute;
         top: 120px;
         width: 377px;
         height: 350px;
-        overflow: hidden;
+        overflow-y: auto;
         .content {
           font-size: 14px;
-          line-height: 20px;
+          line-height: 40px;
           color: rgb(140, 140, 140);
-          li {
-            margin-top: 20px;
+          cursor: text;
+          p {
+            cursor: text;
             &:first-child {
               padding-top: 10px;
               margin-top: 0;
             }
             &:last-child {
               padding-bottom: 20px;
+            }
+            &::selection {
+              background: rgb(37, 37, 37);
+              background-size: 100% 100%;
+              // color: rgb(136, 136, 136);
+              // color: rgb(136, 136, 136);
             }
           }
         }

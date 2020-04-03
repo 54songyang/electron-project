@@ -14,6 +14,7 @@ const state = {
   mvData: [], //推荐MV
   newsong: [], //推荐新音乐
   djprogram: [], //推荐电台
+  showLrcPop:false //显示歌词窗口
 }
 
 const mutations = {
@@ -35,6 +36,9 @@ const mutations = {
   SET_DJPROGRAM(state, val) {
     state.djprogram = val;
   },
+  SET_SHOWLRCPOP(state,val){
+    state.showLrcPop = val;
+  }
 }
 
 const actions = {
@@ -192,6 +196,9 @@ const actions = {
   clearData({ commit, dispatch, state }) {
     commit('SET_USERINFO', {});
   },
+  changeLrcPop({commit,state},val){
+    commit('SET_SHOWLRCPOP',val)
+  }
   // getUserInfo({ commit, dispatch, state }) {
   //   axios({
   //     type: "get",
