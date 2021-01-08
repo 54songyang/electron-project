@@ -19,7 +19,7 @@ Vue.use(clampy);
 Vue.use(VueLazyload);
 
 axios.defaults.withCredentials = true// 允许跨域设置，不然可能因为拿不到cookie而报错
-axios.defaults.baseURL = "http://www.request.pipicong.top/";
+axios.defaults.baseURL = "http://39.98.108.187/music/";
 /*请求拦截*/
 axios.interceptors.request.use(
   config => {

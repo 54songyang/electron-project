@@ -177,7 +177,8 @@ export default {
         height: 100%;
         border-radius: 8px;
         overflow: hidden;
-          background-color: rgb(30, 30, 30);
+        background-color: rgb(30, 30, 30);
+        -webkit-user-drag: none;
 
         &::after {
           content: url(~@/assets/images/sing.png);
@@ -281,9 +282,9 @@ export default {
     margin-top: 10px;
     span {
       display: inline-block;
-      width: 5px;
-      height: 5px;
-      margin: 1px 6px;
+      width: 6px;
+      height: 6px;
+      margin: 1px 5px;
       border-radius: 50%;
       cursor: pointer;
     }

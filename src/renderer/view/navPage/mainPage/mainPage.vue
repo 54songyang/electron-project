@@ -422,6 +422,7 @@ export default {
           .singer-body {
             display: flex;
             cursor: pointer;
+            align-items: center;
           }
           .sq-icon {
             display: block;

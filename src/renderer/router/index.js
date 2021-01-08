@@ -23,15 +23,14 @@ router.historyRecord = {
     });
   },
   slice(sta, end) {
-    console.log('123',this._history.slice(sta, end));
     this._history = this._history.slice(sta, end);
   },
-  // canBack() {
-  //   return this._history[this._index].index === this._index;
-  // },
-  // canNext() {
-  //   return this._history.length;
-  // }
+  canBack() {
+    return this._index >= 1
+  },
+  canNext() {
+    return this._index < this._history.length - 1;
+  }
 }
 router.goBack = function () {
   backFlag = true;

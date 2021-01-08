@@ -32,7 +32,7 @@
           :class="{ 'inactive': !$parent.showList }"
           @click.native="$emit('togglelist')"
         />-->
-        <div class="play-btn play-tree"></div>
+        <!-- <div class="play-btn play-tree"></div>
         <div :class="['play-btn',repeat]" @click="$emit('nextmode')"></div>
         <div class="play-btn play-lb" @click="$emit('togglelist')"></div>
         <div class="play-btn play-gc"></div>
@@ -43,7 +43,7 @@
           :muted="muted"
           @togglemute="$emit('togglemute')"
           @setvolume="v => $emit('setvolume', v)"
-        />
+        /> -->
       </div>
     </div>
   </div>
@@ -52,15 +52,13 @@
 <script>
 import IconButton from "../components/aplayer-iconbutton.vue";
 import VProgress from "../components/aplayer-controller-progress.vue";
-import Volume from "../components/aplayer-controller-volume.vue";
 
 export default {
   components: {
     IconButton,
     VProgress,
-    Volume
   },
-  props: ["shuffle", "repeat", "stat", "theme", "volume", "muted"],
+  props: ["shuffle", "repeat", "stat", "theme", "muted"],
   computed: {
     loadProgress() {
       if (this.stat.duration === 0) return 0;
@@ -117,50 +115,6 @@ export default {
     font-size: 13px;
     top: 30px;
     width: 100%;
-    .btn-box {
-      display: flex;
-      width: 200px;
-      justify-content: space-around;
-      align-items: center;
-      position: relative;
-      bottom: 7px;
-      right: 17px;
-      .play-btn {
-        width: 18px;
-        height: 18px;
-      }
-      .aplayer-icon-mode {
-        background: #fff;
-      }
-      .repeat-all {
-        background: url(~@/assets/images/xh.png) no-repeat;
-        background-size: 100% 100%;
-      }
-      .repeat-one {
-        background: url(~@/assets/images/dq.png) no-repeat;
-        background-size: 100% 100%;
-      }
-      .no-repeat {
-        background: url(~@/assets/images/sx.png) no-repeat;
-        background-size: 100% 100%;
-      }
-      .suiji {
-        background: url(~@/assets/images/sj.png) no-repeat;
-        background-size: 100% 100%;
-      }
-      .play-gc {
-        background: url(~@/assets/images/gc.png) no-repeat;
-        background-size: 100% 100%;
-      }
-      .play-tree {
-        background: url(~@/assets/images/tree.png) no-repeat;
-        background-size: 100% 100%;
-      }
-      .play-lb {
-        background: url(~@/assets/images/lb.png) no-repeat;
-        background-size: 100% 100%;
-      }
-    }
 
     .aplayer-icon {
       cursor: pointer;

@@ -9,8 +9,13 @@
           <div class="max" @click="channel('full')"></div>
         </div>
         <div class="btn-box" v-show="!showLrcPop">
-          <img @click="toNext" :class="['next','unCli']" src="@/assets/images/prev1.png" alt />
-          <img @click="toPrev" :class="['prev','unCli']" src="@/assets/images/next1.png" alt />
+          <img
+            @click="toNext"
+            :class="['next',{'canCli':$router.historyRecord.canNext()}]"
+            src="@/assets/images/prev1.png"
+            alt
+          />
+          <img @click="toPrev" :class="['prev',{'canCli':$router.historyRecord.canBack()}]" src="@/assets/images/next1.png" alt />
         </div>
         <div v-show="showLrcPop" class="close-lrc" @click="changeLrcPop(false)"></div>
         <div class="top-tool-box">
@@ -75,10 +80,10 @@ export default {
   computed: {
     showLrcPop() {
       return this.$store.state.page.showLrcPop;
-    }
+    },
   },
   methods: {
-    ...mapActions(["renderData", "clearData","changeLrcPop"]),
+    ...mapActions(["renderData", "clearData", "changeLrcPop"]),
     channel(val) {
       this.$electron.ipcRenderer.send(val);
     },
@@ -119,13 +124,10 @@ export default {
       this.$electron.ipcRenderer.send("mini");
     },
     toNext() {
-      this.$router.back();
-      return;
+      if(!this.$router.historyRecord.canNext()) return;
       this.$router.goNext();
     },
     toPrev() {
-      this.$router.back();
-      return;
       this.$router.goBack();
     }
   },
@@ -133,7 +135,7 @@ export default {
     this.creatData = await import("./js/main.json");
   },
   async mounted() {
-    // console.log('123',this.$router.historyRecord);
+    console.log('90',this.$router.historyRecord.canNext());
     await this.renderData();
     this.userInfo = this.$store.state.page.userInfo;
   }
@@ -143,6 +145,10 @@ export default {
 .hover-bright:hover {
   filter: brightness(2.3);
 }
+// .click-bright:hover{
+//   background-color: rgb(56, 56, 56);
+//   border-radius: 50%;
+// }
 body {
   font-family: PingFangSC-Semibold, sans-serif;
   cursor: pointer;
@@ -252,19 +258,22 @@ body {
       display: block;
       width: 15px;
       height: 15px;
+      padding:4.5px;
+      box-sizing: content-box;
+      filter: brightness(0.5);
     }
     .next {
       margin-left: 20px;
     }
-    .unCli {
-      filter: brightness(0.5);
+    .canCli {
+      filter: brightness(2);
     }
   }
-  .close-lrc{
-    margin:14px 0 0 80px;
-    background:url(~@/assets/images/xl.png) no-repeat;
+  .close-lrc {
+    margin: 14px 0 0 80px;
+    background: url(~@/assets/images/xl.png) no-repeat;
     background-size: 100% 100%;
-    width:16px;
+    width: 16px;
     height: 16px;
   }
   .top-tool-box {

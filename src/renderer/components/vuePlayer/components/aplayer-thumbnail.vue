@@ -1,5 +1,7 @@
 <template>
   <div class="aplayer-pic">
+    <div class="collection" @click="toCollection"></div>
+    <div class="next"></div>
     <div
       class="aplayer-button"
       :class="playing ? 'aplayer-pause' : 'aplayer-play'"
@@ -8,6 +10,8 @@
     >
       <div :class="playing ? 'aplayer-icon-pause' : 'aplayer-icon-play'"></div>
     </div>
+    <div class="prev"></div>
+    <div class="share"></div>
   </div>
 </template>
 <script>
@@ -15,19 +19,19 @@ import IconButton from "../components/aplayer-iconbutton.vue";
 
 export default {
   components: {
-    IconButton
+    IconButton,
   },
   props: {
     pic: String,
     theme: String,
     playing: {
       type: Boolean,
-      default: false
+      default: false,
     },
     enableDrag: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
@@ -41,9 +45,9 @@ export default {
       if (!this.pic) return {};
       return {
         backgroundImage: `url(${this.pic})`,
-        backgroundColor: this.theme
+        backgroundColor: this.theme,
       };
-    }
+    },
   },
   methods: {
     onDragBegin(e) {
@@ -60,7 +64,7 @@ export default {
       this.hasMovedSinceMouseDown = true;
       this.$emit("dragging", {
         offsetLeft: e.clientX - this.dragStartX,
-        offsetTop: e.clientY - this.dragStartY
+        offsetTop: e.clientY - this.dragStartY,
       });
     },
     onDocumentMouseUp(e) {
@@ -73,8 +77,11 @@ export default {
       if (!this.hasMovedSinceMouseDown) {
         this.$emit("toggleplay");
       }
+    },
+    toCollection(){
+      //sc-red.png
     }
-  }
+  },
 };
 </script>
 
@@ -89,18 +96,21 @@ export default {
 
 .aplayer-pic {
   flex-shrink: 0;
-
   height: 60px;
   background-size: cover;
   transition: all 0.3s ease;
-  cursor: pointer;
+  width: 200px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: default;
   &:hover {
     .aplayer-button {
       opacity: 1;
     }
   }
   .aplayer-button {
-    position: absolute;
+    // position: absolute;
     border-radius: 50%;
     transition: all 0.1s ease;
 
@@ -108,26 +118,54 @@ export default {
       fill: #fff;
     }
   }
-
+  .next,
+  .prev {
+    background: url(~@/assets/images/change-red.png) no-repeat;
+    background-size: 100% 100%;
+    width: 14px;
+    height: 14px;
+    // position: absolute;
+    // top: 50%;
+    // transform: translateY(-50%);
+    // left: -45px;
+  }
+  .prev {
+    // left: auto;
+    // right: -45px;
+    transform: rotate(-180deg);
+  }
+  .collection {
+    background: url(~@/assets/images/sc-white.png) no-repeat;
+    background-size: 100% 100%;
+    width: 15px;
+    height: 14px;
+  }
+  .share{
+    background: url(~@/assets/images/share.png) no-repeat;
+    background-size: 100% 100%;
+    width: 14px;
+    height: 13px;
+  }
   .aplayer-play,
   .aplayer-pause {
     width: 40px;
     height: 40px;
-    bottom: 50%;
-    right: calc(50% + 30px);
-    margin: 0 -15px -15px 0;
+    // bottom: 50%;
+    // right: calc(50% + 30px);
+    // margin: 0 -15px -15px 0;
     background-color: rgb(195, 70, 58);
     div {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      // position: absolute;
+      // top: 50%;
+      // left: 50%;
+      // transform: translate(-50%, -50%);
     }
     .aplayer-icon-play {
       width: 100%;
       height: 100%;
       background: url(~@/assets/images/play-btn.png) center center no-repeat;
       background-size: 22px 22px;
+      margin-left: 1px;
     }
     .aplayer-icon-pause {
       width: 22px;

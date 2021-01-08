@@ -3,20 +3,47 @@
     class="aplayer"
     :class="{
       'aplayer-narrow': isMiniMode,
-      'aplayer-withlist' : !isMiniMode && musicList.length > 0,
+      'aplayer-withlist': !isMiniMode && musicList.length > 0,
       'aplayer-withlrc': !isMiniMode && (!!$slots.display || shouldShowLrc),
       'aplayer-float': isFloatMode,
-      'aplayer-loading': isPlaying && isLoading
+      'aplayer-loading': isPlaying && isLoading,
     }"
     :style="floatStyleObj"
   >
     <div class="img-box" @click="lyricsChannel">
-      <i :class="[showLrcPop?'retract-pop':'open-pop']"></i>
+      <i :class="[showLrcPop ? 'retract-pop' : 'open-pop']"></i>
       <div class="blur-box">
         <img :src="currentMusic.pic" alt />
       </div>
     </div>
     <div class="aplayer-body">
+      <div class="aplayer-info" v-show="!isMiniMode">
+        <controls
+          :shuffle="shouldShuffle"
+          :repeat="repeatMode"
+          :stat="playStat"
+          :muted="isAudioMuted"
+          :theme="currentTheme"
+          @toggleshuffle="shouldShuffle = !shouldShuffle"
+          @setvolume="setAudioVolume"
+          @dragbegin="onProgressDragBegin"
+          @dragend="onProgressDragEnd"
+          @dragging="onProgressDragging"
+        />
+        <div class="aplayer-music">
+          <span class="aplayer-title">{{
+            currentMusic.title || "Untitled"
+          }}</span>
+          <span class="aplayer-author hover-bright"
+            >-{{
+              currentMusic.artist || currentMusic.author || "Unknown"
+            }}</span
+          >
+        </div>
+        <!-- <slot name="display" :current-music="currentMusic" :play-stat="playStat"> -->
+        <!-- <lyrics :current-music="currentMusic" :play-stat="playStat" v-if="shouldShowLrc" /> -->
+        <!-- </slot> -->
+      </div>
       <thumbnail
         :pic="currentMusic.pic"
         :playing="isPlaying"
@@ -26,32 +53,19 @@
         @dragbegin="onDragBegin"
         @dragging="onDragAround"
       />
-      <div class="aplayer-info" v-show="!isMiniMode">
-        <controls
-          :shuffle="shouldShuffle"
-          :repeat="repeatMode"
-          :stat="playStat"
+      <div class="controller-box">
+        <div class="play-btn play-tree"></div>
+        <div :class="['play-btn', repeat]" @click="setNextMode"></div>
+        <div class="play-btn play-lb" @click="showList = !showList"></div>
+        <div class="play-btn play-gc"></div>
+        <volume
+          v-if="!isMobile"
           :volume="audioVolume"
-          :muted="isAudioMuted"
           :theme="currentTheme"
-          @toggleshuffle="shouldShuffle = !shouldShuffle"
-          @togglelist="showList = !showList"
+          :muted="isAudioMuted"
           @togglemute="toggleMute"
-          @setvolume="setAudioVolume"
-          @dragbegin="onProgressDragBegin"
-          @dragend="onProgressDragEnd"
-          @dragging="onProgressDragging"
-          @nextmode="setNextMode"
+          @setvolume="(v) => setAudioVolume(v)"
         />
-        <div class="aplayer-music">
-          <span class="aplayer-title">{{ currentMusic.title || 'Untitled' }}</span>
-          <span
-            class="aplayer-author"
-          >-{{ currentMusic.artist || currentMusic.author || 'Unknown' }}</span>
-        </div>
-        <!-- <slot name="display" :current-music="currentMusic" :play-stat="playStat"> -->
-        <!-- <lyrics :current-music="currentMusic" :play-stat="playStat" v-if="shouldShowLrc" /> -->
-        <!-- </slot> -->
       </div>
     </div>
     <audio ref="audio"></audio>
@@ -64,9 +78,11 @@
       :theme="currentTheme"
       @selectsong="onSelectSong"
     />
-    <div :class="['lyrics-box',{'lyrics-top':showLrcPop}]">
+    <div :class="['lyrics-box', { 'lyrics-top': showLrcPop }]">
       <!-- <div class="lyrics-box lyrics-top"> -->
-      <div :class="['lyrics-player',isPlaying?'pointer-play':'pointer-end']">
+      <div
+        :class="['lyrics-player', isPlaying ? 'pointer-play' : 'pointer-end']"
+      >
         <div class="pointer">
           <i class="lyrics-raido"></i>
           <img src="@/assets/images/pointer.png" alt />
@@ -93,6 +109,7 @@ import Thumbnail from "./components/aplayer-thumbnail.vue";
 import MusicList from "./components/aplayer-list.vue";
 import Controls from "./components/aplayer-controller.vue";
 import Lyrics from "./components/aplayer-lrc.vue";
+import Volume from "./components/aplayer-controller-volume";
 import { deprecatedProp, versionCompare, warn } from "./js/utils";
 import { mapActions } from "vuex";
 
@@ -114,7 +131,7 @@ const REPEAT = {
   LIST: "list",
   NO_REPEAT: "no-repeat",
   REPEAT_ONE: "repeat-one",
-  REPEAT_ALL: "repeat-all"
+  REPEAT_ALL: "repeat-all",
 };
 
 const VueAPlayer = {
@@ -124,7 +141,8 @@ const VueAPlayer = {
     Thumbnail,
     Controls,
     MusicList,
-    Lyrics
+    Lyrics,
+    Volume
   },
   props: {
     music: {
@@ -138,29 +156,29 @@ const VueAPlayer = {
           deprecatedProp("music.author", "1.4.1", "music.artist");
         }
         return song.src || song.url;
-      }
+      },
     },
     list: {
       type: Array,
       default() {
         return [];
-      }
+      },
     },
     mini: {
       type: Boolean,
-      default: false
+      default: false,
     },
     showLrc: {
       type: Boolean,
-      default: false
+      default: false,
     },
     mutex: {
       type: Boolean,
-      default: true
+      default: true,
     },
     theme: {
       type: String,
-      default: "#c3463a"
+      default: "#c3463a",
     },
 
     listMaxHeight: String,
@@ -170,7 +188,7 @@ const VueAPlayer = {
      */
     listFolded: {
       type: Boolean,
-      default: false
+      default: false,
     },
 
     /**
@@ -178,7 +196,7 @@ const VueAPlayer = {
      */
     float: {
       type: Boolean,
-      default: false
+      default: false,
     },
 
     // Audio attributes as props
@@ -192,7 +210,7 @@ const VueAPlayer = {
      */
     autoplay: {
       type: Boolean,
-      default: false
+      default: false,
     },
 
     /**
@@ -204,7 +222,7 @@ const VueAPlayer = {
      */
     controls: {
       type: Boolean,
-      default: false
+      default: false,
     },
 
     /**
@@ -213,7 +231,7 @@ const VueAPlayer = {
      */
     muted: {
       type: Boolean,
-      default: false
+      default: false,
     },
     /**
      * @since 1.4.0
@@ -230,7 +248,7 @@ const VueAPlayer = {
       default: 0.8,
       validator(value) {
         return value >= 0 && value <= 1;
-      }
+      },
     },
 
     // play order control
@@ -243,7 +261,7 @@ const VueAPlayer = {
      */
     shuffle: {
       type: Boolean,
-      default: false
+      default: false,
     },
     /**
      * @since 1.5.0
@@ -252,7 +270,7 @@ const VueAPlayer = {
      */
     repeat: {
       type: String,
-      default: REPEAT.NO_REPEAT
+      default: REPEAT.NO_REPEAT,
     },
 
     // deprecated props
@@ -267,7 +285,7 @@ const VueAPlayer = {
           deprecatedProp("listmaxheight", "1.1.2", "listMaxHeight");
         }
         return true;
-      }
+      },
     },
     /**
      * @deprecated since 1.1.2, use mini instead
@@ -280,7 +298,7 @@ const VueAPlayer = {
           deprecatedProp("narrow", "1.1.2", "mini");
         }
         return true;
-      }
+      },
     },
     /**
      * @deprecated since 1.2.2
@@ -293,8 +311,8 @@ const VueAPlayer = {
           deprecatedProp("showlrc", "1.2.2", "showLrc");
         }
         return true;
-      }
-    }
+      },
+    },
     /**
      * @deprecated and REMOVED since 1.5.0
      */
@@ -319,7 +337,7 @@ const VueAPlayer = {
       playStat: {
         duration: 0,
         loadedTime: 0,
-        playedTime: 0
+        playedTime: 0,
       },
       showList: !this.listFolded,
 
@@ -352,11 +370,11 @@ const VueAPlayer = {
       internalShuffle: this.shuffle,
       internalRepeat: this.repeat,
       // for shuffling
-      shuffledList: []
+      shuffledList: [],
     };
   },
   computed: {
-    showLrcPop(){
+    showLrcPop() {
       return this.$store.state.page.showLrcPop;
     },
     // alias for $refs.audio
@@ -372,7 +390,7 @@ const VueAPlayer = {
       set(val) {
         canUseSync && this.$emit("update:music", val);
         this.internalMusic = val;
-      }
+      },
     },
     // compatible for deprecated props
     isMiniMode() {
@@ -411,13 +429,13 @@ const VueAPlayer = {
       // transform: translate(floatOffsetLeft, floatOffsetY)
       return {
         transform: `translate(${this.floatOffsetLeft}px, ${this.floatOffsetTop}px)`,
-        webkitTransform: `translate(${this.floatOffsetLeft}px, ${this.floatOffsetTop}px)`
+        webkitTransform: `translate(${this.floatOffsetLeft}px, ${this.floatOffsetTop}px)`,
       };
     },
     currentPicStyleObj() {
       if (this.currentMusic && this.currentMusic.pic) {
         return {
-          backgroundImage: `url(${this.currentMusic.pic})`
+          backgroundImage: `url(${this.currentMusic.pic})`,
         };
       }
       return {};
@@ -436,7 +454,7 @@ const VueAPlayer = {
       },
       set(val) {
         this.currentMusic = this.shuffledList[val % this.shuffledList.length];
-      }
+      },
     },
     shouldRepeat() {
       return this.repeatMode !== REPEAT.NO_REPEAT;
@@ -452,7 +470,7 @@ const VueAPlayer = {
       set(val) {
         canUseSync && this.$emit("update:muted", val);
         this.internalMuted = val;
-      }
+      },
     },
     audioVolume: {
       get() {
@@ -461,7 +479,7 @@ const VueAPlayer = {
       set(val) {
         canUseSync && this.$emit("update:volume", val);
         this.internalVolume = val;
-      }
+      },
     },
 
     // since 1.5.0
@@ -473,7 +491,7 @@ const VueAPlayer = {
       set(val) {
         canUseSync && this.$emit("update:shuffle", val);
         this.internalShuffle = val;
-      }
+      },
     },
     repeatMode: {
       get() {
@@ -491,11 +509,11 @@ const VueAPlayer = {
       set(val) {
         canUseSync && this.$emit("update:repeat", val);
         this.internalRepeat = val;
-      }
-    }
+      },
+    },
   },
   methods: {
-    ...mapActions(['changeLrcPop']),
+    ...mapActions(["changeLrcPop"]),
     // Float mode
 
     onDragBegin() {
@@ -549,7 +567,7 @@ const VueAPlayer = {
           // rejectPlayPromise is to force reject audioPlayPromise if it's still pending when pause() is called
           this.rejectPlayPromise = reject;
           audioPlayPromise
-            .then(res => {
+            .then((res) => {
               this.rejectPlayPromise = null;
               resolve(res);
             })
@@ -651,7 +669,7 @@ const VueAPlayer = {
         if (indexOfCurrentMusic !== 0) {
           [unshuffled[0], unshuffled[indexOfCurrentMusic]] = [
             unshuffled[indexOfCurrentMusic],
-            unshuffled[0]
+            unshuffled[0],
           ];
         }
       }
@@ -773,10 +791,10 @@ const VueAPlayer = {
         "suspend",
         "timeupdate",
         "volumechange",
-        "waiting"
+        "waiting",
       ];
-      mediaEvents.forEach(event => {
-        this.audio.addEventListener(event, e => this.$emit(event, e));
+      mediaEvents.forEach((event) => {
+        this.audio.addEventListener(event, (e) => this.$emit(event, e));
       });
 
       // event handlers
@@ -822,8 +840,8 @@ const VueAPlayer = {
       }
     },
     lyricsChannel() {
-      this.changeLrcPop(!this.showLrcPop)
-    }
+      this.changeLrcPop(!this.showLrcPop);
+    },
   },
   watch: {
     music(music) {
@@ -865,7 +883,7 @@ const VueAPlayer = {
           this.audio.src = src;
         }
         // self-adapting theme color
-      }
+      },
     },
 
     // since 1.4.0
@@ -899,7 +917,7 @@ const VueAPlayer = {
     },
     repeat(val) {
       this.internalRepeat = val;
-    }
+    },
   },
   beforeCreate() {
     if (!VueAPlayer.disableVersionBadge && !versionBadgePrinted) {
@@ -927,7 +945,7 @@ const VueAPlayer = {
     if (this.hls) {
       this.hls.destroy();
     }
-  }
+  },
 };
 
 export default VueAPlayer;
@@ -1220,8 +1238,10 @@ export default VueAPlayer;
     background: #252525;
     position: relative;
     z-index: 101;
+    justify-content: space-between;
+    cursor: default;
     .aplayer-info {
-      flex-grow: 1;
+      // flex-grow: 1;
       display: flex;
       flex-direction: column;
 
@@ -1246,6 +1266,51 @@ export default VueAPlayer;
 
       .aplayer-lrc {
         z-index: 0;
+      }
+    }
+    .controller-box {
+      display: flex;
+      width: 200px;
+      justify-content: space-around;
+      align-items: center;
+      margin-right: 14px;
+      // position: relative;
+      // bottom: 3px;
+      // right: 17px;
+      .play-btn {
+        width: 18px;
+        height: 18px;
+      }
+      .aplayer-icon-mode {
+        background: #fff;
+      }
+      .repeat-all {
+        background: url(~@/assets/images/xh.png) no-repeat;
+        background-size: 100% 100%;
+      }
+      .repeat-one {
+        background: url(~@/assets/images/dq.png) no-repeat;
+        background-size: 100% 100%;
+      }
+      .no-repeat {
+        background: url(~@/assets/images/sx.png) no-repeat;
+        background-size: 100% 100%;
+      }
+      .suiji {
+        background: url(~@/assets/images/sj.png) no-repeat;
+        background-size: 100% 100%;
+      }
+      .play-gc {
+        background: url(~@/assets/images/gc.png) no-repeat;
+        background-size: 100% 100%;
+      }
+      .play-tree {
+        background: url(~@/assets/images/tree.png) no-repeat;
+        background-size: 100% 100%;
+      }
+      .play-lb {
+        background: url(~@/assets/images/lb.png) no-repeat;
+        background-size: 100% 100%;
       }
     }
   }
