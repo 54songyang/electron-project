@@ -156,6 +156,7 @@ export default {
         transition: transform 300ms, background-color 0.3s, border-color 0.3s;
         border-radius: 50%;
         background: rgb(195, 70, 58);
+        z-index: 200;
         cursor: pointer;
         opacity: 0;
         &:hover {

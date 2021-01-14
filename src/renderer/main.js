@@ -11,6 +11,9 @@ import clampy from '@clampy-js/vue-clampy';
 import VueLazyload from 'vue-lazyload';
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
+
+process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
+
 Vue.prototype.$axios = axios
 Vue.prototype.$utils = utils
 Vue.config.productionTip = false

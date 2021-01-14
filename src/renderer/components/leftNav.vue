@@ -2,40 +2,51 @@
   <div class="nav-body">
     <div class="user-box-top">
       <div class="user-box" @click.stop="showUserDetail = !showUserDetail">
-        <img v-if="Object.keys(userInfo).length>0" :src="avatarUrl" alt />
+        <img v-if="Object.keys(userInfo).length > 0" :src="avatarUrl" alt />
         <img v-else src="@/assets/images/person.png" alt />
-        <p class="user-name">{{Object.keys(userInfo).length>0?userInfo.profile.nickname:'未登录'}}</p>
+        <p class="user-name">
+          {{
+            Object.keys(userInfo).length > 0
+              ? userInfo.profile.nickname
+              : "未登录"
+          }}
+        </p>
         <i class="user-detail" @click="openDetail"></i>
       </div>
     </div>
-    <div
-      class="title-box"
-      v-for="(item,index) in navList"
-      :key="index"
-      @click="selectPage(item,index)"
-      :class="['item',{'item-hover':item.nav},{active:$route.meta.pageNav === index}]"
-    >
-      <div>
-        <i :class="['item-icon',`icon-${item.name}`]" v-if="item.nav"></i>
-        <p :class="[item.nav?'nav':'title']">{{item.nav?item.nav:item.title}}</p>
+    <div class="title-box">
+      <div
+        v-for="(item, index) in navList"
+        :key="index"
+        :class="[
+          'item',
+          { 'item-hover': item.nav },
+          { active: $route.meta.pageNav === index },
+        ]"
+        @click="selectPage(item, index)"
+      >
+        <i :class="['item-icon', `icon-${item.name}`]" v-if="item.nav"></i>
+        <p :class="[item.nav ? 'nav' : 'title']">
+          {{ item.nav ? item.nav : item.title }}
+        </p>
       </div>
     </div>
     <div
       class="user-detail-box cloud-pop-box"
-      v-if="Object.keys(userInfo).length>0"
+      v-if="Object.keys(userInfo).length > 0"
       v-ownShow="showUserDetail"
     >
       <div class="user-top">
-        <div @click="toList('event','动态')">
-          <p>{{userInfo.profile.eventCount}}</p>
+        <div @click="toList('event', '动态')">
+          <p>{{ userInfo.profile.eventCount }}</p>
           <span>动态</span>
         </div>
-        <div @click="toList('follows','关注')">
-          <p>{{userInfo.profile.follows}}</p>
+        <div @click="toList('follows', '关注')">
+          <p>{{ userInfo.profile.follows }}</p>
           <span>关注</span>
         </div>
-        <div @click="toList('followeds','粉丝')">
-          <p>{{userInfo.profile.followeds}}</p>
+        <div @click="toList('followeds', '粉丝')">
+          <p>{{ userInfo.profile.followeds }}</p>
           <span>粉丝</span>
         </div>
       </div>
@@ -48,15 +59,30 @@
       </div>
       <div class="border"></div>
       <div class="btn-list">
-        <div class="btn-item" @click="$electron.shell.openExternal('http://baidu.com')">
+        <div
+          class="btn-item"
+          @click="$electron.shell.openExternal('http://baidu.com')"
+        >
           <div class="btn-title vip">会员中心</div>
-          <div class="btn-right">{{userInfo.profile.vipType==0?'未订购':userInfo.profile.vipType}}</div>
+          <div class="btn-right">
+            {{
+              userInfo.profile.vipType == 0
+                ? "未订购"
+                : userInfo.profile.vipType
+            }}
+          </div>
         </div>
-        <div class="btn-item" @click="$electron.shell.openExternal('http://baidu.com')">
+        <div
+          class="btn-item"
+          @click="$electron.shell.openExternal('http://baidu.com')"
+        >
           <div class="btn-title grade">等级</div>
           <div class="btn-right">未订购</div>
         </div>
-        <div class="btn-item" @click="$electron.shell.openExternal('http://baidu.com')">
+        <div
+          class="btn-item"
+          @click="$electron.shell.openExternal('http://baidu.com')"
+        >
           <div class="btn-title shopping">商城</div>
         </div>
         <div class="border"></div>
@@ -84,14 +110,14 @@ export default {
   data() {
     return {
       active: 0,
-      showUserDetail: false
+      showUserDetail: false,
     };
   },
   computed: {
     avatarUrl() {
       if (JSON.stringify(this.userInfo) === "{}") return "";
       return this.userInfo.profile.avatarUrl;
-    }
+    },
   },
   methods: {
     selectPage(item, index) {
@@ -104,33 +130,33 @@ export default {
         query: {
           from,
           name,
-          userId: this.userInfo.profile.userId
-        }
+          userId: this.userInfo.profile.userId,
+        },
       });
     },
     signin() {
       this.$axios({
         type: "get",
-        url: "/daily_signin"
+        url: "/daily_signin",
       })
-        .then(res => {
+        .then((res) => {
           if (res.status === 200) {
-            console.log('userInfo',this.userInfo);
+            console.log("userInfo", this.userInfo);
             console.log("签到res", res.data);
           }
         })
-        .catch(err => {
+        .catch((err) => {
           console.log("err", err);
         });
     },
-    openDetail() {}
+    openDetail() {},
   },
   directives: {
     ownShow: {
-      bind: function(el, binding, vnode) {
+      bind: function (el, binding, vnode) {
         el.style.display = binding.value ? "block" : "none";
       },
-      update: function(el, binding, vnode) {
+      update: function (el, binding, vnode) {
         let _this = vnode.context,
           value = binding.value,
           bindData = binding.expression;
@@ -140,7 +166,7 @@ export default {
         } else {
           el.style.display = "block";
           _this[bindData] = true;
-          let handFn = function(e) {
+          let handFn = function (e) {
             el.style.display = "none";
             _this[bindData] = false;
             document.body.removeEventListener("click", handFn, false);
@@ -155,10 +181,10 @@ export default {
           };
           document.body.addEventListener("click", handFn);
         }
-      }
-    }
+      },
+    },
   },
-  mounted() {}
+  mounted() {},
 };
 </script>
 
@@ -168,11 +194,12 @@ export default {
   flex-direction: column;
   width: 196px;
   background: rgb(32, 32, 32);
-  min-height: 100vh;
+  height: calc(100vh - 120px);
   color: rgb(177, 177, 177);
+  margin-top: 60px;
   .user-box-top {
     position: relative;
-    height: 60px;
+    height: 50px;
     .user-box {
       position: fixed;
       top: 47px;
@@ -212,10 +239,13 @@ export default {
   .title-box {
     line-height: 36px;
     font-size: 13.5px;
-    padding-left: 15px;
+    overflow: auto;
+    height: calc(100% - 66px);
+    flex: 1;
     & > div {
       display: flex;
       align-items: center;
+      padding-left: 15px;
     }
     .nav {
       flex: 1;

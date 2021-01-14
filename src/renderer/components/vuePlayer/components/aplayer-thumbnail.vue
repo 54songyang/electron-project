@@ -78,9 +78,10 @@ export default {
         this.$emit("toggleplay");
       }
     },
-    toCollection(){
+    toCollection() {
+      //收藏按钮
       //sc-red.png
-    }
+    },
   },
 };
 </script>
@@ -140,7 +141,7 @@ export default {
     width: 15px;
     height: 14px;
   }
-  .share{
+  .share {
     background: url(~@/assets/images/share.png) no-repeat;
     background-size: 100% 100%;
     width: 14px;
@@ -150,16 +151,7 @@ export default {
   .aplayer-pause {
     width: 40px;
     height: 40px;
-    // bottom: 50%;
-    // right: calc(50% + 30px);
-    // margin: 0 -15px -15px 0;
     background-color: rgb(195, 70, 58);
-    div {
-      // position: absolute;
-      // top: 50%;
-      // left: 50%;
-      // transform: translate(-50%, -50%);
-    }
     .aplayer-icon-play {
       width: 100%;
       height: 100%;
@@ -168,8 +160,8 @@ export default {
       margin-left: 1px;
     }
     .aplayer-icon-pause {
-      width: 22px;
-      height: 22px;
+      width: 100%;
+      height: 100%;
       background: url(~@/assets/images/end-btn.png) center center no-repeat;
       background-size: 22px 22px;
     }

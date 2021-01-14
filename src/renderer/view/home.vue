@@ -11,20 +11,34 @@
         <div class="btn-box" v-show="!showLrcPop">
           <img
             @click="toNext"
-            :class="['next',{'canCli':$router.historyRecord.canNext()}]"
+            :class="['next', { canCli: $router.historyRecord.canNext() }]"
             src="@/assets/images/prev1.png"
             alt
           />
-          <img @click="toPrev" :class="['prev',{'canCli':$router.historyRecord.canBack()}]" src="@/assets/images/next1.png" alt />
+          <img
+            @click="toPrev"
+            :class="['prev', { canCli: $router.historyRecord.canBack() }]"
+            src="@/assets/images/next1.png"
+            alt
+          />
         </div>
-        <div v-show="showLrcPop" class="close-lrc" @click="changeLrcPop(false)"></div>
+        <div
+          v-show="showLrcPop"
+          class="close-lrc"
+          @click="changeLrcPop(false)"
+        ></div>
         <div class="top-tool-box">
           <div class="top-tool" v-show="!showLrcPop">
-            <div class="user-page-title" v-if="$route.meta.pageTitle">{{$route.meta.pageTitle}}</div>
-            <component v-else-if="$route.meta.topName" :is="$route.meta.topName"></component>
+            <div class="user-page-title" v-if="$route.meta.pageTitle">
+              {{ $route.meta.pageTitle }}
+            </div>
+            <component
+              v-else-if="$route.meta.topName"
+              :is="$route.meta.topName"
+            ></component>
             <div class="user-page-title" v-if="$route.path === '/userPage'">
-              <p>{{userInfo.profile.nickname}}</p>
-              的{{$route.query.name}}
+              <p>{{ userInfo.profile.nickname }}</p>
+              的{{ $route.query.name }}
             </div>
           </div>
         </div>
@@ -33,13 +47,22 @@
           <div class="input-box">
             <i class="search-icon"></i>
             <input placeholder="搜索" v-model="searchData" type="text" />
-            <i v-show="searchData.length>0" class="search-clear" @click="searchData = ''"></i>
+            <i
+              v-show="searchData.length > 0"
+              class="search-clear"
+              @click="searchData = ''"
+            ></i>
           </div>
           <div class="main-set">
             <img class="setting" src="@/assets/images/set.png" alt />
             <img class="email" src="@/assets/images/email.png" alt />
             <img class="skin" src="@/assets/images/skin.png" alt />
-            <img @click="toMini" class="small" src="@/assets/images/small.png" alt />
+            <img
+              @click="toMini"
+              class="small"
+              src="@/assets/images/small.png"
+              alt
+            />
           </div>
         </div>
       </div>
@@ -74,7 +97,7 @@ export default {
       active: 0,
       searchData: "",
       creatData: null,
-      userInfo: {}
+      userInfo: {},
     };
   },
   computed: {
@@ -106,9 +129,9 @@ export default {
     logout() {
       this.$axios({
         type: "get",
-        url: "/logout"
+        url: "/logout",
       })
-        .then(res => {
+        .then((res) => {
           console.log("退出登录", res);
           if (res.status === 200) {
             localStorage.removeItem("userInfo");
@@ -116,7 +139,7 @@ export default {
             this.userInfo = this.$store.state.page.userInfo;
           }
         })
-        .catch(err => {
+        .catch((err) => {
           console.log("err", err);
         });
     },
@@ -124,21 +147,20 @@ export default {
       this.$electron.ipcRenderer.send("mini");
     },
     toNext() {
-      if(!this.$router.historyRecord.canNext()) return;
+      if (!this.$router.historyRecord.canNext()) return;
       this.$router.goNext();
     },
     toPrev() {
       this.$router.goBack();
-    }
+    },
   },
   async beforeCreate() {
     this.creatData = await import("./js/main.json");
   },
   async mounted() {
-    console.log('90',this.$router.historyRecord.canNext());
     await this.renderData();
     this.userInfo = this.$store.state.page.userInfo;
-  }
+  },
 };
 </script>
 <style lang="scss">
@@ -246,7 +268,7 @@ body {
   width: 100vw;
   display: flex;
   justify-content: space-between;
-  z-index: 99;
+  z-index: 151;
   background: rgb(45, 45, 45);
   height: 51px;
   .btn-box {
@@ -258,7 +280,7 @@ body {
       display: block;
       width: 15px;
       height: 15px;
-      padding:4.5px;
+      padding: 4.5px;
       box-sizing: content-box;
       filter: brightness(0.5);
     }
@@ -340,13 +362,21 @@ body {
 }
 .left-scroll {
   position: absolute;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   height: calc(100vh - 60px);
   width: 196px;
-  .left-nav {
-    margin-top: 51px;
-  }
+  z-index: 150;
+  // &::-webkit-scrollbar {
+  //   width: 8px;
+  //   background: rgb(45, 45, 45);
+  // }
+  // &::-webkit-scrollbar-thumb {
+  //   border-radius: 4px;
+  //   background: rgb(68, 68, 68);
+  // }
+  // .left-nav {
+  //   margin-top: 51px;
+  // }
 }
 .main-body {
   height: calc(100vh - 111px);

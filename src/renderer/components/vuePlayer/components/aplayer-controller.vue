@@ -13,38 +13,6 @@
         <span class="aplayer-ptime">{{secondToTime(stat.playedTime)}}</span> /
         <span class="aplayer-dtime">{{secondToTime(stat.duration)}}</span>
       </div>
-      <div class="btn-box">
-        <!-- <icon-button
-          class="aplayer-icon-mode"
-          icon="shuffle"
-          :class="{ 'inactive': !shuffle }"
-          @click.native="$emit('toggleshuffle')"
-        />-->
-        <!-- <icon-button
-          class="aplayer-icon-mode"
-          :icon="repeat === 'repeat-one' ? 'repeat-one' : 'repeat-all'"
-          :class="{ 'inactive': repeat === 'no-repeat'}"
-          @click.native="$emit('nextmode')"
-        /> -->
-        <!-- <icon-button
-          class="aplayer-icon-menu"
-          icon="menu"
-          :class="{ 'inactive': !$parent.showList }"
-          @click.native="$emit('togglelist')"
-        />-->
-        <!-- <div class="play-btn play-tree"></div>
-        <div :class="['play-btn',repeat]" @click="$emit('nextmode')"></div>
-        <div class="play-btn play-lb" @click="$emit('togglelist')"></div>
-        <div class="play-btn play-gc"></div>
-        <volume
-          v-if="!$parent.isMobile"
-          :volume="volume"
-          :theme="theme"
-          :muted="muted"
-          @togglemute="$emit('togglemute')"
-          @setvolume="v => $emit('setvolume', v)"
-        /> -->
-      </div>
     </div>
   </div>
 </template>
@@ -68,14 +36,6 @@ export default {
       if (this.stat.duration === 0) return 0;
       return this.stat.playedTime / this.stat.duration;
     }
-  },
-  watch: {
-    repeat(val) {
-      console.log("t4903943904", val);
-    }
-  },
-  mounted(){
-    console.log('t4903943904',this.repeat);
   },
   methods: {
     secondToTime(second) {
