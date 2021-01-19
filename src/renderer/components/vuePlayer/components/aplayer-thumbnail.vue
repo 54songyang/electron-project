@@ -1,7 +1,7 @@
 <template>
   <div class="aplayer-pic">
     <div class="collection" @click="toCollection"></div>
-    <div class="next"></div>
+    <div class="next" @click="next"></div>
     <div
       class="aplayer-button"
       :class="playing ? 'aplayer-pause' : 'aplayer-play'"
@@ -10,11 +10,12 @@
     >
       <div :class="playing ? 'aplayer-icon-pause' : 'aplayer-icon-play'"></div>
     </div>
-    <div class="prev"></div>
+    <div class="prev" @click="prev"></div>
     <div class="share"></div>
   </div>
 </template>
 <script>
+import { mapMutations, mapState } from "vuex";
 import IconButton from "../components/aplayer-iconbutton.vue";
 
 export default {
@@ -50,6 +51,7 @@ export default {
     },
   },
   methods: {
+    ...mapMutations(["SET_MUSIC"]),
     onDragBegin(e) {
       if (this.enableDrag) {
         this.hasMovedSinceMouseDown = false;
@@ -77,6 +79,20 @@ export default {
       if (!this.hasMovedSinceMouseDown) {
         this.$emit("toggleplay");
       }
+    },
+    next() {
+      //下一首
+      const { list, active } = this.$store.state.music.videoUpload;
+      if (active === list.length - 1) return;
+      let index = active + 1;
+      this.SET_MUSIC({ index });
+    },
+    prev(){
+      //上一首
+      const { list, active } = this.$store.state.music.videoUpload;
+      if (active === 0) return;
+      let index = active - 1;
+      this.SET_MUSIC({ index });
     },
     toCollection() {
       //收藏按钮
@@ -125,15 +141,10 @@ export default {
     background-size: 100% 100%;
     width: 14px;
     height: 14px;
-    // position: absolute;
-    // top: 50%;
-    // transform: translateY(-50%);
-    // left: -45px;
-  }
-  .prev {
-    // left: auto;
-    // right: -45px;
     transform: rotate(-180deg);
+  }
+  .next {
+    transform: rotate(0deg);
   }
   .collection {
     background: url(~@/assets/images/sc-white.png) no-repeat;

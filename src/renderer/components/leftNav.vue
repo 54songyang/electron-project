@@ -20,15 +20,21 @@
         :key="index"
         :class="[
           'item',
-          { 'item-hover': item.nav },
+          { 'item-hover': item.name },
           { active: $route.meta.pageNav === index },
         ]"
-        @click="selectPage(item, index)"
+        @click="selectPage(item, index, item.id)"
       >
-        <i :class="['item-icon', `icon-${item.name}`]" v-if="item.nav"></i>
-        <p :class="[item.nav ? 'nav' : 'title']">
-          {{ item.nav ? item.nav : item.title }}
-        </p>
+        <template v-if="!item.id">
+          <i :class="['item-icon', `icon-${item.name}`]" v-if="item.nav"></i>
+          <p :class="[item.nav ? 'nav' : 'title']">
+            {{ item.nav ? item.nav : item.title || item.name }}
+          </p>
+        </template>
+        <template v-if="item.id">
+          <i class="item-icon music-icon"></i>
+          <p class="nav">{{ item.specialType ? "我喜欢的音乐" : item.name }}</p>
+        </template>
       </div>
     </div>
     <div
@@ -104,12 +110,12 @@
 </template>
 
 <script>
+import { mapMutations } from "vuex";
 export default {
   name: "leftNav",
   props: ["navList", "userInfo"],
   data() {
     return {
-      active: 0,
       showUserDetail: false,
     };
   },
@@ -118,11 +124,21 @@ export default {
       if (JSON.stringify(this.userInfo) === "{}") return "";
       return this.userInfo.profile.avatarUrl;
     },
+    pageActive() {
+      return this.$store.state.page.pageActive;
+    },
   },
   methods: {
-    selectPage(item, index) {
+    ...mapMutations(["SET_PLAYMENU", "SET_PAGEACTIVE"]),
+    selectPage(item, index, id) {
       if (!item.name) return;
-      this.$router.push(item.name);
+      this.SET_PAGEACTIVE(index);
+      if (id) {
+        this.SET_PLAYMENU(item);
+        this.$router.push("ownMenu");
+      } else {
+        this.$router.push(item.name);
+      }
     },
     toList(from, name) {
       this.$router.push({
@@ -150,6 +166,9 @@ export default {
         });
     },
     openDetail() {},
+    beforeunloadFn() {
+      localStorage.setItem("active", this.pageActive);
+    },
   },
   directives: {
     ownShow: {
@@ -184,7 +203,15 @@ export default {
       },
     },
   },
-  mounted() {},
+  beforeDestroy() {
+    window.removeEventListener("beforeunload", (e) => this.beforeunloadFn(e));
+  },
+  mounted() {
+    const pageNav = this.$route.meta.pageNav;
+    window.addEventListener("beforeunload", (e) => this.beforeunloadFn(e));
+    const oldActive = localStorage.getItem("active");
+    this.SET_PAGEACTIVE(pageNav <= 11 ? pageNav : Number(oldActive) || 0);
+  },
 };
 </script>
 
@@ -234,7 +261,7 @@ export default {
   }
   .title {
     font-size: 12px;
-    padding-left: 15px;
+    // padding-left: 15px;
   }
   .title-box {
     line-height: 36px;
@@ -289,6 +316,9 @@ export default {
     .icon-loveList {
       background-image: url(~@/assets/images/heart.png);
     }
+    .music-icon {
+      background-image: url(~@/assets/images/music-icon.png);
+    }
   }
   .active {
     color: #e63b2a;
@@ -322,6 +352,9 @@ export default {
     }
     .icon-loveList {
       background-image: url(~@/assets/images/heart1.png);
+    }
+    .music-icon {
+      background-image: url(~@/assets/images/music-red.png);
     }
   }
   .item-hover:hover {

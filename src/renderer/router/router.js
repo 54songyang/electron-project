@@ -10,9 +10,9 @@ export const routers = [
         name: 'mainPage',
         component: require('@/view/navPage/mainPage/mainPage').default,
         meta: {
-          pageNav: 0,
+          pageNav: 0,//刷新后位置上次选择（因增加自定义歌单暂不可用）
           topNav: 0,
-          topName:'mainPageTop'
+          topName: 'mainPageTop'
         }
       },
       {
@@ -45,7 +45,7 @@ export const routers = [
         component: require('@/view/navPage/itunesNav').default,
         meta: {
           pageNav: 5,
-          pageTitle:'iTunes音乐'
+          pageTitle: 'iTunes音乐'
         }
       },
       {
@@ -62,7 +62,7 @@ export const routers = [
         component: require('@/view/navPage/cloudNav').default,
         meta: {
           pageNav: 7,
-          pageTitle:'我的音乐云盘'
+          pageTitle: '我的音乐云盘'
         }
       },
       {
@@ -71,7 +71,7 @@ export const routers = [
         component: require('@/view/navPage/radioNav').default,
         meta: {
           pageNav: 8,
-          pageTitle:'我的电台'
+          pageTitle: '我的电台'
         }
       },
       {
@@ -83,9 +83,9 @@ export const routers = [
         }
       },
       {
-        path: '/loveList',
-        name: 'loveList',
-        component: require('@/view/navPage/loveList').default,
+        path: '/ownMenu',
+        name: 'ownMenu',
+        component: require('@/view/navPage/ownMenu').default,
         meta: {
           pageNav: 11
         }
@@ -96,7 +96,7 @@ export const routers = [
         component: require('@/view/navPage/setInfo').default,
         meta: {
           pageNav: '',
-          pageTitle:'编辑个人信息'
+          pageTitle: '编辑个人信息'
         }
       },
       {
@@ -115,7 +115,7 @@ export const routers = [
         meta: {
           pageNav: 0,
           topNav: 1,
-          topName:'mainPageTop'
+          topName: 'mainPageTop'
         }
       },
       {
@@ -124,7 +124,7 @@ export const routers = [
         component: require('@/view/navPage/recommend').default,
         meta: {
           pageNav: '',
-          pageTitle:'独家放送'
+          pageTitle: '独家放送'
         }
       },
       {
@@ -134,7 +134,7 @@ export const routers = [
         meta: {
           pageNav: 0,
           topNav: 5,
-          topName:'mainPageTop'
+          topName: 'mainPageTop'
         }
       },
       {
@@ -152,7 +152,7 @@ export const routers = [
         meta: {
           pageNav: 0,
           topNav: 2,
-          topName:'mainPageTop'
+          topName: 'mainPageTop'
         }
       },
       {
@@ -162,7 +162,7 @@ export const routers = [
         meta: {
           pageNav: 0,
           topNav: 3,
-          topName:'mainPageTop'
+          topName: 'mainPageTop'
         }
       },
       {
@@ -172,7 +172,7 @@ export const routers = [
         meta: {
           pageNav: 0,
           topNav: 4,
-          topName:'mainPageTop'
+          topName: 'mainPageTop'
         }
       },
       {

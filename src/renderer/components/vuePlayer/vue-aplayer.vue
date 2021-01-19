@@ -54,22 +54,27 @@
         @dragging="onDragAround"
       />
       <div class="controller-box">
-        <div class="play-btn play-tree"></div>
-        <div :class="['play-btn', repeat]" @click="setNextMode"></div>
-        <div class="play-btn play-lb" @click="showList = !showList"></div>
-        <div class="play-btn play-gc"></div>
-        <volume
-          v-if="!isMobile"
-          :volume="audioVolume"
-          :theme="currentTheme"
-          :muted="isAudioMuted"
-          @togglemute="toggleMute"
-          @setvolume="(v) => setAudioVolume(v)"
-        />
+        <div>
+          <div class="play-btn play-tree"></div>
+          <div :class="['play-btn', repeat]" @click="setNextMode"></div>
+          <div
+            :class="['play-btn', !showMusicList ? 'play-lb' : 'play-lb-red']"
+            @click="changeList"
+          ></div>
+          <div class="play-btn play-gc"></div>
+          <volume
+            v-if="!isMobile"
+            :volume="audioVolume"
+            :theme="currentTheme"
+            :muted="isAudioMuted"
+            @togglemute="toggleMute"
+            @setvolume="(v) => setAudioVolume(v)"
+          />
+        </div>
       </div>
     </div>
     <audio ref="audio"></audio>
-    <music-list
+    <!-- <music-list
       :show="showList && !isMiniMode"
       :current-music="currentMusic"
       :music-list="musicList"
@@ -77,9 +82,8 @@
       :listmaxheight="listmaxheight || listMaxHeight"
       :theme="currentTheme"
       @selectsong="onSelectSong"
-    />
+    /> -->
     <div :class="['lyrics-box', { 'lyrics-top': showLrcPop }]">
-      <!-- <div class="lyrics-box lyrics-top"> -->
       <div
         :class="['lyrics-player', isPlaying ? 'pointer-play' : 'pointer-end']"
       >
@@ -111,7 +115,7 @@ import Controls from "./components/aplayer-controller.vue";
 import Lyrics from "./components/aplayer-lrc.vue";
 import Volume from "./components/aplayer-controller-volume";
 import { deprecatedProp, versionCompare, warn } from "./js/utils";
-import { mapActions } from "vuex";
+import { mapActions, mapMutations } from "vuex";
 
 let versionBadgePrinted = false;
 const canUseSync = versionCompare(Vue.version, "2.3.0") >= 0;
@@ -142,7 +146,7 @@ const VueAPlayer = {
     Controls,
     MusicList,
     Lyrics,
-    Volume
+    Volume,
   },
   props: {
     music: {
@@ -374,6 +378,9 @@ const VueAPlayer = {
     };
   },
   computed: {
+    showMusicList() {
+      return this.$store.state.music.showMusicList;
+    },
     showLrcPop() {
       return this.$store.state.page.showLrcPop;
     },
@@ -515,7 +522,7 @@ const VueAPlayer = {
   methods: {
     ...mapActions(["changeLrcPop"]),
     // Float mode
-
+    ...mapMutations(["SET_SHOWMUSICLIST"]),
     onDragBegin() {
       this.floatOriginX = this.floatOffsetLeft;
       this.floatOriginY = this.floatOffsetTop;
@@ -841,6 +848,9 @@ const VueAPlayer = {
     },
     lyricsChannel() {
       this.changeLrcPop(!this.showLrcPop);
+    },
+    changeList() {
+      this.SET_SHOWMUSICLIST(!this.showMusicList);
     },
   },
   watch: {
@@ -1241,10 +1251,10 @@ export default VueAPlayer;
     justify-content: space-between;
     cursor: default;
     .aplayer-info {
-      // flex-grow: 1;
+      flex: 1;
       display: flex;
       flex-direction: column;
-
+      max-width: 39.38%;
       text-align: start;
       height: $aplayer-height;
       box-sizing: border-box;
@@ -1270,13 +1280,16 @@ export default VueAPlayer;
     }
     .controller-box {
       display: flex;
-      width: 200px;
-      justify-content: space-around;
-      align-items: center;
-      margin-right: 14px;
-      // position: relative;
-      // bottom: 3px;
-      // right: 17px;
+      justify-content: flex-end;
+      flex: 1;
+      & > div {
+        height: 66px;
+        display: flex;
+        width: 200px;
+        justify-content: space-around;
+        align-items: center;
+        margin-right: 14px;
+      }
       .play-btn {
         width: 18px;
         height: 18px;
@@ -1311,6 +1324,12 @@ export default VueAPlayer;
       .play-lb {
         background: url(~@/assets/images/lb.png) no-repeat;
         background-size: 100% 100%;
+        width: 20px;
+      }
+      .play-lb-red {
+        background: url(~@/assets/images/lb-red.png) no-repeat;
+        background-size: 100% 100%;
+        width: 20px;
       }
     }
   }

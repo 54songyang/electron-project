@@ -1,6 +1,11 @@
 <template>
   <div>
-    <div id="wrapper" v-if="creatData">
+    <div
+      id="wrapper"
+      v-if="creatData"
+      @mousewheel="wheelFn"
+      @click="globalClick"
+    >
       <div class="top-cli" @dblclick="channel('max')"></div>
       <div class="top-nav">
         <div class="tool-box">
@@ -75,8 +80,17 @@
           :userInfo="userInfo"
         ></leftNav>
       </div>
-      <div class="main-body">
-        <router-view :ref="$route.name"></router-view>
+      <div
+        :class="[
+          'main-body',
+          { 'main-over': mainOver },
+          { 'no-scroll-bar': showMusicList },
+        ]"
+      >
+        <keep-alive>
+          <router-view :ref="$route.name"></router-view>
+        </keep-alive>
+        <musicList v-show="showMusicList" />
       </div>
       <player />
     </div>
@@ -86,11 +100,12 @@
 <script>
 import leftNav from "@/components/leftNav";
 import player from "@/components/player";
+import musicList from "@/components/musicList";
 import mainPageTop from "@/components/mainPageTop";
-import { mapActions, mapState } from "vuex";
+import { mapActions, mapMutations, mapState } from "vuex";
 export default {
   name: "home",
-  components: { leftNav, player, mainPageTop },
+  components: { leftNav, player, mainPageTop, musicList },
   data() {
     return {
       activeSize: [],
@@ -98,17 +113,33 @@ export default {
       searchData: "",
       creatData: null,
       userInfo: {},
+      mainOver: false,
     };
   },
   computed: {
     showLrcPop() {
       return this.$store.state.page.showLrcPop;
     },
+    showMusicList() {
+      return this.$store.state.music.showMusicList;
+    },
+    playlist() {
+      //歌单
+      return this.$store.state.page.playlist;
+    },
   },
   methods: {
     ...mapActions(["renderData", "clearData", "changeLrcPop"]),
+    ...mapMutations(["SET_SHOWMUSICLIST"]),
     channel(val) {
       this.$electron.ipcRenderer.send(val);
+    },
+    globalClick(e) {
+      const listBody = document.querySelector(".list-body");
+      const playerBox = document.querySelector(".player-box");
+      if (!listBody.contains(e.target) && !playerBox.contains(e.target)) {
+        this.SET_SHOWMUSICLIST(false);
+      }
     },
     // dayList() {
     //   //每日歌单推荐
@@ -153,9 +184,19 @@ export default {
     toPrev() {
       this.$router.goBack();
     },
+    wheelFn(e) {
+      const listBody = document.querySelector(".list-body");
+      if (listBody.contains(e.target)) {
+        this.mainOver = true;
+      } else {
+        this.mainOver = false;
+      }
+    },
   },
   async beforeCreate() {
-    this.creatData = await import("./js/main.json");
+    const obj = await import("./js/main.json").then((res) => res.default);
+    obj.navList = [...obj.navList, ...this.playlist];
+    this.creatData = obj;
   },
   async mounted() {
     await this.renderData();
@@ -379,12 +420,20 @@ body {
   // }
 }
 .main-body {
+  position: relative;
   height: calc(100vh - 111px);
   background: #252525;
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 0;
-  margin-left: 196px;
-  margin-top: 51px;
+  margin: 51px 0 0 196px;
+}
+.main-over {
+  overflow-y: hidden;
+}
+.no-scroll-bar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  opacity: 0;
 }
 </style>

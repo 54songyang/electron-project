@@ -63,7 +63,7 @@ export default {
               data: { data },
             } = res;
             this.personalFm = [...this.personalFm, ...data];
-            console.log("this.btn-box", this.personalFm);
+            // console.log("this.btn-box", this.personalFm);
             return true;
           } else {
             throw new Error("请求失败");

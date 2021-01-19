@@ -14,7 +14,10 @@ const state = {
   mvData: [], //推荐MV
   newsong: [], //推荐新音乐
   djprogram: [], //推荐电台
-  showLrcPop: false //显示歌词窗口
+  playlist: [],//用户歌单
+  playMenu: {},// 当前显示歌单
+  showLrcPop: false,//显示歌词窗口
+  pageActive: 0,//页面
 }
 
 const mutations = {
@@ -39,6 +42,15 @@ const mutations = {
   SET_SHOWLRCPOP(state, val) {
     state.showLrcPop = val;
   },
+  SET_PLAYLIST(state, val) {
+    state.playlist = val
+  },
+  SET_PLAYMENU(state, val) {
+    state.playMenu = val
+  },
+  SET_PAGEACTIVE(state,val){
+    state.pageActive = val
+  }
 }
 
 const actions = {
@@ -54,6 +66,8 @@ const actions = {
     } else {
       commit("SET_USERINFO", JSON.parse(window.localStorage.getItem('userInfo')))
     }
+    const userId = state.userInfo.account.id
+    dispatch("getUserPlaylist", userId)
   },
   loginStatus() {
     if (!localStorage.getItem('userInfo')) return false
@@ -83,7 +97,6 @@ const actions = {
       .then(res => {
         console.log("用户登录", res);
         if (res.status === 200) {
-          console.log('res', res.data);
           commit("SET_USERINFO", res.data);
           window.localStorage.setItem('userInfo', JSON.stringify(res.data))
         }
@@ -198,23 +211,23 @@ const actions = {
   },
   changeLrcPop({ commit, state }, val) {
     commit('SET_SHOWLRCPOP', val)
-  }
-  // getUserInfo({ commit, dispatch, state }) {
-  //   axios({
-  //     type: "get",
-  //     url:
-  //       "user/subcount"
-  //   })
-  //     .then(res => {
-  //       console.log("获取用户信息", res);
-  //       if (res.status === 200) {
-  //         commit("SET_USERINFO", res.data)
-  //       }
-  //     })
-  //     .catch(err => {
-  //       dispatch("userLogin")
-  //     });
-  // },
+  },
+  getUserPlaylist({ commit, dispatch, state }, id) {
+    axios({
+      type: "get",
+      url:
+        `user/playlist?uid=${id}`
+    })
+      .then(res => {
+        console.log("获取用户歌单", res);
+        if (res.status === 200) {
+          commit("SET_PLAYLIST", res.data.playlist)
+        }
+      })
+      .catch(err => {
+        dispatch("userLogin")
+      });
+  },
 }
 
 export default {

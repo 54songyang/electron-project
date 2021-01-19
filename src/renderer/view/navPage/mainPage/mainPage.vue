@@ -1,34 +1,55 @@
 <template>
   <div class="main-page">
-    <mySwiper v-if="bannerList.length>0" :list="bannerList" :autoPlay="true" class="swiper-box"></mySwiper>
+    <mySwiper
+      v-if="bannerList.length > 0"
+      :list="bannerList"
+      :autoPlay="true"
+      class="swiper-box"
+    ></mySwiper>
     <div class="main-list">
       <mainList :myArray="myArray">
         <template #songSheet>
           <div class="recommend-title">
-            <span class="hover-bright" @click="$router.push('songSheet')">推荐歌单</span>
+            <span class="hover-bright" @click="$router.push('songSheet')"
+              >推荐歌单</span
+            >
           </div>
           <div class="main-item">
             <div class="list-item recommend-item">
               <div class="recommend-box">
                 <img class="calendar-bg" src="@/assets/images/cal-bg.png" alt />
                 <div class="calendar-box">
-                  <img class="calendar" src="@/assets/images/calendar-bg.png" alt />
-                  <div class="calendar-num">{{new Date().getDate()}}</div>
+                  <img
+                    class="calendar"
+                    src="@/assets/images/calendar-bg.png"
+                    alt
+                  />
+                  <div class="calendar-num">{{ new Date().getDate() }}</div>
                 </div>
                 <i class="recommend-btn"></i>
               </div>
               <div class="recommend-name hover-bright">
-                <div v-clampy="2" class="menu-name hover-bright">每日歌曲推荐</div>
+                <div v-clampy="2" class="menu-name hover-bright">
+                  每日歌曲推荐
+                </div>
               </div>
             </div>
-            <div class="list-item recommend-item" v-for="item in personalized" :key="item.id">
+            <div
+              class="list-item recommend-item"
+              v-for="item in personalized"
+              :key="item.id"
+            >
               <div class="recommend-box">
-                <div class="recommend-num">{{item.playCount | numberFormat}}</div>
-                <img v-lazy="imgLazy(item.picUrl,2)" />
+                <div class="recommend-num">
+                  {{ item.playCount | numberFormat }}
+                </div>
+                <img v-lazy="imgLazy(item.picUrl, 2)" />
                 <i class="recommend-btn"></i>
               </div>
               <div class="recommend-name hover-bright">
-                <div v-clampy="2" class="menu-name hover-bright">{{item.name}}</div>
+                <div v-clampy="2" class="menu-name hover-bright">
+                  {{ item.name }}
+                </div>
               </div>
             </div>
           </div>
@@ -36,7 +57,9 @@
 
         <template #recommend>
           <div class="recommend-title">
-            <span class="hover-bright" @click="$router.push('recommend')">独家放送</span>
+            <span class="hover-bright" @click="$router.push('recommend')"
+              >独家放送</span
+            >
           </div>
           <div class="main-item">
             <div
@@ -45,11 +68,13 @@
               :key="item.id"
             >
               <div class="recommend-box">
-                <img v-lazy="imgLazy(item.sPicUrl,1)" />
+                <img v-lazy="imgLazy(item.sPicUrl, 1)" />
                 <i class="privatecontent-btn"></i>
               </div>
               <div class="recommend-name hover-bright">
-                <div v-clampy="2" class="menu-name hover-bright">{{item.name}}</div>
+                <div v-clampy="2" class="menu-name hover-bright">
+                  {{ item.name }}
+                </div>
               </div>
             </div>
           </div>
@@ -57,29 +82,38 @@
 
         <template #newsong>
           <div class="recommend-title">
-            <span class="hover-bright" @click="$router.push('newsong')">最新音乐</span>
+            <span class="hover-bright" @click="$router.push('newsong')"
+              >最新音乐</span
+            >
           </div>
           <div class="newsong-flex-box">
             <div class="main-item main-newsong-item">
               <div
                 class="list-item newsong-item"
-                v-for="(item,index) in newsong.slice(0,5)"
+                v-for="(item, index) in newsong.slice(0, 5)"
                 :key="item.id"
               >
                 <div class="newsong-box">
                   <div class="img-box">
-                    <img v-lazy="imgLazy(item.picUrl,0)" />
+                    <img v-lazy="imgLazy(item.picUrl, 0)" />
                     <i class="privatecontent-btn newsong-btn"></i>
                   </div>
-                  <div class="newsong-index">{{`${index>8?'':'0'}${index+1}`}}</div>
+                  <div class="newsong-index">
+                    {{ `${index > 8 ? "" : "0"}${index + 1}` }}
+                  </div>
                   <div class="newsong-detail" :title="item.name">
                     <div class="newsong-name" v-clampy="1" :title="item.name">
-                      {{item.name}}
-                      <span v-if="item.song.alias[0]">({{item.song.alias[0]}}</span>
+                      {{ item.name }}
+                      <span v-if="item.song.alias[0]"
+                        >({{ item.song.alias[0] }}</span
+                      >
                     </div>
                     <div class="singer-body">
-                      <em class="sq-icon">SQ</em>
-                      <div class="singer-box" v-html="testff(item.song.artists)"></div>
+                      <em class="sq-icon"></em>
+                      <div
+                        class="singer-box"
+                        v-html="testff(item.song.artists)"
+                      ></div>
                     </div>
                   </div>
                   <div class="newsong-play-btn"></div>
@@ -89,7 +123,7 @@
             <div class="main-item main-newsong-item">
               <div
                 class="list-item newsong-item"
-                v-for="(item,index) in newsong.slice(5)"
+                v-for="(item, index) in newsong.slice(5)"
                 :key="item.id"
               >
                 <div class="newsong-box">
@@ -97,15 +131,22 @@
                     <img :src="item.picUrl" />
                     <i class="privatecontent-btn newsong-btn"></i>
                   </div>
-                  <div class="newsong-index">{{`${index>3?'':'0'}${index+6}`}}</div>
+                  <div class="newsong-index">
+                    {{ `${index > 3 ? "" : "0"}${index + 6}` }}
+                  </div>
                   <div class="newsong-detail" :title="item.name">
                     <div class="newsong-name" v-clampy="1" :title="item.name">
-                      {{item.name}}
-                      <span v-if="item.song.alias[0]">({{item.song.alias[0]}}</span>
+                      {{ item.name }}
+                      <span v-if="item.song.alias[0]"
+                        >({{ item.song.alias[0] }}</span
+                      >
                     </div>
                     <div class="singer-body">
-                      <em class="sq-icon">SQ</em>
-                      <div class="singer-box" v-html="testff(item.song.artists)"></div>
+                      <em class="sq-icon"></em>
+                      <div
+                        class="singer-box"
+                        v-html="testff(item.song.artists)"
+                      ></div>
                     </div>
                   </div>
                   <div class="newsong-play-btn"></div>
@@ -117,18 +158,32 @@
 
         <template #personalizedMv>
           <div class="recommend-title">
-            <span class="hover-bright" @click="$router.push('personalizedMv')">推荐MV</span>
+            <span class="hover-bright" @click="$router.push('personalizedMv')"
+              >推荐MV</span
+            >
           </div>
           <div class="main-item">
-            <div class="list-item privatecontent-item" v-for="item in mvData" :key="item.id">
+            <div
+              class="list-item privatecontent-item"
+              v-for="item in mvData"
+              :key="item.id"
+            >
               <div class="recommend-box">
-                <div v-clampy="3" class="copywriter">{{item.copywriter}}</div>
-                <div class="recommend-num mv-num">{{item.playCount | numberFormat}}</div>
-                <img v-lazy="imgLazy(item.picUrl,1)" lazy="error" />
+                <div v-clampy="3" class="copywriter">{{ item.copywriter }}</div>
+                <div class="recommend-num mv-num">
+                  {{ item.playCount | numberFormat }}
+                </div>
+                <img v-lazy="imgLazy(item.picUrl, 1)" lazy="error" />
               </div>
               <div class="recommend-name">
-                <div v-clampy="1" class="menu-name hover-bright">{{item.name}}</div>
-                <div v-clampy="1" class="singer-box" v-html="testff(item.artists)"></div>
+                <div v-clampy="1" class="menu-name hover-bright">
+                  {{ item.name }}
+                </div>
+                <div
+                  v-clampy="1"
+                  class="singer-box"
+                  v-html="testff(item.artists)"
+                ></div>
               </div>
             </div>
           </div>
@@ -136,17 +191,27 @@
 
         <template #djprogram>
           <div class="recommend-title">
-            <span class="hover-bright" @click="$router.push('djprogram')">主播电台</span>
+            <span class="hover-bright" @click="$router.push('djprogram')"
+              >主播电台</span
+            >
           </div>
           <div class="main-item">
-            <div class="list-item djprogram-item" v-for="(item) in djprogram" :key="item.id">
+            <div
+              class="list-item djprogram-item"
+              v-for="item in djprogram"
+              :key="item.id"
+            >
               <div class="djprogram-box">
                 <div class="img-box">
-                  <img v-lazy="imgLazy(item.picUrl,0)" />
+                  <img v-lazy="imgLazy(item.picUrl, 0)" />
                 </div>
                 <div class="djprogram-detail">
-                  <div class="djprogram-name hover-bright" v-clampy="1">{{item.name}}</div>
-                  <div class="hover-bright" v-clampy="1">{{item.copywriter}}</div>
+                  <div class="djprogram-name hover-bright" v-clampy="1">
+                    {{ item.name }}
+                  </div>
+                  <div class="hover-bright" v-clampy="1">
+                    {{ item.copywriter }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -162,14 +227,18 @@
     <div class="shelter" v-show="changeShow"></div>
     <div class="change-box" ref="changeBox" v-show="changeShow">
       <div class="change-title" @mousedown="dragPop">
-        <i @click="changeShow=false"></i>调整栏目顺序
+        <i @click="changeShow = false"></i>调整栏目顺序
       </div>
       <div class="change-tip">想调整首页栏目的顺序？按住右边的按钮拖动即可</div>
       <div class="change-list-box">
         <draggable v-model="changeArr">
           <transition-group>
-            <div class="change-item-box" v-for="item in changeArr" :key="item.id">
-              <div class="change-item">{{item.name}}</div>
+            <div
+              class="change-item-box"
+              v-for="item in changeArr"
+              :key="item.id"
+            >
+              <div class="change-item">{{ item.name }}</div>
             </div>
           </transition-group>
         </draggable>
@@ -190,7 +259,7 @@ export default {
   components: {
     mySwiper,
     draggable,
-    mainList
+    mainList,
   },
   data() {
     return {
@@ -202,15 +271,15 @@ export default {
         { name: "独家放送", id: "recommend", index: 1 },
         { name: "最新音乐", id: "newsong", index: 2 },
         { name: "推荐MV", id: "personalizedMv", index: 3 },
-        { name: "主播电台", id: "djprogram", index: 4 }
+        { name: "主播电台", id: "djprogram", index: 4 },
       ],
       changeArr: [
         { name: "推荐歌单", id: "songSheet", index: 0 },
         { name: "独家放送", id: "recommend", index: 1 },
         { name: "最新音乐", id: "newsong", index: 2 },
         { name: "推荐MV", id: "personalizedMv", index: 3 },
-        { name: "主播电台", id: "djprogram", index: 4 }
-      ]
+        { name: "主播电台", id: "djprogram", index: 4 },
+      ],
     };
   },
   computed: {
@@ -228,18 +297,18 @@ export default {
     },
     djprogram() {
       return this.$store.state.page.djprogram;
-    }
+    },
   },
   mounted() {
     this.$axios({
       type: "get",
-      url: `banner?type=0`
+      url: `banner?type=0`,
     })
-      .then(res => {
+      .then((res) => {
         console.log("banners", res.data.banners);
         if (res.status === 200) this.bannerList = res.data.banners;
       })
-      .catch(err => {
+      .catch((err) => {
         console.log("err", err);
       });
   },
@@ -269,7 +338,7 @@ export default {
       }
       return {
         src,
-        error
+        error,
       };
     },
     changIndex() {
@@ -279,7 +348,7 @@ export default {
       this.changeShow = true;
     },
     dragPop(e) {
-      document.onmousemove = e => {
+      document.onmousemove = (e) => {
         if (!document.querySelector(".change-box").contains(e.target))
           return (document.onmousemove = null), (document.onmouseup = null);
         var oDiv = e.path[1];
@@ -287,7 +356,7 @@ export default {
         var disY = e.clientY - oDiv.offsetTop;
         const dw = document.body.clientWidth - 330;
         const dh = document.body.clientHeight - 395;
-        document.onmousemove = e => {
+        document.onmousemove = (e) => {
           e.preventDefault();
           var l = e.clientX - disX > 0 ? e.clientX - disX : 0;
           var t = e.clientY - disY > 0 ? e.clientY - disY : 0;
@@ -310,9 +379,9 @@ export default {
         { name: "独家放送", id: "recommend", index: 1 },
         { name: "最新音乐", id: "newsong", index: 2 },
         { name: "推荐MV", id: "personalizedMv", index: 3 },
-        { name: "主播电台", id: "djprogram", index: 4 }
+        { name: "主播电台", id: "djprogram", index: 4 },
       ];
-    }
+    },
   },
   filters: {
     numberFormat(val) {
@@ -325,8 +394,8 @@ export default {
         i = Math.floor(Math.log(val) / Math.log(k));
         return (val / Math.pow(k, i)).toFixed(0) + sizes[i];
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -372,6 +441,7 @@ export default {
         .newsong-box {
           display: flex;
           align-items: center;
+          position: relative;
           .img-box {
             position: relative;
             img {
@@ -416,8 +486,13 @@ export default {
             }
           }
           .newsong-play-btn {
-            display: block;
+            position: absolute;
+            right: 30px;
             width: 50px;
+            background: url(~@/assets/images/video-red.png) no-repeat;
+            background-size: 100% 100%;
+            width: 16px;
+            height: 14px;
           }
           .singer-body {
             display: flex;
@@ -426,15 +501,12 @@ export default {
           }
           .sq-icon {
             display: block;
-            width: 20px;
-            height: 15px;
-            color: #c25b24;
-            line-height: 15px;
-            border: 1px solid #c25b24;
-            border-radius: 2px;
-            font-size: 12px;
-            transform: scale(0.8, 0.8);
+            width: 15px;
+            height: 12px;
+            background: url(~@/assets/images/sq.png) no-repeat;
+            background-size: 100% 100%;
             pointer-events: none;
+            margin-right: 4px;
           }
         }
         .djprogram-box {
