@@ -305,8 +305,8 @@ export default {
       url: `banner?type=0`,
     })
       .then((res) => {
-        console.log("banners", res.data.banners);
-        if (res.status === 200) this.bannerList = res.data.banners;
+        console.log("banners", res.banners);
+        if (res.code === 200) this.bannerList = res.banners;
       })
       .catch((err) => {
         console.log("err", err);

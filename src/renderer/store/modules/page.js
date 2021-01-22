@@ -1,4 +1,5 @@
 import axios from 'axios'
+axios.defaults.baseURL = "http://www.await.site/music/";
 const state = {
   topNav: [
     { name: "个性推荐", path: 'mainPage' },
@@ -15,7 +16,6 @@ const state = {
   newsong: [], //推荐新音乐
   djprogram: [], //推荐电台
   playlist: [],//用户歌单
-  playMenu: {},// 当前显示歌单
   showLrcPop: false,//显示歌词窗口
   pageActive: 0,//页面
 }
@@ -43,67 +43,66 @@ const mutations = {
     state.showLrcPop = val;
   },
   SET_PLAYLIST(state, val) {
-    state.playlist = val
+    if (Array.isArray(val)) {
+      state.playlist = val
+    } else {
+      state.playlist.forEach(el => {
+        if (el.id === val.id) el = val
+      });
+    }
   },
-  SET_PLAYMENU(state, val) {
-    state.playMenu = val
-  },
-  SET_PAGEACTIVE(state,val){
+  SET_PAGEACTIVE(state, val) {
     state.pageActive = val
   }
 }
 
 const actions = {
   async renderData({ commit, dispatch, state }) {
-    dispatch('recommendList');
-    dispatch('privatecontentList');
-    dispatch('mvtList');
-    dispatch('newsongList');
-    dispatch('djprogramList');
-    const loginStatus = await dispatch('loginStatus');
-    if (!loginStatus) {
-      await dispatch('userLogin');
-    } else {
-      commit("SET_USERINFO", JSON.parse(window.localStorage.getItem('userInfo')))
+    try {
+      dispatch('recommendList');
+      dispatch('privatecontentList');
+      dispatch('mvtList');
+      dispatch('newsongList');
+      dispatch('djprogramList');
+    } catch (error) {
+      console.log("error", error);
     }
-    const userId = state.userInfo.account.id
-    dispatch("getUserPlaylist", userId)
+
   },
-  loginStatus() {
-    if (!localStorage.getItem('userInfo')) return false
+  loginStatus({ commit }) {
     return axios({
       type: "get",
       url:
         "/login/status"
     })
       .then(res => {
-        console.log("用户登录状态", res);
-        if (res.status === 200 && res.statusText === 'OK') {
-          return true
-        } else {
-          return false
-        }
+        console.log("用户登录状态", res.data);
+        return res.data
       })
-      .catch(err => {
-        console.log("err", err);
-      });
   },
   userLogin({ commit, state }) {
     return axios({
       type: "get",
       url:
-        "login/cellphone?phone=13522499772&password=s459992561"
+        "/login?email=m13522499772@163.com&password=songyang123"
     })
       .then(res => {
         console.log("用户登录", res);
-        if (res.status === 200) {
-          commit("SET_USERINFO", res.data);
-          window.localStorage.setItem('userInfo', JSON.stringify(res.data))
-        }
+        if (res.code === 200) return res
       })
-      .catch(err => {
-        console.log("err", err);
-      });
+  },
+  refresh({ commit, state }) {
+    ///刷新登录
+    return axios({
+      type: "get",
+      url:
+        "/login/refresh"
+    })
+      .then(res => {
+        console.log("res123", res);
+      }).catch(err => {
+        console.log("error", err);
+      })
   },
   //推荐歌单
   recommendList({ commit, state }) {
@@ -114,13 +113,10 @@ const actions = {
     })
       .then(res => {
         console.log("推荐歌单", res);
-        if (res.status === 200) {
-          commit("SET_PERSONALIZED", res.data.result)
+        if (res.code === 200) {
+          commit("SET_PERSONALIZED", res.result)
         }
       })
-      .catch(err => {
-        console.log("err", err);
-      });
   },
   //独家放送
   privatecontentList({ commit, state }) {
@@ -131,13 +127,10 @@ const actions = {
     })
       .then(res => {
         console.log("独家放送", res);
-        if (res.status === 200) {
-          commit("SET_PRIVATECONTENT", res.data.result)
+        if (res.code === 200) {
+          commit("SET_PRIVATECONTENT", res.result)
         }
       })
-      .catch(err => {
-        console.log("err", err);
-      });
   },
   //推荐MV
   mvtList({ commit, state }) {
@@ -148,13 +141,10 @@ const actions = {
     })
       .then(res => {
         console.log("推荐MV", res);
-        if (res.status === 200) {
-          commit("SET_MVDATA", res.data.result)
+        if (res.code === 200) {
+          commit("SET_MVDATA", res.result)
         }
       })
-      .catch(err => {
-        console.log("err", err);
-      });
   },
   //推荐新音乐
   newsongList({ commit, state }) {
@@ -165,13 +155,10 @@ const actions = {
     })
       .then(res => {
         console.log("推荐新音乐", res);
-        if (res.status === 200) {
-          commit("SET_NEWSONG", res.data.result)
+        if (res.code === 200) {
+          commit("SET_NEWSONG", res.result)
         }
       })
-      .catch(err => {
-        console.log("err", err);
-      });
   },
   //推荐电台
   djprogramList({ commit, state }) {
@@ -182,13 +169,10 @@ const actions = {
     })
       .then(res => {
         console.log("推荐电台", res);
-        if (res.status === 200) {
-          commit("SET_DJPROGRAM", res.data.result)
+        if (res.code === 200) {
+          commit("SET_DJPROGRAM", res.result)
         }
       })
-      .catch(err => {
-        console.log("err", err);
-      });
   },
   getUserDetail({ commit, dispatch, state }) {
     axios({
@@ -198,7 +182,7 @@ const actions = {
     })
       .then(res => {
         console.log("获取用户信息", res);
-        if (res.status === 200) {
+        if (res.code === 200) {
           commit("SET_USERINFO", res.data)
         }
       })
@@ -212,21 +196,19 @@ const actions = {
   changeLrcPop({ commit, state }, val) {
     commit('SET_SHOWLRCPOP', val)
   },
+  //获取用户歌单
   getUserPlaylist({ commit, dispatch, state }, id) {
-    axios({
+    return axios({
       type: "get",
       url:
         `user/playlist?uid=${id}`
     })
       .then(res => {
         console.log("获取用户歌单", res);
-        if (res.status === 200) {
-          commit("SET_PLAYLIST", res.data.playlist)
+        if (res.code === 200) {
+          return res.playlist
         }
       })
-      .catch(err => {
-        dispatch("userLogin")
-      });
   },
 }
 

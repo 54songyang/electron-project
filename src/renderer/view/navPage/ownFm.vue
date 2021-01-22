@@ -58,11 +58,8 @@ export default {
       })
         .then((res) => {
           console.log("获取私人FM", res);
-          if (res.status === 200) {
-            const {
-              data: { data },
-            } = res;
-            this.personalFm = [...this.personalFm, ...data];
+          if (res.code === 200) {
+            this.personalFm = [...this.personalFm, ...res.data];
             // console.log("this.btn-box", this.personalFm);
             return true;
           } else {

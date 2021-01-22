@@ -557,6 +557,10 @@ const VueAPlayer = {
       if (!this.audio.paused) {
         this.pause();
       } else {
+        console.log("00",window.localStorage);
+        console.log("00",window.sessionStorage);
+        console.log("00",document.cookie);
+        console.log("09",this.$store.state);
         this.play();
       }
     },

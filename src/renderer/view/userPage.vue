@@ -47,10 +47,10 @@ export default {
         url: `user/${this.query.from}?uid=${this.query.userId}`
       })
         .then(res => {
-          if (res.status === 200) {
-            if (this.query.from === "follows") this.list = res.data.follow;
-            if (this.query.from === "followeds") this.list = res.data.followeds;
-            if (this.query.from === "event") this.list = res.data.events;
+          if (res.code === 200) {
+            if (this.query.from === "follows") this.list = res.follow;
+            if (this.query.from === "followeds") this.list = res.followeds;
+            if (this.query.from === "event") this.list = res.events;
           }
           console.log("userlist", this.list);
         })

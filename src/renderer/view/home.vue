@@ -407,17 +407,6 @@ body {
   height: calc(100vh - 60px);
   width: 196px;
   z-index: 150;
-  // &::-webkit-scrollbar {
-  //   width: 8px;
-  //   background: rgb(45, 45, 45);
-  // }
-  // &::-webkit-scrollbar-thumb {
-  //   border-radius: 4px;
-  //   background: rgb(68, 68, 68);
-  // }
-  // .left-nav {
-  //   margin-top: 51px;
-  // }
 }
 .main-body {
   position: relative;

@@ -83,14 +83,6 @@ export const routers = [
         }
       },
       {
-        path: '/ownMenu',
-        name: 'ownMenu',
-        component: require('@/view/navPage/ownMenu').default,
-        meta: {
-          pageNav: 11
-        }
-      },
-      {
         path: '/setInfo',
         name: 'setInfo',
         component: require('@/view/navPage/setInfo').default,
@@ -175,11 +167,6 @@ export const routers = [
           topName: 'mainPageTop'
         }
       },
-      {
-        path: '/test',
-        name: 'test',
-        component: require('@/view/test').default,
-      }
     ]
   },
   {

@@ -27,13 +27,13 @@
       >
         <template v-if="!item.id">
           <i :class="['item-icon', `icon-${item.name}`]" v-if="item.nav"></i>
-          <p :class="[item.nav ? 'nav' : 'title']">
+          <div :class="[item.nav ? 'nav' : 'title']">
             {{ item.nav ? item.nav : item.title || item.name }}
-          </p>
+          </div>
         </template>
         <template v-if="item.id">
           <i class="item-icon music-icon"></i>
-          <p class="nav">{{ item.specialType ? "我喜欢的音乐" : item.name }}</p>
+          <div class="nav">{{ item.specialType ? "我喜欢的音乐" : item.name }}</div>
         </template>
       </div>
     </div>
@@ -129,13 +129,12 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(["SET_PLAYMENU", "SET_PAGEACTIVE"]),
+    ...mapMutations(["SET_PAGEACTIVE"]),
     selectPage(item, index, id) {
       if (!item.name) return;
       this.SET_PAGEACTIVE(index);
       if (id) {
-        this.SET_PLAYMENU(item);
-        this.$router.push("ownMenu");
+        this.$router.push(`ownMenu${item.id}?id=item.id`);
       } else {
         this.$router.push(item.name);
       }
@@ -156,7 +155,7 @@ export default {
         url: "/daily_signin",
       })
         .then((res) => {
-          if (res.status === 200) {
+          if (res.code === 200) {
             console.log("userInfo", this.userInfo);
             console.log("签到res", res.data);
           }

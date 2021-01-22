@@ -15,7 +15,7 @@
   </div>
 </template>
 <script>
-import { mapMutations, mapState } from "vuex";
+import { mapActions, mapMutations, mapState } from "vuex";
 import IconButton from "../components/aplayer-iconbutton.vue";
 
 export default {
@@ -85,14 +85,14 @@ export default {
       const { list, active } = this.$store.state.music.videoUpload;
       if (active === list.length - 1) return;
       let index = active + 1;
-      this.SET_MUSIC({ index });
+      this.SET_MUSIC(index);
     },
     prev(){
       //上一首
       const { list, active } = this.$store.state.music.videoUpload;
       if (active === 0) return;
       let index = active - 1;
-      this.SET_MUSIC({ index });
+      this.SET_MUSIC(index);
     },
     toCollection() {
       //收藏按钮
