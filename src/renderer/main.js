@@ -92,15 +92,33 @@ axios.interceptors.response.use(
 const appRender = async () => {
 	try {
 		const loginStatus = await store.dispatch('loginStatus');
-		if (loginStatus.code !== 200) {
+		const playlist = store.state.page.playlist;
+		let children = router.options.routes[0].children
+		if (loginStatus.code !== 200 || !loginStatus.profile) {
 			const res = await store.dispatch('userLogin');
 			store.commit("SET_USERINFO", res);
 		} else {
 			store.commit("SET_USERINFO", loginStatus);
 		}
+		if (playlist.length) {
+			const newList = playlist.filter(el => children.every(el1 => el1.path !== el.path))
+			const newRouter = newList.map((el, index) => {
+				return {
+					path: `/ownMenu${el.id}`,
+					name: `ownMenu${el.id}`,
+					component: require('@/view/navPage/ownMenu').default,
+					meta: {
+						pageNav: index + 11
+					}
+				}
+			})
+			router.options.routes[0].children = newRouter
+			router.addRoutes([router.options.routes[0]])
+		}
 	} catch (error) {
 		console.log("error", error);
 	} finally {
+		console.log("000", router);
 		new Vue({
 			components: { App },
 			router,

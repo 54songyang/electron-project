@@ -22,6 +22,7 @@ function createWindow() {
     height: 670,
     minWidth: 1002,
     minHeight: 670,
+    backgroundColor:'#2d2d2d',
     useContentSize: true,
     transparent: false,
     // titleBarStyle: 'hiddenInset',
@@ -30,9 +31,8 @@ function createWindow() {
     movable: true,
     webPreferences: {
       nodeIntegration: true
-    }
+    },
   })
-
   mainWindow.loadURL(winURL)
 
   mainWindow.on('closed', () => {

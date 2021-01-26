@@ -131,10 +131,9 @@ export default {
   methods: {
     ...mapMutations(["SET_PAGEACTIVE"]),
     selectPage(item, index, id) {
-      if (!item.name) return;
       this.SET_PAGEACTIVE(index);
       if (id) {
-        this.$router.push(`ownMenu${item.id}?id=item.id`);
+        this.$router.push(`/ownMenu${item.id}?id=${item.id}`);
       } else {
         this.$router.push(item.name);
       }

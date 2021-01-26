@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import { routers } from './router'
-import store from '../store'
+// import store from '../store'
 
 Vue.use(VueRouter)
 
@@ -56,33 +56,36 @@ router.goNext = function () {
 
 
 router.beforeEach(async (to, from, next) => {
-  try {
-    let playlist = store.state.page.playlist;
-    if (playlist && playlist.length > 0) {
-      next()
-    } else {
-      const children = routers[0].children
-      const userId = store.state.page.userInfo.account.id
-      playlist = await store.dispatch("getUserPlaylist", userId)
-      const newList = playlist.filter(el => children.every(el1 => el1.path !== el.path))
-      const newRouter = newList.map((el, index) => {
-        return {
-          path: `/ownMenu${el.id}`,
-          name: `ownMenu${el.id}`,
-          component: require('@/view/navPage/ownMenu').default,
-          meta: {
-            pageNav: index + 11
-          }
-        }
-      })
-      routers[0].children = newRouter
-      store.commit("SET_PLAYLIST", playlist)
-      router.addRoutes(routers)
-      next()
-    }
-  } catch (error) {
-    console.log("error", error);
-  }
+  next();
+  //*** 未登录跳转首页
+  // console.log("to",to);
+  // try {
+  //   let playlist = store.state.page.playlist;
+  //   if (playlist && playlist.length > 0) {
+  //     next()
+  //   } else {
+  //     const children = routers[0].children
+  //     const userId = store.state.page.userInfo.account.id
+  //     playlist = await store.dispatch("getUserPlaylist", userId)
+  //     const newList = playlist.filter(el => children.every(el1 => el1.path !== el.path))
+  //     const newRouter = newList.map((el, index) => {
+  //       return {
+  //         path: `/ownMenu${el.id}`,
+  //         name: `ownMenu${el.id}`,
+  //         component: require('@/view/navPage/ownMenu').default,
+  //         meta: {
+  //           pageNav: index + 11
+  //         }
+  //       }
+  //     })
+  //     routers[0].children = newRouter
+  //     store.commit("SET_PLAYLIST", playlist)
+  //     router.addRoutes(routers)
+  //     next()
+  //   }
+  // } catch (error) {
+  //   console.log("error", error);
+  // }
 })
 
 router.afterEach((to, from) => {

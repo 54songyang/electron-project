@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
 import aplayer from "./vuePlayer/vue-aplayer";
 export default {
   name: "player",
@@ -30,9 +31,25 @@ export default {
       return "no-repeat";
     },
   },
+  methods:{
+    ...mapActions(['canUse','musicUrl']),
+    // async getMusicUrl(){
+    //   let url = ''
+    //   try {
+    //     const canRes = await this.canUse() //音乐是否可用
+    //     if(canRes) url = await this.musicUrl() //获取音乐url
+    //     return url
+    //   } catch (error) {
+    //     alert(error)
+    //   }
+    // },
+  },
   updated() {
     this.player = this.$refs.player;
   },
+  mounted(){
+    
+  }
 };
 </script>
 

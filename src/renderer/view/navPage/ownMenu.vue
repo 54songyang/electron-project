@@ -1,6 +1,23 @@
 <template>
   <div class="own-menu">
-    <div class="own-top"></div>
+    <div class="own-top">
+      <img
+        class="own-pic"
+        src="https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1709216491,2536617744&fm=26&gp=0.jpg"
+        alt=""
+      />
+      <div class="info-box">
+        <div class="own-name"><span>歌单</span>123<i></i></div>
+        <div class="user-name">
+          <img
+            src="https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1709216491,2536617744&fm=26&gp=0.jpg"
+            alt=""
+          />
+          <div class="name">皮成仙</div>
+          <div class="time">2020-12-09创建</div>
+        </div>
+      </div>
+    </div>
     <div class="music-body">
       <div
         v-for="(item, index) in menuItem.tracks"
@@ -103,6 +120,50 @@ export default {
 <style lang="scss" scoped>
 .own-menu {
   .own-top {
+    display: flex;
+    padding: 0 37px 0 25px;
+    .own-pic {
+      display: block;
+      width: 200px;
+      height: 200px;
+      border-radius: 6px;
+    }
+    .info-box{
+      padding-left: 30px;
+      .own-name{
+        color: rgb(179, 179, 179);
+        font-size: 22px;
+        display: flex;
+        align-items: center;
+        span{
+          display: block;
+          border: 1px solid rgb(176, 66, 55);
+          font-size:12px;
+          color: rgb(176, 66, 55);
+          padding:0px 3px;
+          border-radius: 2px;
+          margin-right: 8px;
+        }
+      }
+      .user-name{
+        display: flex;
+        align-items: center;
+          font-size: 12px;
+        img{
+          width:23px;
+          height: 23px;
+          border-radius: 50%;
+        }
+        .name{
+          color: rgb(130, 165, 202);
+          margin-left: 7px;
+        }
+        .time{
+          color: rgb(129, 129, 129);
+          margin-left: 11px;
+        }
+      }
+    }
   }
   .music-body {
     .item-box {

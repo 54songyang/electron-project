@@ -253,7 +253,6 @@
 import mySwiper from "@/components/my-swiper";
 import draggable from "vuedraggable";
 import mainList from "./mainList";
-import { mapState } from "vuex";
 export default {
   name: "mainPage",
   components: {

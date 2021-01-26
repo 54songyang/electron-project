@@ -10,7 +10,7 @@ export const routers = [
         name: 'mainPage',
         component: require('@/view/navPage/mainPage/mainPage').default,
         meta: {
-          pageNav: 0,//刷新后位置上次选择（因增加自定义歌单暂不可用）
+          pageNav: 0,
           topNav: 0,
           topName: 'mainPageTop'
         }

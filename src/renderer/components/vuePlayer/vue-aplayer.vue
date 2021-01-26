@@ -18,6 +18,14 @@
     </div>
     <div class="aplayer-body">
       <div class="aplayer-info" v-show="!isMiniMode">
+        <!-- shuffle：随机？
+        theme:主题
+        muted：静音
+        toggleshuffle：切换随机
+        setvolume：设置声音
+        dragbegin：拖放开始
+        dragend：拖放结束
+        dragging：拖放中 -->
         <controls
           :shuffle="shouldShuffle"
           :repeat="repeatMode"
@@ -544,6 +552,7 @@ const VueAPlayer = {
       }
     },
     thenPlay() {
+      //异步开始播放
       this.$nextTick(() => {
         this.play();
       });
@@ -565,6 +574,7 @@ const VueAPlayer = {
       }
     },
     play() {
+      //***播放
       if (this.mutex) {
         if (activeMutex && activeMutex !== this) {
           activeMutex.pause();
@@ -587,6 +597,7 @@ const VueAPlayer = {
       }
     },
     pause() {
+      //***暂停
       this.audioPlayPromise
         .then(() => {
           this.audio.pause();
@@ -744,7 +755,9 @@ const VueAPlayer = {
      */
     onAudioEnded() {
       // determine next song according to shuffle and repeat
+      //播放完成
       if (this.repeatMode === REPEAT.REPEAT_ALL) {
+        // 随机播放
         if (
           this.shouldShuffle &&
           this.playIndex === this.shuffledList.length - 1
@@ -754,8 +767,10 @@ const VueAPlayer = {
         this.playIndex++;
         this.thenPlay();
       } else if (this.repeatMode === REPEAT.REPEAT_ONE) {
+        // 单个重复
         this.thenPlay();
       } else {
+        // 列表重复
         this.playIndex++;
         if (this.playIndex !== 0) {
           this.thenPlay();
@@ -948,6 +963,7 @@ const VueAPlayer = {
     this.shuffledList = this.getShuffledList();
   },
   mounted() {
+    //初始化并播放
     this.initAudio();
     this.setSelfAdaptingTheme();
     if (this.autoplay) this.play();
