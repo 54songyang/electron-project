@@ -1,4 +1,9 @@
-export const routers = [
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import store from '../store'
+
+Vue.use(VueRouter)
+export const constantRoutes = [
   {
     path: '/',
     name: 'home',
@@ -182,3 +187,36 @@ export const routers = [
     redirect: '/'
   }
 ]
+const playlist = store.state.page.playlist
+const userRoute = [];
+const children = constantRoutes[0].children
+const createRouter = () => {
+  if (playlist.length && !userRoute.length) {
+    playlist.forEach((el,index) => {
+      if (children.every(el1 => el1.path !== el.path)) {
+        children.push({
+          path: `/ownMenu${el.id}`,
+          name: `ownMenu${el.id}`,
+          component: require('@/view/navPage/ownMenu').default,
+          meta: {
+            pageNav: index + 11
+          }
+        })
+      }
+    });
+  }
+  const RouterConfig = {
+    mode: 'hash',
+    scrollBehavior: () => ({ x: 0, y: 0 }),
+    routes: constantRoutes
+  }
+  return new VueRouter(RouterConfig)
+}
+const router = createRouter()
+
+export function resetRouter() {
+  const newRouter = createRouter()
+  router.matcher = newRouter.matcher
+}
+
+export default router

@@ -1,5 +1,4 @@
-import axios from 'axios'
-axios.defaults.baseURL = "http://www.await.site/music/";
+import axios from '../../axios/index'
 const state = {
   topNav: [
     { name: "个性推荐", path: 'mainPage' },

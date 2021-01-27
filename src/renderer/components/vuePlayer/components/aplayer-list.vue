@@ -1,5 +1,5 @@
 <template>
-  <transition name="slide-v">
+  <transition name="fade">
     <div
       class="aplayer-list"
       :style="listHeightStyle"
