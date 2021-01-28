@@ -11,7 +11,4 @@
 </script>
 
 <style>
-body{
-  background: #2d2d2d;
-}
 </style>

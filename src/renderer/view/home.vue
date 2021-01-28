@@ -75,7 +75,7 @@
         <leftNav
           class="left-nav"
           ref="leftNav"
-          @logout="logout"
+          @logoutFn="logoutFn"
           :navList="creatData.navList"
           :userInfo="userInfo"
         ></leftNav>
@@ -102,7 +102,7 @@ import leftNav from "@/components/leftNav";
 import player from "@/components/player";
 import musicList from "@/components/musicList";
 import mainPageTop from "@/components/mainPageTop";
-import { mapActions, mapMutations, mapState } from "vuex";
+import { mapActions, mapMutations } from "vuex";
 export default {
   name: "home",
   components: { leftNav, player, mainPageTop, musicList },
@@ -112,7 +112,6 @@ export default {
       active: 0,
       searchData: "",
       creatData: null,
-      userInfo: {},
       mainOver: false,
     };
   },
@@ -127,12 +126,98 @@ export default {
       //歌单
       return this.$store.state.page.playlist;
     },
+    userInfo() {
+      return this.$store.state.page.userInfo;
+    },
+    ownRoutes() {
+      return this.$store.state.page.ownRoutes;
+    },
   },
   methods: {
-    ...mapActions(["renderData", "clearData", "changeLrcPop"]),
-    ...mapMutations(["SET_SHOWMUSICLIST"]),
+    ...mapActions([
+      "renderData",
+      "clearData",
+      "changeLrcPop",
+      "logout",
+      "loginStatus",
+      "getUserPlaylist",
+    ]),
+    ...mapMutations([
+      "SET_SHOWMUSICLIST",
+      "SET_USERINFO",
+      "SET_PLAYLIST",
+      "SET_OWNROUTES",
+    ]),
     channel(val) {
       this.$electron.ipcRenderer.send(val);
+    },
+    logoutFn() {
+      this.logout()
+        .then((res) => {
+          if (res.code == 200) {
+            this.SET_OWNROUTES([]);
+            this.removeOwnRoute();
+            console.log(
+              "this.$router.historyRecord",
+              this.$router.historyRecord
+            );
+          }
+        })
+        .catch((err) => {
+          console.log("err", err);
+        });
+    },
+    async toLogin() {
+      try {
+        await this.loginStatus();
+        const playlist = await this.getUserPlaylist(this.userInfo.account.id);
+        this.$refs.leftNav.showLogin = false;
+        const navList = this.creatData.navList;
+        this.creatData.navList = [...navList, ...playlist];
+        if (!this.ownRoutes.length) this.addOwnRoute();
+      } catch (error) {
+        console.log("error", error);
+      }
+    },
+    addOwnRoute() {
+      const routes = this.$router.options.routes.map((el) => ({ ...el }));
+      const newList = this.playlist.filter((el) =>
+        routes[0].children.every((el1) => el1.path !== el.path)
+      );
+      const arr = newList.map((el, index) => {
+        return {
+          path: `/ownMenu${el.id}`,
+          name: `ownMenu${el.id}`,
+          component: require("@/view/navPage/ownMenu").default,
+          meta: {
+            pageNav: index + 11,
+          },
+        };
+      });
+      this.SET_OWNROUTES(arr);
+      routes[0].children = [...this.ownRoutes];
+      this.$router.addRoutes([routes[0]]);
+      this.$router.push("mainPage");
+      //!!!
+      this.$router.backFlag = false;
+      this.$router.historyRecord._history = [];
+      this.$router.historyRecord._index = -1;
+    },
+    async removeOwnRoute() {
+      //清除客户路由
+      const res = this.creatData.navList.filter((el) => !el.id);
+      this.creatData.navList = res;
+      const routes = this.$router.options.routes;
+      const arr = routes[0].children.filter(
+        (el) => !el.path.includes("ownMenu")
+      );
+      routes[0].children = arr;
+      this.$router.resetRouter();
+      this.$router.push("mainPage");
+      //!!!
+      this.$router.backFlag = false;
+      this.$router.historyRecord._history = [];
+      this.$router.historyRecord._index = -1;
     },
     globalClick(e) {
       const listBody = document.querySelector(".list-body");
@@ -140,39 +225,6 @@ export default {
       if (!listBody.contains(e.target) && !playerBox.contains(e.target)) {
         this.SET_SHOWMUSICLIST(false);
       }
-    },
-    // dayList() {
-    //   //每日歌单推荐
-    //   this.$axios({
-    //     type: "get",
-    //     url: "/recommend/songs"
-    //   })
-    //     .then(res => {
-    //       console.log("ewe", res);
-    //       if (res.status === 200) {
-    //         console.log("res", res.data);
-    //       }
-    //     })
-    //     .catch(err => {
-    //       console.log("err", err);
-    //     });
-    // },
-    logout() {
-      this.$axios({
-        type: "get",
-        url: "/logout",
-      })
-        .then((res) => {
-          console.log("退出登录", res);
-          if (res.status === 200) {
-            localStorage.removeItem("userInfo");
-            this.clearData();
-            this.userInfo = this.$store.state.page.userInfo;
-          }
-        })
-        .catch((err) => {
-          console.log("err", err);
-        });
     },
     toMini() {
       this.$electron.ipcRenderer.send("mini");
@@ -200,7 +252,11 @@ export default {
   },
   async mounted() {
     await this.renderData();
-    this.userInfo = this.$store.state.page.userInfo;
+    this.$electron.ipcRenderer.on("toLogin", (e, message) => this.toLogin());
+    if (!this.userInfo.profile) {
+      this.SET_USERINFO("");
+      this.SET_PLAYLIST([]);
+    }
   },
 };
 </script>
@@ -215,6 +271,7 @@ export default {
 body {
   font-family: PingFangSC-Semibold, sans-serif;
   cursor: pointer;
+  background: #2d2d2d;
 }
 </style>
 <style lang="scss" scoped>

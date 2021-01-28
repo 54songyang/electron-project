@@ -1,16 +1,16 @@
 <template>
   <div class="nav-body">
     <div class="user-box-top">
-      <div class="user-box" @click.stop="showUserDetail = !showUserDetail">
+      <div class="user-box" @click.stop="popShow">
         <img v-if="Object.keys(userInfo).length > 0" :src="avatarUrl" alt />
         <img v-else src="@/assets/images/person.png" alt />
-        <p class="user-name">
+        <div class="user-name">
           {{
             Object.keys(userInfo).length > 0
               ? userInfo.profile.nickname
               : "未登录"
           }}
-        </p>
+        </div>
         <i class="user-detail" @click="openDetail"></i>
       </div>
     </div>
@@ -33,7 +33,9 @@
         </template>
         <template v-if="item.id">
           <i class="item-icon music-icon"></i>
-          <div class="nav">{{ item.specialType ? "我喜欢的音乐" : item.name }}</div>
+          <div class="nav">
+            {{ item.specialType ? "我喜欢的音乐" : item.name }}
+          </div>
         </template>
       </div>
     </div>
@@ -101,8 +103,8 @@
           <div class="btn-right">未订购</div>
         </div>
         <div class="border"></div>
-        <div class="btn-item">
-          <div class="btn-title switch" @click="$emit('logout')">退出登录</div>
+        <div class="btn-item" @click="$emit('logoutFn')">
+          <div class="btn-title switch">退出登录</div>
         </div>
       </div>
     </div>
@@ -110,18 +112,20 @@
 </template>
 
 <script>
-import { mapMutations } from "vuex";
+import { mapActions, mapMutations } from "vuex";
 export default {
   name: "leftNav",
   props: ["navList", "userInfo"],
   data() {
     return {
       showUserDetail: false,
+      account: "",
+      password: "",
     };
   },
   computed: {
     avatarUrl() {
-      if (JSON.stringify(this.userInfo) === "{}") return "";
+      if (!this.userInfo || JSON.stringify(this.userInfo) === "{}") return "";
       return this.userInfo.profile.avatarUrl;
     },
     pageActive() {
@@ -136,6 +140,13 @@ export default {
         this.$router.push(`/ownMenu${item.id}?id=${item.id}`);
       } else {
         this.$router.push(item.name);
+      }
+    },
+    popShow() {
+      if (!this.userInfo || JSON.stringify(this.userInfo) === "{}") {
+        this.$electron.ipcRenderer.send('showLogin');
+      } else {
+        this.showUserDetail = !this.showUserDetail;
       }
     },
     toList(from, name) {

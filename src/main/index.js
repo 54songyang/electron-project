@@ -8,7 +8,7 @@ if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 
-let winType = 'mainWin', mainWindow, miniWindow
+let winType = 'mainWin', mainWindow, miniWindow, loginWindow
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`;
@@ -22,7 +22,7 @@ function createWindow() {
     height: 670,
     minWidth: 1002,
     minHeight: 670,
-    backgroundColor:'#2d2d2d',
+    backgroundColor: '#2d2d2d',
     useContentSize: true,
     transparent: false,
     // titleBarStyle: 'hiddenInset',
@@ -68,6 +68,34 @@ function openMiniWin() {
   })
 }
 
+//开启登录页
+function openLogin() {
+  loginWindow = new BrowserWindow({
+    width: 350,
+    height: 530,
+    x: 545,
+    y: 194,
+    title: '登录页',
+    parent: loginWindow,
+    hasShadow: true,
+    show: true,
+    useContentSize: true,
+    transparent: false,
+    frame: false,
+    resizable: false, //窗口是否可调整大小
+    movable: true, //窗口是否可移动
+    backgroundColor: "#FFF",
+    webPreferences: {
+      nodeIntegration: true
+    }
+  });
+  loginWindow.loadURL(winURL + "#/login")
+
+  loginWindow.on('closed', () => {
+    loginWindow = null;
+  })
+}
+
 //登录窗口最小化
 ipcMain.on('min', () => {
   mainWindow.minimize();
@@ -98,6 +126,22 @@ ipcMain.on('showMain', () => {
   winType = 'mainWin'
   mainWindow.show();
   miniWindow.hide();
+})
+
+ipcMain.on('showLogin', () => {
+  if(!loginWindow){
+    openLogin();
+  }else{
+    loginWindow.show();
+  }
+})
+
+ipcMain.on('closeLogin', () => {
+  loginWindow.close();
+})
+
+ipcMain.on('toLogin', (e,message) => {
+  mainWindow.webContents.send('toLogin', message);
 })
 
 app.on('ready', () => {

@@ -66,9 +66,11 @@
           :class="searchData.length > 0 ? 'clear' : ''"
           @click="clearInput"
         ></div>
+        <!-- @input="searchFn" -->
+        <!-- 暂时使用失焦搜索 -->
         <input
           v-model="searchData"
-          @input="searchFn"
+          @blur="searchFn"
           type="text"
           placeholder="搜索歌单音乐"
         />
@@ -152,10 +154,8 @@ export default {
             playlist.tracks.forEach((el) => {
               el.check = true;
             });
-            console.log("playlist", playlist);
             this.SET_PLAYLIST({ ...playlist });
             this.menuItem = playlist;
-            console.log("this.menuItem", this.menuItem);
           }
         })
         .catch((err) => {
@@ -177,34 +177,56 @@ export default {
       this.searchData = "";
     },
     searchFn() {
+      const replaceReg = new RegExp(this.searchData, "g");
       const tracks = this.menuItem.tracks;
       tracks.forEach((el) => {
         if (
-          el.name.indexOf(this.searchData) > -1 ||
-          el.ar[0].name.indexOf(this.searchData) > -1 ||
-          el.al.name.indexOf(this.searchData) > -1
+          el.name.includes(this.searchData) &&
+          !el.name.includes('<span class="blue-word">')
+        ) {
+          el.name = el.name.replace(
+            replaceReg,
+            `<span class="blue-word">${this.searchData}</span>`
+          );
+        } else {
+          el.name = el.name
+            .replace(/<span class="blue-word">/g, ``)
+            .replace(/<\/span>/g, "");
+        }
+        if (
+          el.ar[0].name.includes(this.searchData) &&
+          !el.ar[0].name.includes('<span class="blue-word">')
+        ) {
+          el.ar[0].name = el.ar[0].name.replace(
+            replaceReg,
+            `<span class="blue-word">${this.searchData}</span>`
+          );
+        } else {
+          el.ar[0].name = el.ar[0].name
+            .replace(/<span class="blue-word">/g, ``)
+            .replace(/<\/span>/g, "");
+        }
+        if (
+          el.al.name.includes(this.searchData) &&
+          !el.al.name.includes('<span class="blue-word">')
+        ) {
+          el.al.name = el.al.name.replace(
+            replaceReg,
+            `<span class="blue-word">${this.searchData}</span>`
+          );
+        } else {
+          el.al.name = el.al.name
+            .replace(/<span class="blue-word">/g, ``)
+            .replace(/<\/span>/g, "");
+        }
+        if (
+          el.name.includes(this.searchData) ||
+          el.ar[0].name.includes(this.searchData) ||
+          el.al.name.includes(this.searchData)
         ) {
           el.check = true;
         } else {
           el.check = false;
-        }
-        if (el.name.indexOf(this.searchData) > -1) {
-          el.name = el.name.replace(
-            `/${this.searchData}/g`,
-            `<span class="blue">${this.searchData}</span>`
-          );
-        }
-        if(el.ar[0].name.indexOf(this.searchData) > -1){
-          el.ar[0].name = el.ar[0].name.replace(
-            `/${this.searchData}/g`,
-            `<span class="blue">${this.searchData}</span>`
-          );
-        }
-        if(el.al.name.indexOf(this.searchData) > -1){
-          el.al.name = el.al.name.replace(
-            `/${this.searchData}/g`,
-            `<span class="blue">${this.searchData}</span>`
-          );
         }
       });
     },
@@ -243,7 +265,11 @@ export default {
   },
 };
 </script>
-
+<style>
+.blue-word {
+  color: rgb(142, 181, 222);
+}
+</style>
 <style lang="scss" scoped>
 .own-menu {
   .fade-enter-active,

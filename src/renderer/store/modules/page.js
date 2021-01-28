@@ -15,11 +15,16 @@ const state = {
   newsong: [], //推荐新音乐
   djprogram: [], //推荐电台
   playlist: [],//用户歌单
+  ownRoutes: [],//用户路由
   showLrcPop: false,//显示歌词窗口
   pageActive: 0,//页面
 }
 
 const mutations = {
+  SET_CLEARSTATE(state, val) {
+    state.userInfo = ''
+    state.playlist = [];
+  },
   SET_USERINFO(state, val) {
     state.userInfo = val;
   },
@@ -50,6 +55,9 @@ const mutations = {
       });
     }
   },
+  SET_OWNROUTES(state, val) {
+    state.ownRoutes = val;
+  },
   SET_PAGEACTIVE(state, val) {
     state.pageActive = val
   }
@@ -70,30 +78,61 @@ const actions = {
   },
   loginStatus({ commit }) {
     return axios({
-      type: "get",
       url:
-        "/login/status"
+        `/login/status?timerstamp=${Date.now()}`,
+      withCredentials: true
     })
       .then(res => {
         console.log("用户登录状态", res.data);
-        return res.data
+        commit('SET_USERINFO', res.data)
+        if (res.code === 200) return res.data
       })
   },
-  userLogin({ commit, state }) {
+  userLogin({ commit, state }, { account, password }) {
+    //!!!暂时使用邮箱登录
     return axios({
-      type: "get",
       url:
-        "/login?email=m13522499772@163.com&password=songyang123"
+        // `/login/cellphone?phone=${account}&password=${password}&timerstamp=${Date.now()}`,
+      `/login?email=${account}&password=${password}&timerstamp=${Date.now()}`,
+      // `/login?email=m13522499772@163.com&password=songyang123&timerstamp=${Date.now()}`,
+      withCredentials: true,
     })
       .then(res => {
         console.log("用户登录", res);
+        commit('SET_USERINFO', res)
         if (res.code === 200) return res
+      })
+  },
+  //获取用户歌单
+  getUserPlaylist({ commit, dispatch, state }, id) {
+    return axios({
+      url:
+        `user/playlist?uid=${id}`
+    })
+      .then(res => {
+        console.log("获取用户歌单", res);
+        if (res.code === 200) {
+          this.commit("SET_PLAYLIST", res.playlist)
+          return res.playlist
+        }
+      })
+  },
+  logout({ commit }) {
+    return axios({
+      url:
+        "/logout"
+    })
+      .then(res => {
+        console.log("退出登录", res);
+        if (res.code === 200) {
+          commit("SET_CLEARSTATE")
+          return res
+        }
       })
   },
   refresh({ commit, state }) {
     ///刷新登录
     return axios({
-      type: "get",
       url:
         "/login/refresh"
     })
@@ -106,7 +145,6 @@ const actions = {
   //推荐歌单
   recommendList({ commit, state }) {
     axios({
-      type: "get",
       url:
         "/personalized?limit=9"
     })
@@ -120,7 +158,6 @@ const actions = {
   //独家放送
   privatecontentList({ commit, state }) {
     axios({
-      type: "get",
       url:
         "/personalized/privatecontent?limit=4"
     })
@@ -134,7 +171,6 @@ const actions = {
   //推荐MV
   mvtList({ commit, state }) {
     axios({
-      type: "get",
       url:
         "/personalized/mv"
     })
@@ -148,7 +184,6 @@ const actions = {
   //推荐新音乐
   newsongList({ commit, state }) {
     axios({
-      type: "get",
       url:
         "/personalized/newsong"
     })
@@ -162,7 +197,6 @@ const actions = {
   //推荐电台
   djprogramList({ commit, state }) {
     axios({
-      type: "get",
       url:
         "/personalized/djprogram"
     })
@@ -175,7 +209,6 @@ const actions = {
   },
   getUserDetail({ commit, dispatch, state }) {
     axios({
-      type: "get",
       url:
         "/user/detail"
     })
@@ -195,20 +228,43 @@ const actions = {
   changeLrcPop({ commit, state }, val) {
     commit('SET_SHOWLRCPOP', val)
   },
-  //获取用户歌单
-  getUserPlaylist({ commit, dispatch, state }, id) {
+  getQrKey() {
     return axios({
-      type: "get",
       url:
-        `user/playlist?uid=${id}`
+        "/login/qr/key",
+      withCredentials: true,
     })
       .then(res => {
-        console.log("获取用户歌单", res);
+        console.log("二维码key生成接口", res);
         if (res.code === 200) {
-          return res.playlist
+          return res.data.unikey
         }
       })
   },
+  getQrcode({ commit }, key) {
+    return axios({
+      url:
+        `/login/qr/create?key=${key}&qrimg=true&timerstamp=${Date.now()}`,
+      withCredentials: true,
+    })
+      .then(res => {
+        console.log("生成二维码", res);
+        if (res.code === 200) {
+          return res.data.qrurl
+        }
+      })
+  },
+  getQrCheck({ commit }, key) {
+    return axios({
+      url:
+        `/login/qr/check?key=${key}&timerstamp=${Date.now()}`,
+      withCredentials: true,
+    })
+      .then(res => {
+        console.log("校验二维码", res);
+        return res
+      })
+  }
 }
 
 export default {

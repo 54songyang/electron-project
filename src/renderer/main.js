@@ -22,34 +22,9 @@ Vue.use(clampy);
 Vue.use(VueLazyload);
 
 /* eslint-disable no-new */
-// console.log("router",router.addRoutes);
-// new Vue({
-//   components: { App },
-//   router,
-//   store,
-//   template: '<App/>'
-// }).$mount('#app')
-const appRender = async () => {
-	try {
-		const loginStatus = await store.dispatch('loginStatus');
-		if (loginStatus.code !== 200 || !loginStatus.profile) {
-			const res = await store.dispatch('userLogin');
-			const playlist = await store.dispatch('getUserPlaylist',res.profile.userId)
-			store.commit("SET_USERINFO", res);
-			store.commit('SET_PLAYLIST',playlist)
-		} else {
-			store.commit("SET_USERINFO", loginStatus);
-		}
-	} catch (error) {
-		console.log("error", error);
-	} finally {
-		/* eslint-disable no-new */
-		new Vue({
-			components: { App },
-			router,
-			store,
-			template: '<App/>'
-		}).$mount('#app')
-	}
-}
-appRender();
+new Vue({
+	components: { App },
+	router,
+	store,
+	template: '<App/>'
+}).$mount('#app')

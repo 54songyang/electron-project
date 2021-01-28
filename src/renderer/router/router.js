@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import store from '../store'
-
 Vue.use(VueRouter)
 export const constantRoutes = [
   {
@@ -183,16 +182,25 @@ export const constantRoutes = [
     }
   },
   {
+    path: '/login',
+    name: 'login',
+    component: require('@/view/login').default,
+    meta: {
+      pageNav: ''
+    }
+  },
+  {
     path: '*',
     redirect: '/'
   }
 ]
 const playlist = store.state.page.playlist
-const userRoute = [];
-const children = constantRoutes[0].children
-const createRouter = () => {
-  if (playlist.length && !userRoute.length) {
-    playlist.forEach((el,index) => {
+const userRoute = store.state.page.ownRoutes;
+const obj = {...constantRoutes[0]}
+const children = obj.children
+const createRouter = (type) => {
+  if (type !== 'remove' && userRoute.length) {
+    playlist.forEach((el, index) => {
       if (children.every(el1 => el1.path !== el.path)) {
         children.push({
           path: `/ownMenu${el.id}`,
@@ -212,10 +220,11 @@ const createRouter = () => {
   }
   return new VueRouter(RouterConfig)
 }
+
 const router = createRouter()
 
-export function resetRouter() {
-  const newRouter = createRouter()
+router.resetRouter = (type) => {
+  const newRouter = createRouter(type)
   router.matcher = newRouter.matcher
 }
 
