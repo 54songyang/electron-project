@@ -135,7 +135,6 @@ export default {
   },
   methods: {
     ...mapActions([
-      "renderData",
       "clearData",
       "changeLrcPop",
       "logout",
@@ -251,7 +250,6 @@ export default {
     this.creatData = obj;
   },
   async mounted() {
-    await this.renderData();
     this.$electron.ipcRenderer.on("toLogin", (e, message) => this.toLogin());
     if (!this.userInfo.profile) {
       this.SET_USERINFO("");
@@ -401,6 +399,7 @@ body {
     font-family: PingFangSC-Semibold, sans-serif;
     display: flex;
     align-items: center;
+    font-size: 14px;
     .top-tool {
       display: flex;
       align-items: center;

@@ -7,8 +7,8 @@ import { app, BrowserWindow, ipcMain } from 'electron'
 if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
-
-let winType = 'mainWin', mainWindow, miniWindow, loginWindow
+app.activeWindow = 'mainWin'
+let mainWindow, miniWindow, loginWindow
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`;
@@ -113,7 +113,7 @@ ipcMain.on('close', () => {
 })
 
 ipcMain.on('mini', () => {
-  winType = 'miniWin'
+  app.activeWindow = 'miniWin'
   miniWindow.show();
   mainWindow.hide();
 })
@@ -123,7 +123,7 @@ ipcMain.on('closeMini', () => {
 })
 
 ipcMain.on('showMain', () => {
-  winType = 'mainWin'
+  app.activeWindow = 'mainWin'
   mainWindow.show();
   miniWindow.hide();
 })
@@ -156,14 +156,11 @@ app.on('window-all-closed', () => {
 })
 
 app.on('activate', () => {
-  console.log('winType', winType);
-  console.log('main', mainWindow.isVisible());
-  console.log('mini', miniWindow.isVisible());
   if (mainWindow === null) {
     createWindow()
-  } else if (winType === 'miniWin') {
+  } else if (app.activeWindow === 'miniWin') {
     if (!miniWindow.isVisible()) miniWindow.show();
-  } else if (winType === 'mainWin') {
+  } else if (app.activeWindow === 'mainWin') {
     if (!mainWindow.isVisible()) mainWindow.show();
   }
 })

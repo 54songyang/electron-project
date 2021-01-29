@@ -5,13 +5,14 @@
 </template>
 
 <script>
-  export default {
-    name: 'electron-project'
-  }
+export default {
+  name: "electron-project",
+};
 </script>
 
 <style>
-body{
+body {
   background: #2d2d2d;
+  color: #b1b1b1;
 }
 </style>

@@ -2,7 +2,11 @@
   <div class="nav-body">
     <div class="user-box-top">
       <div class="user-box" @click.stop="popShow">
-        <img v-if="Object.keys(userInfo).length > 0" :src="userInfo.profile.avatarUrl" alt />
+        <img
+          v-if="Object.keys(userInfo).length > 0"
+          :src="userInfo.profile.avatarUrl"
+          alt
+        />
         <img v-else src="@/assets/images/person.png" alt />
         <div class="user-name">
           {{
@@ -69,7 +73,7 @@
       <div class="btn-list">
         <div
           class="btn-item"
-          @click="$electron.shell.openExternal('http://baidu.com')"
+          @click="$electron.shell.openExternal('https://music.163.com/member')"
         >
           <div class="btn-title vip">会员中心</div>
           <div class="btn-right">
@@ -82,25 +86,29 @@
         </div>
         <div
           class="btn-item"
-          @click="$electron.shell.openExternal('http://baidu.com')"
+          @click="
+            $electron.shell.openExternal('https://music.163.com/user/level')
+          "
         >
           <div class="btn-title grade">等级</div>
-          <div class="btn-right">未订购</div>
+          <div class="btn-right">Lv.{{ userInfo.level }}</div>
         </div>
         <div
           class="btn-item"
-          @click="$electron.shell.openExternal('http://baidu.com')"
+          @click="
+            $electron.shell.openExternal('https://music.163.com/store/product')
+          "
         >
           <div class="btn-title shopping">商城</div>
         </div>
         <div class="border"></div>
         <div class="btn-item" @click="$router.push('setInfo')">
           <div class="btn-title setting">个人信息设置</div>
-          <div class="btn-right">未订购</div>
+          <div class="btn-right"></div>
         </div>
         <div class="btn-item">
           <div class="btn-title phone">绑定社交账号</div>
-          <div class="btn-right">未订购</div>
+          <div class="btn-right"></div>
         </div>
         <div class="border"></div>
         <div class="btn-item" @click="$emit('logoutFn')">
@@ -130,6 +138,7 @@ export default {
   },
   methods: {
     ...mapMutations(["SET_PAGEACTIVE"]),
+    ...mapActions(["getUserDetail"]),
     selectPage(item, index, id) {
       this.SET_PAGEACTIVE(index);
       if (id) {
@@ -138,10 +147,11 @@ export default {
         this.$router.push(item.name);
       }
     },
-    popShow() {
+    async popShow() {
       if (!this.userInfo || JSON.stringify(this.userInfo) === "{}") {
-        this.$electron.ipcRenderer.send('showLogin');
+        this.$electron.ipcRenderer.send("showLogin");
       } else {
+        await this.getUserDetail();
         this.showUserDetail = !this.showUserDetail;
       }
     },
@@ -238,7 +248,6 @@ export default {
       align-items: center;
       padding: 5px 15px 0 15px;
       background: rgb(32, 32, 32);
-      width: 196px;
       z-index: 10;
       height: 60px;
       img {
@@ -285,7 +294,7 @@ export default {
     }
     .item-icon {
       display: inline-block;
-      width: 18px;
+      width: 16px;
       height: 18px;
       filter: brightness(1.5);
       background-size: cover;
@@ -296,27 +305,35 @@ export default {
     }
     .icon-ownFm {
       background-image: url(~@/assets/images/guangbo.png);
+      background-size: 16px 14px;
+      margin-top: 2px;
     }
     .icon-videoNav {
       background-image: url(~@/assets/images/video.png);
+      background-size: 16px;
+      margin-top: 2px;
     }
     .icon-friendNav {
       background-image: url(~@/assets/images/friend-nav.png);
     }
     .icon-itunesNav {
       background-image: url(~@/assets/images/music.png);
+      background-size: 16px;
     }
     .icon-downLoadNav {
       background-image: url(~@/assets/images/download.png);
     }
     .icon-cloudNav {
       background-image: url(~@/assets/images/cloud.png);
+      background-size: 16px;
     }
     .icon-radioNav {
       background-image: url(~@/assets/images/radio-nav.png);
+      background-size: 16px;
     }
     .icon-collectionNav {
       background-image: url(~@/assets/images/collection.png);
+      background-size: 16px;
     }
     .icon-loveList {
       background-image: url(~@/assets/images/heart.png);
@@ -380,6 +397,7 @@ export default {
     background: rgb(54, 54, 54);
     z-index: 99;
     border-radius: 4px;
+    font-size: 13px;
     .user-top {
       display: flex;
       text-align: center;

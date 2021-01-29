@@ -9,11 +9,14 @@ const state = {
     { name: "最新音乐", path: 'newsong' },
   ],
   userInfo: '',
-  personalized: [],//歌单推荐
-  privatecontent: [], //独家放送
-  mvData: [], //推荐MV
-  newsong: [], //推荐新音乐
-  djprogram: [], //推荐电台
+  mainData:{
+    personalized: [],//歌单推荐
+    privatecontent: [], //独家放送
+    mvData: [], //推荐MV
+    newsong: [], //推荐新音乐
+    djprogram: [], //推荐电台
+    bannerList: [],//banner
+  },
   playlist: [],//用户歌单
   ownRoutes: [],//用户路由
   showLrcPop: false,//显示歌词窗口
@@ -28,21 +31,26 @@ const mutations = {
   SET_USERINFO(state, val) {
     state.userInfo = val;
   },
+
   SET_PERSONALIZED(state, val) {
-    state.personalized = val;
+    state.mainData.personalized = val;
   },
   SET_PRIVATECONTENT(state, val) {
-    state.privatecontent = val;
+    state.mainData.privatecontent = val;
   },
   SET_MVDATA(state, val) {
-    state.mvData = val;
+    state.mainData.mvData = val;
   },
   SET_NEWSONG(state, val) {
-    state.newsong = val;
+    state.mainData.newsong = val;
   },
   SET_DJPROGRAM(state, val) {
-    state.djprogram = val;
+    state.mainData.djprogram = val;
   },
+  SET_BANNER(state, val) {
+    state.mainData.bannerList = val
+  },
+
   SET_SHOWLRCPOP(state, val) {
     state.showLrcPop = val;
   },
@@ -60,22 +68,10 @@ const mutations = {
   },
   SET_PAGEACTIVE(state, val) {
     state.pageActive = val
-  }
+  },
 }
 
 const actions = {
-  async renderData({ commit, dispatch, state }) {
-    try {
-      dispatch('recommendList');
-      dispatch('privatecontentList');
-      dispatch('mvtList');
-      dispatch('newsongList');
-      dispatch('djprogramList');
-    } catch (error) {
-      console.log("error", error);
-    }
-
-  },
   loginStatus({ commit }) {
     return axios({
       url:
@@ -93,7 +89,7 @@ const actions = {
     return axios({
       url:
         // `/login/cellphone?phone=${account}&password=${password}&timerstamp=${Date.now()}`,
-      `/login?email=${account}&password=${password}&timerstamp=${Date.now()}`,
+        `/login?email=${account}&password=${password}&timerstamp=${Date.now()}`,
       // `/login?email=m13522499772@163.com&password=songyang123&timerstamp=${Date.now()}`,
       withCredentials: true,
     })
@@ -114,6 +110,20 @@ const actions = {
         if (res.code === 200) {
           this.commit("SET_PLAYLIST", res.playlist)
           return res.playlist
+        }
+      })
+  },
+  getUserDetail({ commit, state }) {
+    return axios({
+      url:
+        `/user/detail?uid=${state.userInfo.account.id}&timerstamp=${Date.now()}`,
+      withCredentials: true,
+    })
+      .then(res => {
+        console.log("获取用户信息", res);
+        if (res.code === 200) {
+          const newInfo = { ...state.userInfo, ...res }
+          commit('SET_USERINFO', newInfo)
         }
       })
   },
@@ -144,7 +154,7 @@ const actions = {
   },
   //推荐歌单
   recommendList({ commit, state }) {
-    axios({
+    return axios({
       url:
         "/personalized?limit=9"
     })
@@ -157,7 +167,7 @@ const actions = {
   },
   //独家放送
   privatecontentList({ commit, state }) {
-    axios({
+    return axios({
       url:
         "/personalized/privatecontent?limit=4"
     })
@@ -170,7 +180,7 @@ const actions = {
   },
   //推荐MV
   mvtList({ commit, state }) {
-    axios({
+    return axios({
       url:
         "/personalized/mv"
     })
@@ -183,7 +193,7 @@ const actions = {
   },
   //推荐新音乐
   newsongList({ commit, state }) {
-    axios({
+    return axios({
       url:
         "/personalized/newsong"
     })
@@ -196,7 +206,7 @@ const actions = {
   },
   //推荐电台
   djprogramList({ commit, state }) {
-    axios({
+    return axios({
       url:
         "/personalized/djprogram"
     })
@@ -207,20 +217,16 @@ const actions = {
         }
       })
   },
-  getUserDetail({ commit, dispatch, state }) {
-    axios({
-      url:
-        "/user/detail"
+  //banner
+  getBanner({ commit }) {
+    return axios({
+      type: "get",
+      url: `banner?type=0`,
     })
-      .then(res => {
-        console.log("获取用户信息", res);
-        if (res.code === 200) {
-          commit("SET_USERINFO", res.data)
-        }
+      .then((res) => {
+        console.log("banners", res.banners);
+        if (res.code === 200) commit('SET_BANNER', res.banners)
       })
-      .catch(err => {
-        dispatch("userLogin")
-      });
   },
   clearData({ commit, dispatch, state }) {
     commit('SET_USERINFO', {});

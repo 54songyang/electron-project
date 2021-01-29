@@ -206,10 +206,10 @@
                   <img v-lazy="imgLazy(item.picUrl, 0)" />
                 </div>
                 <div class="djprogram-detail">
-                  <div class="djprogram-name hover-bright" v-clampy="1">
+                  <div class="djprogram-name hover-bright vertical-word-1">
                     {{ item.name }}
                   </div>
-                  <div class="hover-bright" v-clampy="1">
+                  <div class="hover-bright vertical-word-1">
                     {{ item.copywriter }}
                   </div>
                 </div>
@@ -253,6 +253,7 @@
 import mySwiper from "@/components/my-swiper";
 import draggable from "vuedraggable";
 import mainList from "./mainList";
+import { mapActions, mapMutations } from "vuex";
 export default {
   name: "mainPage",
   components: {
@@ -263,7 +264,6 @@ export default {
   data() {
     return {
       imgShow: true,
-      bannerList: [],
       changeShow: false,
       myArray: [
         { name: "推荐歌单", id: "songSheet", index: 0 },
@@ -283,35 +283,34 @@ export default {
   },
   computed: {
     personalized() {
-      return this.$store.state.page.personalized;
+      return this.$store.state.page.mainData.personalized;
     },
     privatecontent() {
-      return this.$store.state.page.privatecontent;
+      return this.$store.state.page.mainData.privatecontent;
     },
     mvData() {
-      return this.$store.state.page.mvData;
+      return this.$store.state.page.mainData.mvData;
     },
     newsong() {
-      return this.$store.state.page.newsong;
+      return this.$store.state.page.mainData.newsong;
     },
     djprogram() {
-      return this.$store.state.page.djprogram;
+      return this.$store.state.page.mainData.djprogram;
+    },
+    bannerList() {
+      return this.$store.state.page.mainData.bannerList;
     },
   },
-  mounted() {
-    this.$axios({
-      type: "get",
-      url: `banner?type=0`,
-    })
-      .then((res) => {
-        console.log("banners", res.banners);
-        if (res.code === 200) this.bannerList = res.banners;
-      })
-      .catch((err) => {
-        console.log("err", err);
-      });
-  },
   methods: {
+    ...mapActions([
+      "getBanner",
+      "recommendList",
+      "privatecontentList",
+      "mvtList",
+      "newsongList",
+      "djprogramList",
+    ]),
+    ...mapMutations(["SET_DJPROGRAM"]),
     testff(val) {
       return val
         .map((el, i) => {
@@ -395,6 +394,19 @@ export default {
       }
     },
   },
+  async mounted() {
+    // this.SET_DJPROGRAM([])
+    try {
+      await this.getBanner();
+      await this.recommendList();
+      await this.privatecontentList();
+      await this.mvtList();
+      await this.newsongList();
+      await this.djprogramList();
+    } catch (error) {
+      console.log("error", error);
+    }
+  },
 };
 </script>
 
@@ -403,7 +415,7 @@ export default {
   margin: 0 15px;
   .swiper-box {
     width: calc(100vw - 226px);
-    height: 34.18vh;
+    height: 30.18vh;
     margin-top: 15px;
   }
   .newsong-flex-box {
@@ -473,6 +485,8 @@ export default {
             font-size: 14px;
             color: rgb(179, 179, 179);
             line-height: 20px;
+            flex: 1;
+            overflow: hidden;
             span {
               display: inline-block;
               margin-left: 8px;
@@ -485,9 +499,7 @@ export default {
             }
           }
           .newsong-play-btn {
-            position: absolute;
-            right: 30px;
-            width: 50px;
+            margin-right: 30px;
             background: url(~@/assets/images/video-red.png) no-repeat;
             background-size: 100% 100%;
             width: 16px;
@@ -518,6 +530,7 @@ export default {
             width: 95px;
             height: 95px;
             margin-right: 20px;
+            border-radius: 4px;
           }
           .djprogram-detail {
             font-size: 13px;
@@ -645,7 +658,7 @@ export default {
         }
       }
       .djprogram-item {
-        width: calc((100% - 20px) / 2);
+        width: calc((100% - 40px) / 2);
         padding: 10px 0 10px 10px;
         border-radius: 4px;
         margin-bottom: 0px;
@@ -657,12 +670,12 @@ export default {
         }
       }
       .singer-box {
-        display: flex;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
         color: #aeaeae;
         font-size: 12px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        word-break: break-all;
       }
       .recommend-item {
         width: calc((100% - 80px) / 5);
@@ -832,14 +845,22 @@ export default {
 <style lang="scss">
 .main-page {
   .singer {
-    display: block;
-    font-size: 13px;
+    display: inline;
+    font-size: 12px;
     color: rgb(102, 102, 102);
   }
   .fenge {
-    display: block;
+    display: inline;
     margin: 0 2px;
     font-size: 14px;
+  }
+  .vertical-word-1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
   }
 }
 img[lazy="error"] {
