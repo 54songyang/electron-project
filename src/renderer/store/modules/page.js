@@ -250,7 +250,7 @@ const actions = {
       .then(res => {
         console.log("生成二维码", res);
         if (res.code === 200) {
-          return res.data.qrurl
+          return res.data.qrimg
         }
       })
   },
@@ -264,7 +264,7 @@ const actions = {
         console.log("校验二维码", res);
         return res
       })
-  }
+  },
 }
 
 export default {

@@ -2,7 +2,7 @@
   <div class="nav-body">
     <div class="user-box-top">
       <div class="user-box" @click.stop="popShow">
-        <img v-if="Object.keys(userInfo).length > 0" :src="avatarUrl" alt />
+        <img v-if="Object.keys(userInfo).length > 0" :src="userInfo.profile.avatarUrl" alt />
         <img v-else src="@/assets/images/person.png" alt />
         <div class="user-name">
           {{
@@ -124,10 +124,6 @@ export default {
     };
   },
   computed: {
-    avatarUrl() {
-      if (!this.userInfo || JSON.stringify(this.userInfo) === "{}") return "";
-      return this.userInfo.profile.avatarUrl;
-    },
     pageActive() {
       return this.$store.state.page.pageActive;
     },
@@ -229,7 +225,6 @@ export default {
   display: flex;
   flex-direction: column;
   width: 196px;
-  background: rgb(32, 32, 32);
   height: calc(100vh - 120px);
   color: rgb(177, 177, 177);
   margin-top: 60px;
@@ -277,6 +272,7 @@ export default {
     font-size: 13.5px;
     overflow: auto;
     height: calc(100% - 66px);
+    min-height: calc(100% - 66px);
     flex: 1;
     & > div {
       display: flex;

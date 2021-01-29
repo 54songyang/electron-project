@@ -271,7 +271,6 @@ export default {
 body {
   font-family: PingFangSC-Semibold, sans-serif;
   cursor: pointer;
-  background: #2d2d2d;
 }
 </style>
 <style lang="scss" scoped>
@@ -461,7 +460,10 @@ body {
 .left-scroll {
   position: absolute;
   overflow: hidden;
+  -webkit-overflow-scrolling: touch;
   height: calc(100vh - 60px);
+  min-height: calc(100vh - 60px);
+  background: #202020;
   width: 196px;
   z-index: 150;
 }

@@ -5,18 +5,22 @@
       <div
         class="check-active"
         v-show="active === 1"
-        @click="otherLogin(0)"
+        @click="checkActive(0)"
       ></div>
       <div class="login-top-img" v-show="active === 1"></div>
     </div>
     <div class="login-qr-body" v-show="active === 0">
       <div class="login-tip">扫码登录</div>
-      <div class="example-box">
+      <div :class="['example-box', { 'hover-qr': !overdue }]">
         <div class="img-box">
           <img class="example" src="@/assets/images/login-1.png" alt="" />
         </div>
         <div class="qr-box">
           <img :src="baseUrl" alt="" />
+          <div class="qr-overdue" v-show="overdue">
+            <div class="refresh-title">二维码已失效</div>
+            <div class="refresh-qr" @click="qrLogin">点击刷新</div>
+          </div>
         </div>
         <div class="bottom-tip-box">
           <div class="bottom-tip">
@@ -26,11 +30,11 @@
           </div>
         </div>
       </div>
-      <div class="login-else" @click="otherLogin(1)">
+      <div class="login-else" @click="checkActive(1)">
         选择其他登录模式<i></i>
       </div>
     </div>
-    <div class="login-phone-body" v-show="active === 1 || active === 2">
+    <div class="login-phone-body" v-show="active !== 0">
       <img class="login-img" src="@/assets/images/login-2.png" alt="" />
       <div class="input-box">
         <div class="account-box">
@@ -43,19 +47,18 @@
           />
           <div class="account-body">
             <input
-              v-show="active === 1"
               type="text"
               @blur="inputBlur"
               v-model="phoneNum"
               placeholder="请输入手机号"
             />
-            <input
+            <!-- <input
               v-show="active === 2"
               type="text"
               @blur="inputBlur"
               v-model="phoneNum"
               placeholder="请输入手机号"
-            />
+            /> -->
           </div>
         </div>
         <div class="password-box">
@@ -66,23 +69,37 @@
             v-model="password"
             :placeholder="active === 2 ? '设置登录密码' : '请输入密码'"
           />
-          <div class="reset-password" v-show="active === 1">重设密码</div>
+          <div
+            class="reset-password"
+            v-show="active === 1"
+            @click="checkActive(3)"
+          >
+            重设密码
+          </div>
         </div>
       </div>
       <div class="error-tip-box">
-        <div class="registered-tip" v-show="active === 2 && !errorTip">
+        <div
+          class="registered-tip"
+          v-show="(active === 2 || active === 3) && !errorTip"
+        >
           密码8-20位，至少包含字母/数字/字符2种组合
         </div>
         <div class="login-tip" v-show="errorTip"><i></i>{{ errorTip }}</div>
       </div>
       <div class="login-btn" @click="phoneLogin" @keydown="phoneLogin">
-        {{ active === 2 ? "注&nbsp;册" : "登&nbsp;录" }}
+        {{ active | btnFilter }}
       </div>
       <div class="registered" v-show="active === 1">
-        <span @click="toRegistered">注册</span>
+        <span @click="checkActive(2)">注册</span>
       </div>
       <div class="other-title" v-show="active === 2">其他注册方式</div>
-      <img class="login-other" src="@/assets/images/login-3.png" alt="" />
+      <img
+        v-show="active !== 3"
+        class="login-other"
+        src="@/assets/images/login-3.png"
+        alt=""
+      />
       <div class="clause-box" v-show="active === 1">
         <img
           :src="isRead ? clauseOk : clauseNo"
@@ -100,7 +117,11 @@
           >《儿童隐私政策》</span
         >
       </div>
-      <div class="back-login" v-show="active === 2" @click="active = 1">
+      <div
+        class="back-login"
+        v-show="active === 2 || active === 3"
+        @click="active = 1"
+      >
         返回登录
       </div>
     </div>
@@ -120,9 +141,20 @@ export default {
       password: "songyang123", //密码
       errorTip: "",
       isRead: false,
+      overdue: false, //二维码过期
       clauseOk: require("@/assets/images/login-ok.png"),
       clauseNo: require("@/assets/images/login-no.png"),
     };
+  },
+  watch: {
+    active(val) {
+      if (val) {
+        clearInterval(this.timer);
+        this.timer = null;
+      } else {
+        this.qrLogin();
+      }
+    },
   },
   methods: {
     ...mapActions([
@@ -139,17 +171,22 @@ export default {
         this.unikey = unikey;
         const baseUrl = await this.getQrcode(this.unikey);
         this.baseUrl = baseUrl;
+        this.overdue = false;
+        if (this.timer) {
+          clearInterval(this.timer);
+          this.timer = null;
+        }
         this.timer = setInterval(async () => {
           const statusRes = await this.getQrCheck(this.unikey);
           if (statusRes.code === 800) {
-            alert("二维码已过期,请重新获取");
+            this.overdue = true;
             clearInterval(this.timer);
           }
           if (statusRes.code === 803) {
             // 这一步会返回cookie
             clearInterval(this.timer);
-            alert("授权登录成功");
-            await this.loginStatus();
+            this.$electron.ipcRenderer.send("toLogin");
+            this.$electron.ipcRenderer.send("closeLogin");
           }
         }, 3000);
       } catch (error) {
@@ -174,14 +211,10 @@ export default {
         return;
       }
     },
-    toRegistered() {
-      //注册页
-      this.active = 2;
-    },
     openApp(url) {
       this.$electron.shell.openExternal(url);
     },
-    otherLogin(num) {
+    checkActive(num) {
       this.active = num;
     },
     closePage() {
@@ -193,6 +226,13 @@ export default {
       this.errorTip = "";
     },
   },
+  filters: {
+    btnFilter(val) {
+      if (val === 1) return "登\n录";
+      else if (val === 2) return "注\n册";
+      else if (val === 3) return "下一步";
+    },
+  },
   async mounted() {
     console.log(
       "%c 当前环境 => 登录页 ",
@@ -200,18 +240,13 @@ export default {
         process.env.VUE_APP_MODE === "development" ? "#00a050" : "#fd9d0a"
       };-webkit-background-clip: text;font-size:15px;`
     );
-    // this.qrLogin();//验证码登录
+    this.qrLogin(); //验证码登录
   },
   beforeRouteEnter(to, from, next) {
     next((_this) => {});
   },
 };
 </script>
-<style >
-body {
-  background: #fff;
-}
-</style>
 <style lang="scss" scoped>
 .login-page {
   width: 100vw;
@@ -284,18 +319,44 @@ body {
         }
       }
       .qr-box {
-        width: 181px;
-        height: 181px;
+        width: 205px;
+        height: 205px;
         margin: 12px auto 0 auto;
         position: relative;
         z-index: 2;
         img {
           display: block;
-          transition: transform linear 0.3s;
-          width: 181px;
-          height: 181px;
+          transition: transform linear 0.3s, width linear 0.3s,
+            height linear 0.3s;
+          width: 100%;
+          height: 100%;
           background: #fff;
           z-index: 3;
+        }
+        .qr-overdue {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.8);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          color: #fff;
+          z-index: 10px;
+          .refresh-title {
+            font-size: 14px;
+          }
+          .refresh-qr {
+            background: rgb(195, 70, 58);
+            padding: 0 13px;
+            height: 30px;
+            line-height: 30px;
+            border-radius: 15px;
+            margin-top: 16px;
+          }
         }
       }
       .bottom-tip-box {
@@ -304,29 +365,30 @@ body {
         .bottom-tip {
           font-size: 14px;
           text-align: center;
-          margin-top: 22px;
           span {
             color: rgb(50, 115, 188);
           }
         }
       }
-
-      &:hover {
-        .example {
-          transform: translateX(0px);
-          opacity: 1;
+    }
+    // !!!
+    .hover-qr:hover {
+      .example {
+        transform: translateX(0px);
+        opacity: 1;
+      }
+      .qr-box {
+        height: 170px;
+        img {
+          width: 150px;
+          height: 150px;
+          transform: translate(110px, 20px);
         }
-        .qr-box {
-          height: 160px;
-          img {
-            transform: translateX(100px);
-          }
-        }
-        .bottom-tip-box {
-          justify-content: flex-end;
-          .bottom-tip {
-            width: 130px;
-          }
+      }
+      .bottom-tip-box {
+        justify-content: flex-end;
+        .bottom-tip {
+          width: 130px;
         }
       }
     }
@@ -481,10 +543,13 @@ body {
       }
     }
     .back-login {
+      position: absolute;
       text-align: center;
       color: rgb(109, 109, 109);
       font-size: 12px;
-      margin-top: 20px;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
     }
   }
 }
