@@ -36,9 +36,7 @@ const state = {
     //     lrc: "[00:00.00]lrc here\n[00:01.00]aplayer"
     //   },
     // ],
-    musicList:[ //播放列表
-
-    ],
+    musicList:[], //播放列表
     active: 0,//当前播放index
     mini: false, //迷你模式
     showLrc: true, //是否显示歌词
@@ -51,7 +49,6 @@ const state = {
 const mutations = {
   SET_MUSIC(state, index) {
     //设置当前播放音乐
-    console.log("00",state.videoUpload.list[index]);
     state.videoUpload.music = state.videoUpload.list[index]
     state.videoUpload.active = index
   },
@@ -92,7 +89,7 @@ const actions = {
       type: 'get',
       url: `/lyric?id=${id}`
     }).then(res => {
-      console.log("resc",res);
+      console.log("获取歌词",res);
       return res.lrc.lyric      
     })
   },
@@ -101,19 +98,19 @@ const actions = {
       type: 'get',
       url: `/song/detail?ids=${id}`
     }).then(res => {
-      console.log("resd",res.songs[0]);
+      console.log("歌曲详情",res.songs[0]);
       return res.songs[0]
     })
   },
       // [405998841,33894312]
 
-  async checkMusic({ dispatch },id) {
-    //选择音乐
+  async getMusicData({ dispatch },id) {
+    //音乐播放准备
     try {
-      const use = await dispatch("canUse",id)
-      const detail = await dispatch("musicDetail",id)
-      const murl = await dispatch("musicUrl",id)
-      const lrc = await dispatch("musicLrc",id)
+      const use = await dispatch("canUse",id); //音乐是否可用
+      const detail = await dispatch("musicDetail",id) //音乐详情
+      const murl = await dispatch("musicUrl",id) //音乐url
+      const lrc = await dispatch("musicLrc",id) //音乐歌词
       // console.log("00",a,b,c,d);
     let obj = {
       artist:'',

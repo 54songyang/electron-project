@@ -274,7 +274,7 @@ export default {
 .own-menu {
   .fade-enter-active,
   .fade-leave-active {
-    transition: opacity 2s;
+    transition: opacity .5s;
   }
   .fade-enter, .fade-leave-to /* .fade-leave-active, 2.1.8 版本以下 */ {
     opacity: 0;

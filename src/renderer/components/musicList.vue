@@ -34,7 +34,6 @@
   </div>
 </template>
 <script>
-import { mapMutations } from "vuex";
 export default {
   name: "musicList",
   data() {
@@ -132,7 +131,7 @@ export default {
       div {
         flex: 1;
         border-radius: 14px;
-        height: 28px;
+        height: 30px;
       }
       .no-acitve:hover {
         background: rgb(62, 62, 62);

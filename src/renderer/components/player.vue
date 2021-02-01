@@ -22,33 +22,24 @@ export default {
     };
   },
   computed: {
-    videoUpload() {
-      return this.$store.state.music.videoUpload;
-    },
     playRepeat() {
       if (this.typeData == 0) return "repeat-all";
       if (this.typeData == 1) return "repeat-one";
       return "no-repeat";
     },
+    videoUpload() {
+      return this.$store.state.music.videoUpload;
+    },
   },
   methods:{
     ...mapActions(['canUse','musicUrl']),
-    // async getMusicUrl(){
-    //   let url = ''
-    //   try {
-    //     const canRes = await this.canUse() //音乐是否可用
-    //     if(canRes) url = await this.musicUrl() //获取音乐url
-    //     return url
-    //   } catch (error) {
-    //     alert(error)
-    //   }
-    // },
   },
   updated() {
     this.player = this.$refs.player;
   },
   mounted(){
-    
+    const {active,musicList,music} = this.videoUpload;
+    console.log("active",active,musicList,music);
   }
 };
 </script>
