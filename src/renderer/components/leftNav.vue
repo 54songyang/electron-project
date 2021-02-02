@@ -37,7 +37,7 @@
         </template>
         <template v-if="item.id">
           <i class="item-icon music-icon"></i>
-          <div class="nav">
+          <div :class="['nav', { playing: activeMenu === index - 11 }]">
             {{ item.specialType ? "我喜欢的音乐" : item.name }}
           </div>
         </template>
@@ -134,6 +134,9 @@ export default {
   computed: {
     pageActive() {
       return this.$store.state.page.pageActive;
+    },
+    activeMenu() {
+      return this.$store.state.music.videoUpload.activeMenu;
     },
   },
   methods: {
@@ -291,6 +294,20 @@ export default {
     .nav {
       flex: 1;
       margin-left: 10px;
+    }
+    .playing{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      &::after{
+        content: '';
+        display: inline-block;
+        background: url(~@/assets/images/laba.png) no-repeat;
+        background-size: 100% 100%;
+        width: 15px;
+        height: 15px;
+        margin-right: 20px;
+      }
     }
     .item-icon {
       display: inline-block;

@@ -36,8 +36,9 @@ const state = {
     //     lrc: "[00:00.00]lrc here\n[00:01.00]aplayer"
     //   },
     // ],
-    musicList:[], //播放列表
+    musicList: [], //播放列表
     active: 0,//当前播放index
+    activeMenu: 0,//当前使用的歌单
     mini: false, //迷你模式
     showLrc: true, //是否显示歌词
     shuffle: false, //随机播放
@@ -47,9 +48,10 @@ const state = {
 }
 
 const mutations = {
-  SET_MUSIC(state, index) {
+  SET_MUSIC(state, { index, song }) {
     //设置当前播放音乐
-    state.videoUpload.music = state.videoUpload.list[index]
+    state.videoUpload.music = song
+    console.log("song", song);
     state.videoUpload.active = index
   },
   SET_MUSIC_LIST(state, val) {
@@ -58,72 +60,58 @@ const mutations = {
   SET_SHOWMUSICLIST(state, val) {
     //歌曲列表显示隐藏
     state.showMusicList = val
+  },
+  SET_MUSICLIST(state, { list, index, active }) {
+    console.log("000", list);
+    state.videoUpload.musicList = list
+    state.videoUpload.active = index
+    state.videoUpload.activeMenu = active
+
   }
 }
 
 const actions = {
-  canUse({ commit, state },id) {
+  canUse({ commit, state }, id) {
     //歌曲是否可用
     return axios({
       type: 'get',
       url: `/check/music?id=${id}`
     }).then(res => {
-      console.log("歌曲是否可用",res);
+      console.log("歌曲是否可用", res);
       const { success, message } = res
       return success === true && message === "ok"
     })
   },
-  musicUrl({ commit, state },id) {
+  musicUrl({ commit, state }, id) {
     //获取歌曲url
     return axios({
       type: 'get',
       url: `/song/url?id=${id}`
     }).then(res => {
-      console.log("获取歌曲url",res);
+      console.log("获取歌曲url", res);
       return res.data[0]
     })
   },
-  musicLrc({ commit, state },id) {
+  musicLrc({ commit, state }, id) {
     //获取歌词
     return axios({
       type: 'get',
       url: `/lyric?id=${id}`
     }).then(res => {
-      console.log("获取歌词",res);
-      return res.lrc.lyric      
+      console.log("获取歌词", res);
+      return res.lrc.lyric
     })
   },
-  musicDetail({ commit, state },id){
+  musicDetail({ commit, state }, id) {
     return axios({
       type: 'get',
       url: `/song/detail?ids=${id}`
     }).then(res => {
-      console.log("歌曲详情",res.songs[0]);
+      console.log("歌曲详情", res.songs[0]);
       return res.songs[0]
     })
   },
-      // [405998841,33894312]
-
-  async getMusicData({ dispatch },id) {
-    //音乐播放准备
-    try {
-      const use = await dispatch("canUse",id); //音乐是否可用
-      const detail = await dispatch("musicDetail",id) //音乐详情
-      const murl = await dispatch("musicUrl",id) //音乐url
-      const lrc = await dispatch("musicLrc",id) //音乐歌词
-      // console.log("00",a,b,c,d);
-    let obj = {
-      artist:'',
-      name:detail.name,
-      pic:detail.al.picUrl,
-      url:murl.url,
-      lrc
-    }
-    console.log("obj",obj);
-    } catch (error) {
-      console.log("error",error);
-    }
-  }
+  // [405998841,33894312]
 }
 
 export default {

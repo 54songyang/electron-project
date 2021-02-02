@@ -79,12 +79,18 @@
     <div class="music-body" v-show="pageActive === 0">
       <div
         v-for="(item, index) in menuItem.tracks"
-        :class="['item-box', { 'bg-white': active === index }]"
+        :class="[
+          'item-box',
+          { 'bg-white': active === index && activeMenu === pageIndex },
+        ]"
         :key="item.id"
         v-show="item.check"
-        @click="checkMusic(index)"
+        @dblclick="checkMusic(index)"
       >
-        <div class="item-index">{{ index | indexFilter }}</div>
+        <!-- laba.png -->
+        <!-- laba1.png -->
+        <div class="item-index" v-if="active === index"></div>
+        <div class="item-index" v-else>{{ index | indexFilter }}</div>
         <div class="item-sc"></div>
         <div class="item-download"></div>
         <div class="item-name" v-html="item.name"></div>
@@ -113,7 +119,7 @@ export default {
     return {
       id: "",
       menuItem: "",
-      active: "",
+      pageIndex: 0,
       pageActive: 0,
       titleShow: false,
       searchData: "",
@@ -124,9 +130,15 @@ export default {
     userInfo() {
       return this.$store.state.page.userInfo;
     },
+    active() {
+      return this.$store.state.music.videoUpload.active;
+    },
+    activeMenu() {
+      return this.$store.state.music.videoUpload.activeMenu;
+    },
   },
   methods: {
-    ...mapMutations(["SET_PLAYLIST"]),
+    ...mapMutations(["SET_PLAYLIST", "SET_MUSICLIST"]),
     add0(m) {
       return m < 10 ? "0" + m : m;
     },
@@ -140,7 +152,7 @@ export default {
       return hs + mms + this.add0(s);
     },
     checkMusic(index) {
-      this.active = index;
+      this.SET_MUSICLIST({ list: this.menuItem.tracks, index, active: 1 });
     },
     getMenuDetail() {
       this.$axios({
@@ -253,6 +265,7 @@ export default {
       const mainBody = document.querySelector(".main-body");
       mainBody.scrollTop = 0;
       _this.pageActive = 0;
+      _this.pageIndex = _this.$route.meta.pageNav - 11;
       _this.id = _this.$route.name.replace("ownMenu", "");
       _this.getMenuDetail();
       mainBody.addEventListener("scroll", () => debounce(_this.listScroll()));
@@ -274,7 +287,7 @@ export default {
 .own-menu {
   .fade-enter-active,
   .fade-leave-active {
-    transition: opacity .5s;
+    transition: opacity 0.5s;
   }
   .fade-enter, .fade-leave-to /* .fade-leave-active, 2.1.8 版本以下 */ {
     opacity: 0;
@@ -610,6 +623,16 @@ export default {
     }
     .bg-white {
       background: rgb(50, 50, 50) !important;
+      .item-name {
+        color: rgb(187, 69, 57);
+      }
+      .item-index{
+        display: inline-block;
+        background: url(~@/assets/images/laba.png) left center no-repeat;
+        background-size: 12px 12px;
+        width: 30px;
+        height: 34px;
+      }
     }
   }
 }

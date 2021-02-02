@@ -90,24 +90,36 @@
         <keep-alive>
           <router-view :ref="$route.name"></router-view>
         </keep-alive>
-        <musicList v-show="showMusicList" />
+        <musicList v-show="showMusicList" @selectsong="selectsong" />
       </div>
-      <player />
+      <div class="player-box">
+        <!-- :list="videoUpload.list" -->
+        <aplayer
+          :music="videoUpload.music"
+          :shuffle="typeData == 2"
+          :repeat="playRepeat"
+          ref="player"
+        ></aplayer>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import leftNav from "@/components/leftNav";
-import player from "@/components/player";
 import musicList from "@/components/musicList";
 import mainPageTop from "@/components/mainPageTop";
+import aplayer from "@/components/vuePlayer/vue-aplayer";
+
 import { mapActions, mapMutations } from "vuex";
 export default {
   name: "home",
-  components: { leftNav, player, mainPageTop, musicList },
+  components: { leftNav, aplayer, mainPageTop, musicList },
   data() {
     return {
+      player: null,
+      typeData: 0,
+
       activeSize: [],
       active: 0,
       searchData: "",
@@ -131,6 +143,14 @@ export default {
     },
     ownRoutes() {
       return this.$store.state.page.ownRoutes;
+    },
+    playRepeat() {
+      if (this.typeData == 0) return "repeat-all";
+      if (this.typeData == 1) return "repeat-one";
+      return "no-repeat";
+    },
+    videoUpload() {
+      return this.$store.state.music.videoUpload;
     },
   },
   methods: {
@@ -243,6 +263,12 @@ export default {
         this.mainOver = false;
       }
     },
+    selectsong(song) {
+      this.$refs.player.onSelectSong(song)
+    },
+  },
+  updated() {
+    this.player = this.$refs.player;
   },
   async beforeCreate() {
     const obj = await import("./js/main.json").then((res) => res.default);
@@ -255,6 +281,8 @@ export default {
       this.SET_USERINFO("");
       this.SET_PLAYLIST([]);
     }
+    const { active, musicList, music } = this.videoUpload;
+
   },
 };
 </script>
@@ -482,5 +510,56 @@ body {
   display: none;
   width: 0;
   opacity: 0;
+}
+</style>
+<style lang="scss">
+body .player-box {
+  position: fixed;
+  border-top: 1px solid rgb(35, 35, 35);
+  z-index: 500;
+  width: 100%;
+  .control-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    .play-btn {
+      margin: 0 10px;
+      flex: 1;
+      width: 18px;
+      height: 18px;
+    }
+    .play-type1 {
+      background: url(~@/assets/images/xh.png) no-repeat;
+      background-size: 100% 100%;
+    }
+    .play-type2 {
+      background: url(~@/assets/images/dq.png) no-repeat;
+      background-size: 100% 100%;
+    }
+    .play-type3 {
+      background: url(~@/assets/images/sj.png) no-repeat;
+      background-size: 100% 100%;
+    }
+    .play-yl {
+      background: url(~@/assets/images/yl.png) no-repeat;
+      background-size: 100% 100%;
+    }
+    .play-gc {
+      background: url(~@/assets/images/gc.png) no-repeat;
+      background-size: 100% 100%;
+    }
+    .play-tree {
+      background: url(~@/assets/images/tree.png) no-repeat;
+      background-size: 100% 100%;
+    }
+    .play-lb {
+      background: url(~@/assets/images/lb.png) no-repeat;
+      background-size: 100% 100%;
+    }
+  }
 }
 </style>

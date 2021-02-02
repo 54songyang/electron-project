@@ -341,17 +341,17 @@ const VueAPlayer = {
   },
   data() {
     return {
-      internalMusic: this.music,
-      isPlaying: false,
-      isSeeking: false,
-      wasPlayingBeforeSeeking: false,
+      internalMusic: this.music, //当前音乐？
+      isPlaying: false, //是否在播放
+      isSeeking: false, //是否在寻找？
+      wasPlayingBeforeSeeking: false, //是否在寻找之前播放？
       isMobile: /mobile/i.test(window.navigator.userAgent),
       playStat: {
         duration: 0,
         loadedTime: 0,
         playedTime: 0,
-      },
-      showList: !this.listFolded,
+      }, //播放统计
+      showList: !this.listFolded, //显示播放列表
 
       // handle Promise returned from audio.play()
       // @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/play
@@ -375,14 +375,14 @@ const VueAPlayer = {
 
       // @since 1.4.1
       // Loading indicator
-      isLoading: false,
+      isLoading: false, //歌曲缓冲中？
 
       // @since 1.5.1
       // sync shuffle, repeat
       internalShuffle: this.shuffle,
       internalRepeat: this.repeat,
       // for shuffling
-      shuffledList: [],
+      shuffledList: [], //随机列表？
     };
   },
   computed: {
@@ -399,16 +399,19 @@ const VueAPlayer = {
 
     // sync music
     currentMusic: {
+      //!!!当前播放音乐
       get() {
         return this.internalMusic;
       },
       set(val) {
+        //!!!重设当前音乐时，改变父组件传入的music值
         canUseSync && this.$emit("update:music", val);
         this.internalMusic = val;
       },
     },
     // compatible for deprecated props
     isMiniMode() {
+      // 迷你模式
       return this.mini || this.narrow;
     },
     shouldShowLrc() {
@@ -424,10 +427,12 @@ const VueAPlayer = {
       return this.float && !this.isMobile;
     },
     shouldAutoplay() {
+      //可以自动播放（非移动端可以）
       if (this.isMobile) return false;
       return this.autoplay;
     },
     musicList() {
+      //播放列表
       return this.list;
     },
     shouldShowNativeControls() {
@@ -464,6 +469,7 @@ const VueAPlayer = {
       return this.playStat.playedTime / this.playStat.duration;
     },
     playIndex: {
+      //当前播放的歌曲在播放列表的位置
       get() {
         return this.shuffledList.indexOf(this.currentMusic);
       },
@@ -472,6 +478,7 @@ const VueAPlayer = {
       },
     },
     shouldRepeat() {
+      //可以重复播放
       return this.repeatMode !== REPEAT.NO_REPEAT;
     },
 
@@ -479,6 +486,7 @@ const VueAPlayer = {
     // sync muted, volume
 
     isAudioMuted: {
+      //静音
       get() {
         return this.internalMuted;
       },
@@ -509,6 +517,7 @@ const VueAPlayer = {
       },
     },
     repeatMode: {
+      //播放模式
       get() {
         switch (this.internalRepeat) {
           case REPEAT.NONE:
@@ -543,6 +552,7 @@ const VueAPlayer = {
     // functions
 
     setNextMode() {
+      //设置播放模式
       if (this.repeatMode === REPEAT.REPEAT_ALL) {
         this.repeatMode = REPEAT.REPEAT_ONE;
       } else if (this.repeatMode === REPEAT.REPEAT_ONE) {
@@ -696,6 +706,7 @@ const VueAPlayer = {
     },
 
     onSelectSong(song) {
+      //选择音乐
       if (this.currentMusic === song) {
         this.toggle();
       } else {
@@ -877,7 +888,7 @@ const VueAPlayer = {
       handler(music) {
         // async
         this.setSelfAdaptingTheme();
-
+        console.log("123",);
         const src = music.src || music.url;
         // HLS support
         if (/\.m3u8(?=(#|\?|$))/.test(src)) {
