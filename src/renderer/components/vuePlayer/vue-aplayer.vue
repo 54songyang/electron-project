@@ -3,17 +3,18 @@
     class="aplayer"
     :class="{
       'aplayer-narrow': isMiniMode,
-      'aplayer-withlist': !isMiniMode && musicList.length > 0,
+      'aplayer-withlist':
+        !isMiniMode && Array.isArray(musicList) && musicList.length > 0,
       'aplayer-withlrc': !isMiniMode && (!!$slots.display || shouldShowLrc),
       'aplayer-float': isFloatMode,
       'aplayer-loading': isPlaying && isLoading,
     }"
     :style="floatStyleObj"
   >
-    <div class="img-box" @click="lyricsChannel">
+    <div class="img-box" @click="$refs.lyrics.lyricsChannel()">
       <i :class="[showLrcPop ? 'retract-pop' : 'open-pop']"></i>
       <div class="blur-box">
-        <img :src="currentMusic.pic" alt />
+        <img v-if="currentMusic" :src="currentMusic.al.picUrl" alt />
       </div>
     </div>
     <div class="aplayer-body">
@@ -27,24 +28,26 @@
         dragend：拖放结束
         dragging：拖放中 -->
         <controls
+          v-if="currentMusic"
           :shuffle="shouldShuffle"
           :repeat="repeatMode"
           :stat="playStat"
           :muted="isAudioMuted"
-          :theme="currentTheme"
           @toggleshuffle="shouldShuffle = !shouldShuffle"
           @setvolume="setAudioVolume"
           @dragbegin="onProgressDragBegin"
           @dragend="onProgressDragEnd"
           @dragging="onProgressDragging"
         />
-        <div class="aplayer-music">
+        <div class="aplayer-music" v-if="currentMusic">
           <span class="aplayer-title">{{
-            currentMusic.title || "Untitled"
+            currentMusic ? currentMusic.name : "Untitled"
           }}</span>
           <span class="aplayer-author hover-bright"
             >-{{
-              currentMusic.artist || currentMusic.author || "Unknown"
+              currentMusic
+                ? currentMusic.ar.map((el) => el.name).join("/")
+                : "Unknown"
             }}</span
           >
         </div>
@@ -53,10 +56,8 @@
         <!-- </slot> -->
       </div>
       <thumbnail
-        :pic="currentMusic.pic"
         :playing="isPlaying"
         :enable-drag="isFloatMode"
-        :theme="currentTheme"
         @toggleplay="toggle"
         @dragbegin="onDragBegin"
         @dragging="onDragAround"
@@ -64,7 +65,7 @@
       <div class="controller-box">
         <div>
           <div class="play-btn play-tree"></div>
-          <div :class="['play-btn', repeat]" @click="setNextMode"></div>
+          <div :class="['play-btn', internalRepeat]" @click="setNextMode"></div>
           <div
             :class="['play-btn', !showMusicList ? 'play-lb' : 'play-lb-red']"
             @click="changeList"
@@ -73,7 +74,6 @@
           <volume
             v-if="!isMobile"
             :volume="audioVolume"
-            :theme="currentTheme"
             :muted="isAudioMuted"
             @togglemute="toggleMute"
             @setvolume="(v) => setAudioVolume(v)"
@@ -88,7 +88,6 @@
       :music-list="musicList"
       :play-index="playIndex"
       :listmaxheight="listmaxheight || listMaxHeight"
-      :theme="currentTheme"
       @selectsong="onSelectSong"
     /> -->
     <div :class="['lyrics-box', { 'lyrics-top': showLrcPop }]">
@@ -100,7 +99,7 @@
           <img src="@/assets/images/pointer.png" alt />
         </div>
         <div class="dish">
-          <img :src="currentMusic.pic" />
+          <img v-if="currentMusic" :src="currentMusic.al.picUrl" />
         </div>
         <div class="lyrics-btn-box">
           <div class="sc"></div>
@@ -110,7 +109,15 @@
         </div>
       </div>
       <div class="lyrics-info">
-        <lyrics :current-music="currentMusic" :play-stat="playStat" />
+        <div class="head-box" v-if="currentMusic">
+          <div class="lyrics-name">{{ currentMusic.name }}</div>
+          <div class="info-box">
+            <div>专辑:<span>{{currentMusic.al.name}}</span></div>
+            <div>歌手:<span>{{currentMusic.ar.map(el=>el.name).join('/')}}</span></div>
+            <div>来源:<span>{{currentMusic.ar.map(el=>el.name).join('/')}}</span></div>
+          </div>
+        </div>
+        <lyrics ref="lyrics" :play-stat="playStat" />
       </div>
     </div>
   </div>
@@ -157,25 +164,25 @@ const VueAPlayer = {
     Volume,
   },
   props: {
-    music: {
-      type: Object,
-      required: true,
-      validator(song) {
-        if (song.url) {
-          deprecatedProp("music.url", "1.4.0", "music.src");
-        }
-        if (song.author) {
-          deprecatedProp("music.author", "1.4.1", "music.artist");
-        }
-        return song.src || song.url;
-      },
-    },
-    list: {
-      type: Array,
-      default() {
-        return [];
-      },
-    },
+    // music: {
+    //   type: Object,
+    //   required: true,
+    //   validator(song) {
+    //     if (song.url) {
+    //       deprecatedProp("music.url", "1.4.0", "music.src");
+    //     }
+    //     if (song.author) {
+    //       deprecatedProp("music.author", "1.4.1", "music.artist");
+    //     }
+    //     return song.src || song.url;
+    //   },
+    // },
+    // list: {
+    //   type: Array,
+    //   default() {
+    //     return [];
+    //   },
+    // },
     mini: {
       type: Boolean,
       default: false,
@@ -341,7 +348,7 @@ const VueAPlayer = {
   },
   data() {
     return {
-      internalMusic: this.music, //当前音乐？
+      // internalMusic: this.music, //当前音乐？
       isPlaying: false, //是否在播放
       isSeeking: false, //是否在寻找？
       wasPlayingBeforeSeeking: false, //是否在寻找之前播放？
@@ -386,11 +393,26 @@ const VueAPlayer = {
     };
   },
   computed: {
+    videoUpload() {
+      return this.$store.state.music.videoUpload;
+    },
+    playIndex() {
+      return this.$store.state.music.videoUpload.active;
+    },
+    currentMusic() {
+      const list = this.$store.state.music.videoUpload.musicList;
+      if (list.length === 0) return null;
+      return list[this.playIndex];
+    },
+    musicList() {
+      //播放列表
+      return this.$store.state.music.videoUpload.musicList;
+    },
     showMusicList() {
       return this.$store.state.music.showMusicList;
     },
     showLrcPop() {
-      return this.$store.state.page.showLrcPop;
+      return this.$store.state.music.videoUpload.showLrcPop;
     },
     // alias for $refs.audio
     audio() {
@@ -398,17 +420,17 @@ const VueAPlayer = {
     },
 
     // sync music
-    currentMusic: {
-      //!!!当前播放音乐
-      get() {
-        return this.internalMusic;
-      },
-      set(val) {
-        //!!!重设当前音乐时，改变父组件传入的music值
-        canUseSync && this.$emit("update:music", val);
-        this.internalMusic = val;
-      },
-    },
+    // currentMusic: {
+    //   //!!!当前播放音乐
+    //   get() {
+    //     return this.internalMusic;
+    //   },
+    //   set(val) {
+    //     //!!!重设当前音乐时，改变父组件传入的music值
+    //     // canUseSync && this.$emit("update:music", val);
+    //     // this.internalMusic = val;
+    //   },
+    // },
     // compatible for deprecated props
     isMiniMode() {
       // 迷你模式
@@ -420,9 +442,9 @@ const VueAPlayer = {
 
     // props wrappers
 
-    currentTheme() {
-      return this.selfAdaptingTheme || this.currentMusic.theme || this.theme;
-    },
+    // currentTheme() {
+    //   return this.selfAdaptingTheme || this.currentMusic.theme || this.theme;
+    // },
     isFloatMode() {
       return this.float && !this.isMobile;
     },
@@ -430,10 +452,6 @@ const VueAPlayer = {
       //可以自动播放（非移动端可以）
       if (this.isMobile) return false;
       return this.autoplay;
-    },
-    musicList() {
-      //播放列表
-      return this.list;
     },
     shouldShowNativeControls() {
       return (
@@ -468,15 +486,15 @@ const VueAPlayer = {
       if (this.playStat.duration === 0) return 0;
       return this.playStat.playedTime / this.playStat.duration;
     },
-    playIndex: {
-      //当前播放的歌曲在播放列表的位置
-      get() {
-        return this.shuffledList.indexOf(this.currentMusic);
-      },
-      set(val) {
-        this.currentMusic = this.shuffledList[val % this.shuffledList.length];
-      },
-    },
+    // playIndex: {
+    //   //当前播放的歌曲在播放列表的位置
+    //   get() {
+    //     return this.shuffledList.indexOf(this.currentMusic);
+    //   },
+    //   set(val) {
+    //     this.currentMusic = this.shuffledList[val % this.shuffledList.length];
+    //   },
+    // },
     shouldRepeat() {
       //可以重复播放
       return this.repeatMode !== REPEAT.NO_REPEAT;
@@ -537,9 +555,9 @@ const VueAPlayer = {
     },
   },
   methods: {
-    ...mapActions(["changeLrcPop","getMusicData"]),
+    ...mapActions(["getMusicData", "canUse", "musicUrl", "musicLrc"]),
     // Float mode
-    ...mapMutations(["SET_SHOWMUSICLIST"]),
+    ...mapMutations(["SET_SHOWMUSICLIST", "SET_MUSIC", "SET_ACTIVE"]),
     onDragBegin() {
       this.floatOriginX = this.floatOffsetLeft;
       this.floatOriginY = this.floatOffsetTop;
@@ -554,12 +572,13 @@ const VueAPlayer = {
     setNextMode() {
       //设置播放模式
       if (this.repeatMode === REPEAT.REPEAT_ALL) {
-        this.repeatMode = REPEAT.REPEAT_ONE;
+        this.internalRepeat = REPEAT.REPEAT_ONE;
       } else if (this.repeatMode === REPEAT.REPEAT_ONE) {
-        this.repeatMode = REPEAT.NO_REPEAT;
+        this.internalRepeat = REPEAT.NO_REPEAT;
       } else {
-        this.repeatMode = REPEAT.REPEAT_ALL;
+        this.internalRepeat = REPEAT.REPEAT_ALL;
       }
+      console.log("000", this.internalRepeat);
     },
     thenPlay() {
       //异步开始播放
@@ -666,54 +685,51 @@ const VueAPlayer = {
     // playlist
 
     getShuffledList() {
-      if (!this.list.length) {
-        return [this.internalMusic];
-      }
-      let unshuffled = [...this.list];
-      if (!this.internalShuffle || unshuffled.length <= 1) {
-        return unshuffled;
-      }
+      let unshuffled = JSON.parse(JSON.stringify(this.musicList));
+      // if (!this.internalShuffle || unshuffled.length <= 1) {
+      //   return unshuffled;
+      // }
 
-      let indexOfCurrentMusic = unshuffled.indexOf(this.internalMusic);
-      if (unshuffled.length === 2 && indexOfCurrentMusic !== -1) {
-        if (indexOfCurrentMusic === 0) {
-          return unshuffled;
-        } else {
-          return [this.internalMusic, unshuffled[0]];
-        }
-      }
-      // shuffle list
-      // @see https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array
-      for (let i = unshuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        const tmp = unshuffled[i];
-        unshuffled[i] = unshuffled[j];
-        unshuffled[j] = tmp;
-      }
+      // let indexOfCurrentMusic = unshuffled.indexOf(this.currentMusic);
+      // if (unshuffled.length === 2 && indexOfCurrentMusic !== -1) {
+      //   if (indexOfCurrentMusic === 0) {
+      //     return unshuffled;
+      //   } else {
+      //     return [this.currentMusic, unshuffled[0]];
+      //   }
+      // }
+      // // shuffle list
+      // // @see https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array
+      // for (let i = unshuffled.length - 1; i > 0; i--) {
+      //   const j = Math.floor(Math.random() * (i + 1));
+      //   const tmp = unshuffled[i];
+      //   unshuffled[i] = unshuffled[j];
+      //   unshuffled[j] = tmp;
+      // }
 
-      // take currentMusic to first
-      if (indexOfCurrentMusic !== -1) {
-        indexOfCurrentMusic = unshuffled.indexOf(this.internalMusic);
-        if (indexOfCurrentMusic !== 0) {
-          [unshuffled[0], unshuffled[indexOfCurrentMusic]] = [
-            unshuffled[indexOfCurrentMusic],
-            unshuffled[0],
-          ];
-        }
-      }
+      // // take currentMusic to first
+      // if (indexOfCurrentMusic !== -1) {
+      //   indexOfCurrentMusic = unshuffled.indexOf(this.currentMusic);
+      //   if (indexOfCurrentMusic !== 0) {
+      //     [unshuffled[0], unshuffled[indexOfCurrentMusic]] = [
+      //       unshuffled[indexOfCurrentMusic],
+      //       unshuffled[0],
+      //     ];
+      //   }
+      // }
 
       return unshuffled;
     },
 
-    onSelectSong(song) {
-      //选择音乐
-      if (this.currentMusic === song) {
-        this.toggle();
-      } else {
-        this.currentMusic = song;
-        this.thenPlay();
-      }
-    },
+    // onSelectSong(song) {
+    //   //选择音乐
+    //   if (this.currentMusic === song) {
+    //     this.toggle();
+    //   } else {
+    //     this.currentMusic = song;
+    //     this.thenPlay();
+    //   }
+    // },
 
     // event handlers
     // for keeping up with audio states
@@ -764,21 +780,26 @@ const VueAPlayer = {
       // determine next song according to shuffle and repeat
       //播放完成
       if (this.repeatMode === REPEAT.REPEAT_ALL) {
-        // 随机播放
+        // 列表重复
         if (
           this.shouldShuffle &&
           this.playIndex === this.shuffledList.length - 1
         ) {
           this.shuffledList = this.getShuffledList();
         }
-        this.playIndex++;
-        this.thenPlay();
+        console.log("2");
+        console.log("this.playIndex", this.playIndex);
+        this.SET_ACTIVE(this.playIndex + 1);
+        // this.$nextTick(()=>{
+        //   this.thenPlay();
+        // })
       } else if (this.repeatMode === REPEAT.REPEAT_ONE) {
         // 单个重复
         this.thenPlay();
       } else {
-        // 列表重复
-        this.playIndex++;
+        // 随机播放
+        console.log("4");
+        this.SET_ACTIVE(this.playIndex + 1);
         if (this.playIndex !== 0) {
           this.thenPlay();
         } else if (this.shuffledList.length === 1) {
@@ -787,7 +808,31 @@ const VueAPlayer = {
       }
     },
 
-    initAudio() {
+    //***
+    currentMusicToData() {
+      //当前音乐对象转具体播放数据
+      return new Promise((resolve, reject) => {
+        if (!this.currentMusic) reject("nothing");
+        const id = this.currentMusic.id;
+
+        return this.canUse(id)
+          .then((res) => {
+            if (res) {
+              return this.musicUrl(id).then(({ url }) =>
+                this.musicLrc(id).then((lrc) => resolve({ url, lrc }))
+              );
+            } else {
+              reject("该歌曲不可播放！");
+            }
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    //***
+
+    async initAudio() {
       // since 1.4.0 Audio attributes as props
 
       this.audio.controls = this.shouldShowNativeControls;
@@ -847,49 +892,61 @@ const VueAPlayer = {
       this.audio.addEventListener("ended", this.onAudioEnded);
 
       if (this.currentMusic) {
-        this.audio.src = this.currentMusic.src || this.currentMusic.url;
+        try {
+          const { url, lrc } = await this.currentMusicToData();
+          this.SET_MUSIC({ url, lrc });
+          this.audio.src = url;
+        } catch (error) {
+          if (error === "nothing") return;
+          this.$toast("该歌曲不可播放！");
+        }
       }
     },
 
-    setSelfAdaptingTheme() {
-      // auto theme according to current music cover image
-      if ((this.currentMusic.theme || this.theme) === "pic") {
-        const pic = this.currentMusic.pic;
-        // use cache
-        if (picThemeCache[pic]) {
-          this.selfAdaptingTheme = picThemeCache[pic];
-        } else {
-          try {
-            new ColorThief().getColorAsync(pic, ([r, g, b]) => {
-              picThemeCache[pic] = `rgb(${r}, ${g}, ${b})`;
-              this.selfAdaptingTheme = `rgb(${r}, ${g}, ${b})`;
-            });
-          } catch (e) {
-            warn("color-thief is required to support self-adapting theme");
-          }
-        }
-      } else {
-        this.selfAdaptingTheme = null;
-      }
-    },
-    lyricsChannel() {
-      this.changeLrcPop(!this.showLrcPop);
-    },
+    // setSelfAdaptingTheme() {
+    //   // auto theme according to current music cover image
+    //   if ((this.currentMusic.theme || this.theme) === "pic") {
+    //     const pic = this.currentMusic.pic;
+    //     // use cache
+    //     if (picThemeCache[pic]) {
+    //       this.selfAdaptingTheme = picThemeCache[pic];
+    //     } else {
+    //       try {
+    //         new ColorThief().getColorAsync(pic, ([r, g, b]) => {
+    //           picThemeCache[pic] = `rgb(${r}, ${g}, ${b})`;
+    //           this.selfAdaptingTheme = `rgb(${r}, ${g}, ${b})`;
+    //         });
+    //       } catch (e) {
+    //         warn("color-thief is required to support self-adapting theme");
+    //       }
+    //     }
+    //   } else {
+    //     this.selfAdaptingTheme = null;
+    //   }
+    // },
     changeList() {
       this.SET_SHOWMUSICLIST(!this.showMusicList);
     },
   },
   watch: {
-    music(music) {
-      this.internalMusic = music;
-    },
+    // music(music) {
+    //   this.internalMusic = music;
+    // },
 
     currentMusic: {
-      handler(music) {
+      async handler(newVal, oldVal) {
         // async
-        this.setSelfAdaptingTheme();
-        console.log("123",);
-        const src = music.src || music.url;
+        // this.setSelfAdaptingTheme();
+        if (!newVal || newVal.id === oldVal.id) return;
+        let src;
+        try {
+          const { url, lrc } = await this.currentMusicToData();
+          this.SET_MUSIC({ url, lrc });
+          src = url;
+        } catch (error) {
+          this.$toast("该歌曲不可播放！");
+        }
+
         // HLS support
         if (/\.m3u8(?=(#|\?|$))/.test(src)) {
           if (
@@ -972,7 +1029,7 @@ const VueAPlayer = {
   mounted() {
     //初始化并播放
     this.initAudio();
-    this.setSelfAdaptingTheme();
+    // this.setSelfAdaptingTheme();
     if (this.autoplay) this.play();
   },
   beforeDestroy() {
@@ -1176,6 +1233,23 @@ export default VueAPlayer;
       }
     }
     .lyrics-info {
+      .head-box{
+        margin-top:29px;
+        .lyrics-name {
+          font-size: 22px;
+          color: rgb(213, 213, 213);
+        }
+        .info-box{
+          display: flex;
+          font-size: 13px;
+          justify-content: space-between;
+          margin-top: 12px;
+          margin-right: 130px;
+          span{
+            color: rgb(141, 180, 221);
+          }
+        }
+      }
       &:before {
         position: absolute;
         top: 118px;
@@ -1237,6 +1311,7 @@ export default VueAPlayer;
         width: 377px;
         height: 350px;
         overflow-y: auto;
+        border-right: 1px solid rgb(54, 54, 54);
         .content {
           font-size: 14px;
           line-height: 40px;
@@ -1327,14 +1402,16 @@ export default VueAPlayer;
       .repeat-all {
         background: url(~@/assets/images/xh.png) no-repeat;
         background-size: 100% 100%;
+        height: 14px;
       }
       .repeat-one {
         background: url(~@/assets/images/dq.png) no-repeat;
         background-size: 100% 100%;
+        height: 14px;
       }
       .no-repeat {
-        background: url(~@/assets/images/sx.png) no-repeat;
-        background-size: 100% 100%;
+        background: url(~@/assets/images/sx.png) center center no-repeat;
+        background-size: 15px 12px;
       }
       .suiji {
         background: url(~@/assets/images/sj.png) no-repeat;
@@ -1343,6 +1420,8 @@ export default VueAPlayer;
       .play-gc {
         background: url(~@/assets/images/gc.png) no-repeat;
         background-size: 100% 100%;
+        width: 14px;
+        height: 14px;
       }
       .play-tree {
         background: url(~@/assets/images/tree.png) no-repeat;

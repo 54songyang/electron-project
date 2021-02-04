@@ -5,57 +5,28 @@
         v-for="(line, index) of lrcLines"
         :key="index"
         :class="{ 'aplayer-lrc-current': index === currentLineIndex }"
-      >{{ line[1] }}</p>
+      >
+        {{ line[1] }}
+      </p>
     </div>
   </div>
 </template>
 
 <script>
+import { mapMutations } from "vuex";
 import { parseLrc } from "../js/utils";
-function getSelectedHtml(){
-    var selectedHtml = "";
-    var documentFragment = null;
-
-    try{
-        if(window.getSelection){
-            documentFragment =  window.getSelection().getRangeAt(0).cloneContents();
-        }else if(document.selection){
-            documentFragment =  document.selection.createRange().HtmlText;
-        }
-
-        for(var i=0;i<documentFragment.childNodes.length;i++){
-            var childNode = documentFragment.childNodes[i];
-            if(childNode.nodeType==3){ // Text 节点
-                selectedHtml+=childNode.nodeValue;
-            }else{
-                var nodeHtml = childNode.outerHTML;
-                selectedHtml+=nodeHtml;
-            }
-
-        }
-
-    }catch(err){
-
-    }
-
-    return selectedHtml;
-}
 export default {
   props: {
-    currentMusic: {
-      type: Object,
-      required: true
-    },
     playStat: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
       displayLrc: "",
       currentLineIndex: 0,
-      setTimeFn: null
+      setTimeFn: null,
     };
   },
   computed: {
@@ -71,25 +42,36 @@ export default {
     transformStyle() {
       if (this.currentLineIndex < 7) {
         return {
-          transform: `translateY(${-this.currentLineIndex * 20}px)`
+          transform: `translateY(${-this.currentLineIndex * 20}px)`,
         };
       } else {
         return {
           transform: `translateY(${-(
             140 +
             (this.currentLineIndex - 7) * 40
-          )}px)`
+          )}px)`,
         };
       }
-    }
+    },
+    playIndex() {
+      return this.$store.state.music.videoUpload.active;
+    },
+    currentMusic() {
+      return this.$store.state.music.videoUpload.musicList[this.playIndex];
+    },
+    showLrcPop() {
+      return this.$store.state.music.videoUpload.showLrcPop;
+    },
   },
   mounted() {
     document
       .querySelector(".aplayer-lrc")
       .addEventListener("scroll", this.debounce(this.turnBack, 1000));
-    document.querySelector('.aplayer-lrc').addEventListener('mouseup',function(){
-      console.log('getSelectedHtml',window.getSelection().getRangeAt(0));
-    })
+    document
+      .querySelector(".aplayer-lrc")
+      .addEventListener("mouseup", function () {
+        console.log("getSelectedHtml", window.getSelection().getRangeAt(0));
+      });
   },
   beforeDestroy() {
     document
@@ -97,6 +79,7 @@ export default {
       .removeEventListener("scroll", this.debounce(this.turnBack, 1000));
   },
   methods: {
+    ...mapMutations(["SET_SHOWLRCPOP"]),
     applyLrc(lrc) {
       if (/^https?:\/\//.test(lrc)) {
         this.fetchLrc(lrc);
@@ -106,8 +89,8 @@ export default {
     },
     fetchLrc(src) {
       fetch(src)
-        .then(response => response.text())
-        .then(lrc => {
+        .then((response) => response.text())
+        .then((lrc) => {
           this.displayLrc = lrc;
         });
     },
@@ -116,14 +99,14 @@ export default {
     },
     debounce(fn, wait) {
       var timer = null;
-      return function() {
+      return function () {
         var context = this;
         var args = arguments;
         if (timer) {
           clearTimeout(timer);
           timer = null;
         }
-        timer = setTimeout(function() {
+        timer = setTimeout(function () {
           fn.apply(context, args);
         }, wait);
       };
@@ -132,24 +115,39 @@ export default {
       this.setTimeFn = setTimeout(() => {
         e.target.scrollTo({
           top: 0,
-          behavior: "smooth"
+          behavior: "smooth",
         });
         this.setTimeFn = null;
       }, 5000);
-    }
+    },
+    lyricsChannel() {
+      this.currentLineIndex = 0;
+      const lrc = this.currentMusic.lrc;
+      if (lrc) {
+        this.applyLrc(lrc);
+      } else {
+        this.hideLrc();
+      }
+      this.SET_SHOWLRCPOP(!this.showLrcPop);
+    },
   },
   watch: {
-    currentMusic: {
-      immediate: true,
-      handler(music) {
-        this.currentLineIndex = 0;
-        if (music.lrc) {
-          this.applyLrc(music.lrc);
-        } else {
-          this.hideLrc();
-        }
-      }
-    },
+    // showLrcPop: {
+    //   immediate: true,
+    //   handler(bo) {
+    //     if (!bo) return;
+    //     this.$nextTick(() => {
+    //       this.currentLineIndex = 0;
+    //       console.log("this.currentMusic.lrc", this.currentMusic);
+    //       const lrc = this.currentMusic.lrc;
+    //       if (lrc) {
+    //         this.applyLrc(lrc);
+    //       } else {
+    //         this.hideLrc();
+    //       }
+    //     });
+    //   },
+    // },
     "playStat.playedTime"(playedTime) {
       for (let i = 0; i < this.lrcLines.length; i++) {
         const line = this.lrcLines[i];
@@ -158,8 +156,8 @@ export default {
           this.currentLineIndex = i;
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss">

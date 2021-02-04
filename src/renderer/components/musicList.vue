@@ -33,8 +33,22 @@
           :key="item.id"
           @dblclick="selectsong(item, index)"
         >
-          <div class="music-title ellipsis">{{ item.name }}</div>
-          <div class="music-singer ellipsis">{{ item.ar[0].name }}</div>
+          <div class="music-title ellipsis">
+            <div class="name-box">
+              <span>{{ item.name }}</span>
+              <span class="name-tip" v-if="item.alia.length > 0"
+                ><em>({{ item.alia.join("/") }})</em></span
+              >
+            </div>
+            <span
+              v-if="item.h.vd <= 0 || item.l.vd <= 0 || item.m.vd <= 0"
+              class="sq"
+            ></span>
+            <span class="mv" v-if="item.mv"></span>
+          </div>
+          <div class="music-singer ellipsis">
+            {{ item.ar.map((el) => el.name).join("/") }}
+          </div>
           <div class="music-link"></div>
           <div class="music-time">04:36</div>
         </div>
@@ -53,9 +67,6 @@ export default {
     };
   },
   computed: {
-    list() {
-      return this.$store.state.music.videoUpload.list;
-    },
     musicList() {
       return this.$store.state.music.videoUpload.musicList;
     },
@@ -64,34 +75,35 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(["SET_MUSICLIST", "SET_MUSIC"]),
+    ...mapMutations(["SET_MUSICLIST"]),
     ...mapActions(["canUse", "musicDetail", "musicUrl", "musicLrc"]),
     scrollFn(e) {
       this.scrollTop = e.target.scrollTop;
     },
     async selectsong({ id }, index) {
-      if (index === this.active) console.log("已开始播放！");
-      try {
-        const canUse = await this.canUse(id);
-        const {
-          name: title,
-          al: { picUrl },
-          ar: [{ name: artist }],
-        } = await this.musicDetail(id);
-        const { url: src } = await this.musicUrl(id);
-        const lrc = await this.musicLrc(id);
-        const song = {
-          artist,
-          title,
-          pic: picUrl,
-          src,
-          lrc,
-        };
-        this.$emit("selectsong", song);
-        this.SET_MUSIC({ index, song });
-      } catch (error) {
-        console.log("error", error);
-      }
+      // if (index === this.active) console.log("已开始播放！");
+      // try {
+      //   const canUse = await this.canUse(id);
+      //   const {
+      //     name: title,
+      //     al: { picUrl },
+      //     ar: [{ name: artist }],
+      //   } = await this.musicDetail(id);
+      //   const { url: src } = await this.musicUrl(id);
+      //   const lrc = await this.musicLrc(id);
+      //   const song = {
+      //     artist,
+      //     title,
+      //     pic: picUrl,
+      //     src,
+      //     lrc,
+      //   };
+      //   this.$emit("selectsong", song);
+      //   this.SET_MUSIC({ index, song });
+      //   console.log("song",song);
+      // } catch (error) {
+      //   console.log("error", error);
+      // }
     },
   },
   // mounted() {
@@ -264,6 +276,7 @@ export default {
   height: calc(100% - 110px);
   display: flex;
   flex-direction: column;
+  box-shadow: -10px 0px 20px -20px #000000;
   .list-box {
     flex: 1;
     overflow-y: auto;
@@ -289,6 +302,40 @@ export default {
       }
       .music-title {
         flex: 1;
+        display: flex;
+        align-items: center;
+        .name-box {
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          word-break: break-all;
+        }
+        .name-tip {
+          display: inline-block;
+          color: #b9b9b9;
+          margin-left: 4px;
+          em {
+            color: rgb(90, 90, 90);
+          }
+        }
+        .sq {
+          display: block;
+          background: url(~@/assets/images/sq-2.png) no-repeat;
+          background-size: 100% 100%;
+          width: 15px;
+          height: 12px;
+          min-width: 17px;
+          margin: 0 4px;
+        }
+        .mv {
+          display: block;
+          background: url(~@/assets/images/video-red.png) no-repeat;
+          background-size: 100% 100%;
+          width: 16px;
+          height: 15px;
+          min-width: 17px;
+          margin: 0 4px;
+        }
       }
       .music-link {
         background: url(~@/assets/images/link.png) no-repeat;
@@ -325,8 +372,8 @@ export default {
     justify-content: center;
     .tab-box {
       width: 210px;
-      line-height: 30px;
-      height: 30px;
+      line-height: 28px;
+      height: 28px;
       font-size: 14px;
       text-align: center;
       display: flex;
@@ -336,7 +383,7 @@ export default {
       div {
         flex: 1;
         border-radius: 14px;
-        height: 30px;
+        height: 28px;
       }
       .no-acitve:hover {
         background: rgb(62, 62, 62);

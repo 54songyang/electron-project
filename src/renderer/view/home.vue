@@ -30,7 +30,7 @@
         <div
           v-show="showLrcPop"
           class="close-lrc"
-          @click="changeLrcPop(false)"
+          @click="SET_SHOWLRCPOP(false)"
         ></div>
         <div class="top-tool-box">
           <div class="top-tool" v-show="!showLrcPop">
@@ -88,19 +88,22 @@
         ]"
       >
         <keep-alive>
-          <router-view :ref="$route.name"></router-view>
+          <router-view :ref="$route.name" @vipPopShowFn="vipPopShowFn"></router-view>
         </keep-alive>
         <musicList v-show="showMusicList" @selectsong="selectsong" />
       </div>
       <div class="player-box">
         <!-- :list="videoUpload.list" -->
+        <!-- :shuffle="typeData == 2" -->
         <aplayer
           :music="videoUpload.music"
-          :shuffle="typeData == 2"
           :repeat="playRepeat"
           ref="player"
         ></aplayer>
       </div>
+    </div>
+    <div class="vip-pop" v-show="vipPopShow" >
+      <img src="@/assets/images/vip-pop.png" @click="vipPopShow=false" alt="">
     </div>
   </div>
 </template>
@@ -119,17 +122,18 @@ export default {
     return {
       player: null,
       typeData: 0,
-
       activeSize: [],
       active: 0,
       searchData: "",
       creatData: null,
       mainOver: false,
+      playRepeat: "no-repeat",
+      vipPopShow:false,
     };
   },
   computed: {
     showLrcPop() {
-      return this.$store.state.page.showLrcPop;
+      return this.$store.state.music.videoUpload.showLrcPop;
     },
     showMusicList() {
       return this.$store.state.music.showMusicList;
@@ -144,28 +148,24 @@ export default {
     ownRoutes() {
       return this.$store.state.page.ownRoutes;
     },
-    playRepeat() {
-      if (this.typeData == 0) return "repeat-all";
-      if (this.typeData == 1) return "repeat-one";
-      return "no-repeat";
-    },
+    // playRepeat() {
+    //   if (this.typeData == 0) return "repeat-all";
+    //   if (this.typeData == 1) return "repeat-one";
+    //   return "no-repeat";
+    // },
     videoUpload() {
       return this.$store.state.music.videoUpload;
     },
   },
   methods: {
-    ...mapActions([
-      "clearData",
-      "changeLrcPop",
-      "logout",
-      "loginStatus",
-      "getUserPlaylist",
-    ]),
+    ...mapActions(["clearData", "logout", "loginStatus", "getUserPlaylist"]),
     ...mapMutations([
       "SET_SHOWMUSICLIST",
       "SET_USERINFO",
       "SET_PLAYLIST",
       "SET_OWNROUTES",
+      "SET_SHOWLRCPOP",
+      "SET_videoUpload",
     ]),
     channel(val) {
       this.$electron.ipcRenderer.send(val);
@@ -264,8 +264,11 @@ export default {
       }
     },
     selectsong(song) {
-      this.$refs.player.onSelectSong(song)
+      this.$refs.player.onSelectSong(song);
     },
+    vipPopShowFn(){
+      this.vipPopShow = !this.vipPopShow
+    }
   },
   updated() {
     this.player = this.$refs.player;
@@ -280,9 +283,9 @@ export default {
     if (!this.userInfo.profile) {
       this.SET_USERINFO("");
       this.SET_PLAYLIST([]);
+      // this.SET_videoUpload()
     }
     const { active, musicList, music } = this.videoUpload;
-
   },
 };
 </script>
@@ -469,17 +472,17 @@ body {
   .tool-box:hover {
     .close {
       background: url(~@/assets/images/close.png) center center no-repeat;
-      background-size: 12px 12px;
+      background-size: 6px 6px;
       background-color: rgb(250, 100, 94);
     }
     .min {
       background: url(~@/assets/images/min.png) center center no-repeat;
-      background-size: 12px 12px;
+      background-size: 6px 2px;
       background-color: rgb(232, 189, 90);
     }
     .max {
       background: url(~@/assets/images/max.png) center center no-repeat;
-      background-size: 12px 12px;
+      background-size: 6px 6px;
       background-color: rgb(106, 187, 83);
     }
   }
@@ -560,6 +563,24 @@ body .player-box {
       background: url(~@/assets/images/lb.png) no-repeat;
       background-size: 100% 100%;
     }
+  }
+}
+.vip-pop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  img{
+    display: block;
+    width:280px;
+    height: 332px;
   }
 }
 </style>

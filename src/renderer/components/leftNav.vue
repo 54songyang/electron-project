@@ -154,8 +154,11 @@ export default {
       if (!this.userInfo || JSON.stringify(this.userInfo) === "{}") {
         this.$electron.ipcRenderer.send("showLogin");
       } else {
-        await this.getUserDetail();
+        if (!this.userInfo) {
+          await this.getUserDetail();
+        }
         this.showUserDetail = !this.showUserDetail;
+        this.getUserDetail();
       }
     },
     toList(from, name) {
@@ -294,18 +297,22 @@ export default {
     .nav {
       flex: 1;
       margin-left: 10px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      word-break: break-all;
     }
-    .playing{
+    .playing {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      &::after{
-        content: '';
+      &::after {
+        content: "";
         display: inline-block;
         background: url(~@/assets/images/laba.png) no-repeat;
         background-size: 100% 100%;
-        width: 15px;
-        height: 15px;
+        width: 12px;
+        height: 12px;
         margin-right: 20px;
       }
     }

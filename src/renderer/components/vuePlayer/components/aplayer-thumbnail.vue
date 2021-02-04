@@ -15,7 +15,7 @@
   </div>
 </template>
 <script>
-import { mapActions, mapMutations, mapState } from "vuex";
+import { mapMutations } from "vuex";
 import IconButton from "../components/aplayer-iconbutton.vue";
 
 export default {
@@ -23,7 +23,6 @@ export default {
     IconButton,
   },
   props: {
-    pic: String,
     theme: String,
     playing: {
       type: Boolean,
@@ -41,17 +40,8 @@ export default {
       dragStartY: 0,
     };
   },
-  computed: {
-    currentPicStyleObj() {
-      if (!this.pic) return {};
-      return {
-        backgroundImage: `url(${this.pic})`,
-        backgroundColor: this.theme,
-      };
-    },
-  },
   methods: {
-    ...mapMutations(["SET_MUSIC"]),
+    ...mapMutations(["SET_ACTIVE"]),
     onDragBegin(e) {
       if (this.enableDrag) {
         this.hasMovedSinceMouseDown = false;
@@ -82,19 +72,20 @@ export default {
     },
     next() {
       //下一首
-      const { list, active } = this.$store.state.music.videoUpload;
-      if (active === list.length - 1) return;
-      let index = active + 1;
-      this.SET_MUSIC(index);
+      const { musicList, active } = this.$store.state.music.videoUpload;
+      if (active === 0) return;
+      let index = active - 1;
+      this.SET_ACTIVE(index)
     },
     prev(){
       //上一首
-      const { list, active } = this.$store.state.music.videoUpload;
-      if (active === 0) return;
-      let index = active - 1;
-      this.SET_MUSIC(index);
+      const { musicList, active } = this.$store.state.music.videoUpload;
+      if (active === musicList.length - 1) return;
+      let index = active + 1;
+      this.SET_ACTIVE(index)
     },
     toCollection() {
+      console.log("收藏",);
       //收藏按钮
       //sc-red.png
     },

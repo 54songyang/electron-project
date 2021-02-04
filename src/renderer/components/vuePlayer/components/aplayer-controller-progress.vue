@@ -6,16 +6,25 @@
     ref="barWrap"
   >
     <div class="aplayer-bar">
-      <div class="aplayer-loaded" :style="{width: `${loadProgress * 100}%`}"></div>
-      <div class="aplayer-played" :style="{width: `${playProgress * 100}%`, background: theme}">
+      <div
+        class="aplayer-loaded"
+        :style="{ width: `${loadProgress * 100}%` }"
+      ></div>
+      <div
+        class="aplayer-played"
+        :style="{ width: `${playProgress * 100}%`, background: theme }"
+      >
         <span
           ref="thumb"
           @mouseover="thumbHovered = true"
           @mouseout="thumbHovered = false"
           class="aplayer-thumb"
-          :style="{borderColor:　theme}"
+          :style="{ borderColor: theme }"
         >
-          <span class="aplayer-loading-icon" :style="{backgroundColor: theme }">
+          <span
+            class="aplayer-loading-icon"
+            :style="{ backgroundColor: theme }"
+          >
             <!-- <icon type="loading" /> -->
           </span>
         </span>
@@ -30,12 +39,12 @@ import Icon from "../components/aplayer-icon.vue";
 
 export default {
   components: {
-    Icon
+    Icon,
   },
   props: ["loadProgress", "playProgress", "theme"],
   data() {
     return {
-      thumbHovered: false
+      thumbHovered: false,
     };
   },
   methods: {
@@ -102,8 +111,8 @@ export default {
       percentage = percentage > 0 ? percentage : 0;
       percentage = percentage < 1 ? percentage : 1;
       this.$emit("dragend", percentage);
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss">
@@ -142,6 +151,7 @@ export default {
       height: 3px;
       transition: background-color 0.3s;
       will-change: width;
+      background: rgb(195, 70, 58);
 
       .aplayer-thumb {
         position: absolute;

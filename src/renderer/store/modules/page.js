@@ -9,7 +9,7 @@ const state = {
     { name: "最新音乐", path: 'newsong' },
   ],
   userInfo: '',
-  mainData:{
+  mainData: {
     personalized: [],//歌单推荐
     privatecontent: [], //独家放送
     mvData: [], //推荐MV
@@ -19,14 +19,32 @@ const state = {
   },
   playlist: [],//用户歌单
   ownRoutes: [],//用户路由
-  showLrcPop: false,//显示歌词窗口
   pageActive: 0,//页面
 }
 
 const mutations = {
   SET_CLEARSTATE(state, val) {
-    state.userInfo = ''
-    state.playlist = [];
+    state.topNav = [
+      { name: "个性推荐", path: 'mainPage' },
+      { name: "歌单", path: 'songSheet' },
+      { name: "主播电台", path: 'djprogram' },
+      { name: "排行榜", path: 'rankingList' },
+      { name: "歌手", path: 'singer' },
+      { name: "最新音乐", path: 'newsong' },
+    ]
+      state.userInfo = ''
+      // state.mainData = {
+      //   personalized: [],//歌单推荐
+      //   privatecontent: [], //独家放送
+      //   mvData: [], //推荐MV
+      //   newsong: [], //推荐新音乐
+      //   djprogram: [], //推荐电台
+      //   bannerList: [],//banner
+      // }
+      state.playlist = []//用户歌单
+      state.ownRoutes = []//用户路由
+      state.pageActive = 0//页面
+
   },
   SET_USERINFO(state, val) {
     state.userInfo = val;
@@ -51,16 +69,16 @@ const mutations = {
     state.mainData.bannerList = val
   },
 
-  SET_SHOWLRCPOP(state, val) {
-    state.showLrcPop = val;
-  },
   SET_PLAYLIST(state, val) {
     if (Array.isArray(val)) {
       state.playlist = val
     } else {
-      state.playlist.forEach(el => {
-        if (el.id === val.id) el = val
-      });
+      const obj = state.playlist.find(el => el.id === val.id)
+      if (obj) {
+        for (const key in val) {
+          obj[key] = val[key]
+        }
+      }
     }
   },
   SET_OWNROUTES(state, val) {
@@ -113,6 +131,24 @@ const actions = {
         }
       })
   },
+  getMenuDetail({ commit, state }, id) {
+    return axios({
+      type: "get",
+      url: `/playlist/detail?id=${id}`,
+    })
+      .then(async (res) => {
+        if (res.code === 200) {
+          const playlist = res.playlist;
+          console.log("获取歌单详情", playlist);
+          if (playlist.tracks) {
+            playlist.tracks.forEach(el => el.check = true);
+          }
+          commit("SET_PLAYLIST", playlist)
+          return true
+        }
+      })
+  },
+
   getUserDetail({ commit, state }) {
     return axios({
       url:
@@ -136,6 +172,7 @@ const actions = {
         console.log("退出登录", res);
         if (res.code === 200) {
           commit("SET_CLEARSTATE")
+          commit("SET_CLEARMUSIC")
           return res
         }
       })
@@ -230,9 +267,6 @@ const actions = {
   },
   clearData({ commit, dispatch, state }) {
     commit('SET_USERINFO', {});
-  },
-  changeLrcPop({ commit, state }, val) {
-    commit('SET_SHOWLRCPOP', val)
   },
   getQrKey() {
     return axios({

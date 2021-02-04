@@ -5,7 +5,7 @@
       :class="`aplayer-icon-${volumeIcon}`"
       :icon="volumeIcon"
       @click.native="$emit('togglemute')"
-    />-->
+    /> -->
     <div class="aplayer-volume-bar-wrap" @mousedown="onBarMouseDown">
       <div class="aplayer-volume-bar" ref="bar">
         <div
@@ -123,6 +123,7 @@ export default {
         right: 0;
         transition: height 0.1s ease, background-color 0.3s;
         will-change: height;
+        background: rgb(195, 70, 58);
       }
     }
   }

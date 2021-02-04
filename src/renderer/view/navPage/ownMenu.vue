@@ -1,5 +1,5 @@
 <template>
-  <div class="own-menu">
+  <div class="own-menu" v-if="menuItem">
     <transition name="fade">
       <div class="own-title" v-show="titleShow">
         <div class="title-name">{{ menuItem.name }}</div>
@@ -81,22 +81,42 @@
         v-for="(item, index) in menuItem.tracks"
         :class="[
           'item-box',
-          { 'bg-white': active === index && activeMenu === pageIndex },
+          { playing: active === index && activeMenu === pageIndex },
+          { 'bg-white': activeItem === index },
         ]"
         :key="item.id"
         v-show="item.check"
-        @dblclick="checkMusic(index)"
+        @dblclick="checkMusic(index, item.fee)"
+        @click="checkItem(index)"
       >
-        <!-- laba.png -->
-        <!-- laba1.png -->
-        <div class="item-index" v-if="active === index"></div>
+        <div
+          class="item-index"
+          v-if="active === index && activeMenu === pageIndex"
+        ></div>
         <div class="item-index" v-else>{{ index | indexFilter }}</div>
         <div class="item-sc"></div>
         <div class="item-download"></div>
-        <div class="item-name" v-html="item.name"></div>
-        <div class="singer-name" v-html="item.ar[0].name"></div>
+        <!-- <div :class="['item-name', item.fee === 0 ? 'gray-word' : '']"> -->
+
+        <div class="item-name">
+          <div class="name-box">
+            <span class="name" v-html="item.name"></span>
+            <span class="name-tip" v-if="item.alia.length > 0"
+              ><em>({{ item.alia.join("/") }})</em></span
+            >
+          </div>
+          <span class="sq"></span>
+          <!-- v-if="item.h.vd <= 0 || item.l.vd <= 0 || item.m.vd <= 0" -->
+          <span class="mv" v-if="item.mv"></span>
+          <span class="more"></span>
+        </div>
+        <div
+          class="singer-name"
+          v-html="item.ar.map((el) => el.name).join('/')"
+        ></div>
         <div class="item-zj" v-html="item.al.name"></div>
-        <div class="item-time">{{ setTime(item.publishTime) }}</div>
+        <div class="item-time">04:30</div>
+        <!-- <div class="item-time">{{ setTime(item.publishTime) }}</div> -->
       </div>
     </div>
     <div v-show="pageActive === 1">评论</div>
@@ -105,7 +125,7 @@
 </template>
 
 <script>
-import { mapMutations } from "vuex";
+import { mapActions, mapMutations } from "vuex";
 const debounce = (() => {
   let timer = 0;
   return (callback, ms = 500) => {
@@ -118,9 +138,9 @@ export default {
   data() {
     return {
       id: "",
-      menuItem: "",
-      pageIndex: 0,
-      pageActive: 0,
+      pageIndex: 0, //页面index
+      pageActive: 0, //tab切换
+      activeItem: "", //当前活动（未播放）歌曲
       titleShow: false,
       searchData: "",
       imgError: require("@/assets/images/err-img3.png"),
@@ -136,9 +156,13 @@ export default {
     activeMenu() {
       return this.$store.state.music.videoUpload.activeMenu;
     },
+    menuItem() {
+      return this.$store.state.page.playlist[this.pageIndex];
+    },
   },
   methods: {
     ...mapMutations(["SET_PLAYLIST", "SET_MUSICLIST"]),
+    ...mapActions(["musicDetail", "getMenuDetail"]),
     add0(m) {
       return m < 10 ? "0" + m : m;
     },
@@ -151,28 +175,22 @@ export default {
       let mms = mm ? `${this.add0(mm)}:` : "";
       return hs + mms + this.add0(s);
     },
-    checkMusic(index) {
-      this.SET_MUSICLIST({ list: this.menuItem.tracks, index, active: 1 });
+    async checkMusic(index, fee) {
+      if (this.activeMenu === this.pageIndex && this.active === index) return;
+      // if (fee === 0) return this.$toast("因合作方要求，该资源暂时下架>_<");
+      else if (fee === 1) return this.$emit("vipPopShowFn");
+      const musicList = await this.musicDetail(
+        this.menuItem.tracks.map((el) => el.id)
+      );
+      this.activeItem = "";
+      this.SET_MUSICLIST({ musicList, index, activeMenu: this.pageIndex });
     },
-    getMenuDetail() {
-      this.$axios({
-        type: "get",
-        url: `/playlist/detail?id=${this.id}`,
-      })
-        .then(async (res) => {
-          if (res.code === 200) {
-            const playlist = res.playlist;
-            console.log("获取歌单详情", playlist);
-            playlist.tracks.forEach((el) => {
-              el.check = true;
-            });
-            this.SET_PLAYLIST({ ...playlist });
-            this.menuItem = playlist;
-          }
-        })
-        .catch((err) => {
-          console.log("err", err);
-        });
+    checkItem(index) {
+      if (this.activeMenu === this.pageIndex) {
+        this.activeItem = "";
+      } else {
+        this.activeItem = index;
+      }
     },
     listScroll() {
       const scrollTop = document.querySelector(".main-body").scrollTop;
@@ -261,13 +279,13 @@ export default {
     },
   },
   beforeRouteEnter(to, from, next) {
-    next((_this) => {
+    next(async (_this) => {
       const mainBody = document.querySelector(".main-body");
       mainBody.scrollTop = 0;
       _this.pageActive = 0;
       _this.pageIndex = _this.$route.meta.pageNav - 11;
       _this.id = _this.$route.name.replace("ownMenu", "");
-      _this.getMenuDetail();
+      _this.getMenuDetail(_this.id);
       mainBody.addEventListener("scroll", () => debounce(_this.listScroll()));
     });
   },
@@ -278,7 +296,7 @@ export default {
   },
 };
 </script>
-<style>
+<style lang="scss">
 .blue-word {
   color: rgb(142, 181, 222);
 }
@@ -584,6 +602,10 @@ export default {
       }
       &:hover {
         background: rgb(50, 50, 50);
+        .more {
+          background: url(~@/assets/images/more.png) no-repeat;
+          background-size: 100% 100%;
+        }
       }
       .item-index {
         font-size: 12px;
@@ -594,7 +616,7 @@ export default {
         background: url(~@/assets/images/sc-white.png) no-repeat;
         background-size: 100% 100%;
         width: 14px;
-        height: 13px;
+        height: 12px;
         margin: 0 8px;
       }
       .item-download {
@@ -602,15 +624,68 @@ export default {
         background-size: 100% 100%;
         width: 15px;
         height: 13px;
-        margin: 0 6px;
+        margin: 0 12px 0 0px;
       }
       .item-name {
         color: rgb(179, 179, 179);
         flex: 1;
+        width: 28%;
+        margin-left: 4px;
+        display: flex;
+        align-items: center;
+        .name-box {
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          word-break: break-all;
+        }
+        .name {
+          display: inline-block;
+        }
+        .name-tip {
+          display: inline-block;
+          color: #b9b9b9;
+          margin-left: 4px;
+          em {
+            color: rgb(90, 90, 90);
+          }
+        }
+      }
+      .sq {
+        display: inline-block;
+        background: url(~@/assets/images/sq-1.png) no-repeat;
+        background-size: 100% 100%;
+        width: 15px;
+        height: 12px;
+        min-width: 17px;
+        margin: 0 2px;
+      }
+      .mv {
+        display: inline-block;
+        background: url(~@/assets/images/video-red.png) no-repeat;
+        background-size: 100% 100%;
+        width: 16px;
+        height: 13px;
+        min-width: 16px;
+        margin: 0 2px;
+      }
+      .more {
+        display: inline-block;
+        width: 16px;
+        height: 4px;
+        min-width: 16px;
+        margin: 0 4px 0 2px;
+      }
+      .gray-word {
+        color: rgb(90, 90, 90);
       }
       .singer-name {
         color: rgb(131, 131, 131);
         flex: 1;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        word-break: break-all;
       }
       .item-zj {
         color: rgb(131, 131, 131);
@@ -621,18 +696,21 @@ export default {
         width: 30px;
       }
     }
-    .bg-white {
+    .playing {
       background: rgb(50, 50, 50) !important;
       .item-name {
         color: rgb(187, 69, 57);
       }
-      .item-index{
+      .item-index {
         display: inline-block;
         background: url(~@/assets/images/laba.png) left center no-repeat;
         background-size: 12px 12px;
         width: 30px;
         height: 34px;
       }
+    }
+    .bg-white {
+      background: rgb(50, 50, 50) !important;
     }
   }
 }
