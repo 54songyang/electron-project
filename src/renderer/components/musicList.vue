@@ -40,10 +40,11 @@
                 ><em>({{ item.alia.join("/") }})</em></span
               >
             </div>
-            <span
+            <span class="sq"></span>
+            <!-- <span
               v-if="item.h.vd <= 0 || item.l.vd <= 0 || item.m.vd <= 0"
               class="sq"
-            ></span>
+            ></span> -->
             <span class="mv" v-if="item.mv"></span>
           </div>
           <div class="music-singer ellipsis">

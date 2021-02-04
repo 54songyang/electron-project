@@ -7,7 +7,7 @@
           :src="userInfo.profile.avatarUrl"
           alt
         />
-        <img v-else src="@/assets/images/person.png" alt />
+        <img class="no-person" v-else src="@/assets/images/person.png" alt />
         <div class="user-name">
           {{
             Object.keys(userInfo).length > 0
@@ -258,9 +258,12 @@ export default {
       height: 60px;
       img {
         display: block;
-        width: 40px;
-        height: 40px;
+        width: 29px;
+        height: 25px;
         border-radius: 50%;
+      }
+      .no-person{
+        border-radius: 0;
       }
       .user-name {
         font-size: 14px;
