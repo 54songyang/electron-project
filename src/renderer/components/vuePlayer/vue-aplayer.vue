@@ -112,9 +112,19 @@
         <div class="head-box" v-if="currentMusic">
           <div class="lyrics-name">{{ currentMusic.name }}</div>
           <div class="info-box">
-            <div>专辑:<span>{{currentMusic.al.name}}</span></div>
-            <div>歌手:<span>{{currentMusic.ar.map(el=>el.name).join('/')}}</span></div>
-            <div>来源:<span>{{currentMusic.ar.map(el=>el.name).join('/')}}</span></div>
+            <div>
+              专辑:<span>{{ currentMusic.al.name }}</span>
+            </div>
+            <div>
+              歌手:<span>{{
+                currentMusic.ar.map((el) => el.name).join("/")
+              }}</span>
+            </div>
+            <div>
+              来源:<span>{{
+                currentMusic.ar.map((el) => el.name).join("/")
+              }}</span>
+            </div>
           </div>
         </div>
         <lyrics ref="lyrics" :play-stat="playStat" />
@@ -396,13 +406,11 @@ const VueAPlayer = {
     videoUpload() {
       return this.$store.state.music.videoUpload;
     },
-    playIndex() {
-      return this.$store.state.music.videoUpload.active;
-    },
+    // playIndex() {
+    //   return this.$store.state.music.videoUpload.active;
+    // },
     currentMusic() {
-      const list = this.$store.state.music.videoUpload.musicList;
-      if (list.length === 0) return null;
-      return list[this.playIndex];
+      return this.$store.state.music.videoUpload.currentMusic;
     },
     musicList() {
       //播放列表
@@ -553,11 +561,14 @@ const VueAPlayer = {
         this.internalRepeat = val;
       },
     },
+    currentIndex() {
+      return this.$store.getters.currentIndex;
+    },
   },
   methods: {
     ...mapActions(["getMusicData", "canUse", "musicUrl", "musicLrc"]),
     // Float mode
-    ...mapMutations(["SET_SHOWMUSICLIST", "SET_MUSIC", "SET_ACTIVE"]),
+    ...mapMutations(["SET_SHOWMUSICLIST", "SET_MUSICLIST"]),
     onDragBegin() {
       this.floatOriginX = this.floatOffsetLeft;
       this.floatOriginY = this.floatOffsetTop;
@@ -779,58 +790,47 @@ const VueAPlayer = {
     onAudioEnded() {
       // determine next song according to shuffle and repeat
       //播放完成
-      if (this.repeatMode === REPEAT.REPEAT_ALL) {
-        // 列表重复
-        if (
-          this.shouldShuffle &&
-          this.playIndex === this.shuffledList.length - 1
-        ) {
-          this.shuffledList = this.getShuffledList();
-        }
-        console.log("2");
-        console.log("this.playIndex", this.playIndex);
-        this.SET_ACTIVE(this.playIndex + 1);
-        // this.$nextTick(()=>{
-        //   this.thenPlay();
-        // })
-      } else if (this.repeatMode === REPEAT.REPEAT_ONE) {
-        // 单个重复
-        this.thenPlay();
+      //***列表循环
+      let index = "";
+      if (this.currentIndex === this.musicList.length - 1) {
+        index = 0;
       } else {
-        // 随机播放
-        console.log("4");
-        this.SET_ACTIVE(this.playIndex + 1);
-        if (this.playIndex !== 0) {
-          this.thenPlay();
-        } else if (this.shuffledList.length === 1) {
-          this.audio.currentTime = 0;
-        }
+        index = this.currentIndex + 1;
       }
+      if (typeof index === "string") return;
+      const currentMusic = { ...this.musicList[index] };
+      this.SET_MUSICLIST({ currentMusic });
+      //todo 判断元素不在可视区域再滚动
+      const dom = document.querySelector(`.music-list${index}`);
+      if (dom) dom.scrollIntoView();
+      // if (this.repeatMode === REPEAT.REPEAT_ALL) {
+      //   // 列表重复
+      //   if (
+      //     this.shouldShuffle &&
+      //     this.playIndex === this.shuffledList.length - 1
+      //   ) {
+      //     this.shuffledList = this.getShuffledList();
+      //   }
+      //   console.log("2");
+      //   console.log("this.playIndex", this.playIndex);
+      //   this.SET_ACTIVE(this.playIndex + 1);
+      //   // this.$nextTick(()=>{
+      //   //   this.thenPlay();
+      //   // })
+      // } else if (this.repeatMode === REPEAT.REPEAT_ONE) {
+      //   // 单个重复
+      //   this.thenPlay();
+      // } else {
+      //   // 随机播放
+      //   console.log("4");
+      //   this.SET_ACTIVE(this.playIndex + 1);
+      //   if (this.playIndex !== 0) {
+      //     this.thenPlay();
+      //   } else if (this.shuffledList.length === 1) {
+      //     this.audio.currentTime = 0;
+      //   }
+      // }
     },
-
-    //***
-    currentMusicToData() {
-      //当前音乐对象转具体播放数据
-      return new Promise((resolve, reject) => {
-        if (!this.currentMusic) reject("nothing");
-        const id = this.currentMusic.id;
-
-        return this.canUse(id)
-          .then((res) => {
-            if (res) {
-              return this.musicUrl(id).then(({ url }) =>
-                this.musicLrc(id).then((lrc) => resolve({ url, lrc }))
-              );
-            } else {
-              reject("该歌曲不可播放！");
-            }
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-    },
-    //***
 
     async initAudio() {
       // since 1.4.0 Audio attributes as props
@@ -892,14 +892,7 @@ const VueAPlayer = {
       this.audio.addEventListener("ended", this.onAudioEnded);
 
       if (this.currentMusic) {
-        try {
-          const { url, lrc } = await this.currentMusicToData();
-          this.SET_MUSIC({ url, lrc });
-          this.audio.src = url;
-        } catch (error) {
-          if (error === "nothing") return;
-          this.$toast("该歌曲不可播放！");
-        }
+        this.audio.src = this.currentMusic.url;
       }
     },
 
@@ -926,6 +919,9 @@ const VueAPlayer = {
     // },
     changeList() {
       this.SET_SHOWMUSICLIST(!this.showMusicList);
+      //todo 判断元素不在可视区域再滚动
+      const dom = document.querySelector(`.music-list${this.currentIndex}`);
+      if (dom) dom.scrollIntoView();
     },
   },
   watch: {
@@ -937,15 +933,8 @@ const VueAPlayer = {
       async handler(newVal, oldVal) {
         // async
         // this.setSelfAdaptingTheme();
-        if (!newVal || newVal.id === oldVal.id) return;
-        let src;
-        try {
-          const { url, lrc } = await this.currentMusicToData();
-          this.SET_MUSIC({ url, lrc });
-          src = url;
-        } catch (error) {
-          this.$toast("该歌曲不可播放！");
-        }
+        if (!newVal || (oldVal && newVal.id === oldVal.id)) return;
+        let src = this.currentMusic.url;
 
         // HLS support
         if (/\.m3u8(?=(#|\?|$))/.test(src)) {
@@ -975,6 +964,7 @@ const VueAPlayer = {
         } else {
           this.audio.src = src;
         }
+        this.thenPlay();
         // self-adapting theme color
       },
     },
@@ -1056,6 +1046,7 @@ export default VueAPlayer;
     z-index: 101;
     display: flex;
     width: 60px;
+    min-width: 60px;
     height: 60px;
     justify-content: center;
     align-items: center;
@@ -1233,19 +1224,27 @@ export default VueAPlayer;
       }
     }
     .lyrics-info {
-      .head-box{
-        margin-top:29px;
+      .head-box {
+        margin-top: 29px;
         .lyrics-name {
           font-size: 22px;
           color: rgb(213, 213, 213);
         }
-        .info-box{
+        .info-box {
           display: flex;
           font-size: 13px;
           justify-content: space-between;
           margin-top: 12px;
           margin-right: 130px;
-          span{
+          max-width: 31.7vw;
+          & > div {
+            flex: 1;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            word-break: break-all;
+          }
+          span {
             color: rgb(141, 180, 221);
           }
         }
@@ -1356,23 +1355,37 @@ export default VueAPlayer;
       flex: 1;
       display: flex;
       flex-direction: column;
-      max-width: 39.38%;
+      max-width: 33vw;
+      padding-right: 5vw;
       text-align: start;
       height: $aplayer-height;
       box-sizing: border-box;
       // overflow: hidden;
 
       .aplayer-music {
+        display: flex;
         cursor: default;
         margin: 6px 0 0 0px;
         .aplayer-title {
+          display: block;
           color: rgb(190, 190, 190);
           font-size: 14px;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          word-break: break-all;
+          max-width: 50%;
         }
 
         .aplayer-author {
+          display: block;
           font-size: 12px;
           color: rgb(146, 146, 146);
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          word-break: break-all;
+          max-width: 50%;
         }
       }
 
@@ -1387,7 +1400,7 @@ export default VueAPlayer;
       & > div {
         height: 66px;
         display: flex;
-        width: 200px;
+        width: 180px;
         justify-content: space-around;
         align-items: center;
         margin-right: 14px;

@@ -81,6 +81,9 @@ const mutations = {
       }
     }
   },
+  SET_SET_PLAYLIST_TRACKS(state, {index,musicList}){
+    state.playlist[index].tracks = musicList
+  },
   SET_OWNROUTES(state, val) {
     state.ownRoutes = val;
   },
@@ -140,11 +143,7 @@ const actions = {
         if (res.code === 200) {
           const playlist = res.playlist;
           console.log("获取歌单详情", playlist);
-          if (playlist.tracks) {
-            playlist.tracks.forEach(el => el.check = true);
-          }
-          commit("SET_PLAYLIST", playlist)
-          return true
+          return playlist
         }
       })
   },

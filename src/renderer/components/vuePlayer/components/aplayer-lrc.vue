@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { mapMutations } from "vuex";
+import { mapActions, mapMutations } from "vuex";
 import { parseLrc } from "../js/utils";
 export default {
   props: {
@@ -57,7 +57,7 @@ export default {
       return this.$store.state.music.videoUpload.active;
     },
     currentMusic() {
-      return this.$store.state.music.videoUpload.musicList[this.playIndex];
+      return this.$store.state.music.videoUpload.currentMusic;
     },
     showLrcPop() {
       return this.$store.state.music.videoUpload.showLrcPop;
@@ -79,7 +79,8 @@ export default {
       .removeEventListener("scroll", this.debounce(this.turnBack, 1000));
   },
   methods: {
-    ...mapMutations(["SET_SHOWLRCPOP"]),
+    ...mapMutations(["SET_SHOWLRCPOP","SET_MUSIC"]),
+    ...mapActions(['musicLrc']),
     applyLrc(lrc) {
       if (/^https?:\/\//.test(lrc)) {
         this.fetchLrc(lrc);
@@ -120,34 +121,26 @@ export default {
         this.setTimeFn = null;
       }, 5000);
     },
-    lyricsChannel() {
+    async lyricsChannel() {
       this.currentLineIndex = 0;
       const lrc = this.currentMusic.lrc;
-      if (lrc) {
-        this.applyLrc(lrc);
-      } else {
-        this.hideLrc();
-      }
       this.SET_SHOWLRCPOP(!this.showLrcPop);
+      if(!lrc){
+        const res = await this.musicLrc(this.currentMusic.id)
+        this.SET_MUSIC({lrc:res})
+        console.log("this.currentMusic.lrc",this.currentMusic.lrc);
+        this.applyLrc(res);
+      }else{
+        this.applyLrc(lrc);
+      }
+      // if (lrc) {
+      //   this.applyLrc(lrc);
+      // } else {
+      //   this.hideLrc();
+      // }
     },
   },
   watch: {
-    // showLrcPop: {
-    //   immediate: true,
-    //   handler(bo) {
-    //     if (!bo) return;
-    //     this.$nextTick(() => {
-    //       this.currentLineIndex = 0;
-    //       console.log("this.currentMusic.lrc", this.currentMusic);
-    //       const lrc = this.currentMusic.lrc;
-    //       if (lrc) {
-    //         this.applyLrc(lrc);
-    //       } else {
-    //         this.hideLrc();
-    //       }
-    //     });
-    //   },
-    // },
     "playStat.playedTime"(playedTime) {
       for (let i = 0; i < this.lrcLines.length; i++) {
         const line = this.lrcLines[i];

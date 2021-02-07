@@ -40,8 +40,16 @@ export default {
       dragStartY: 0,
     };
   },
+  computed: {
+    currentIndex() {
+      return this.$store.getters.currentIndex;
+    },
+    musicList() {
+      return this.$store.state.music.videoUpload.musicList;
+    },
+  },
   methods: {
-    ...mapMutations(["SET_ACTIVE"]),
+    ...mapMutations(["SET_MUSICLIST"]),
     onDragBegin(e) {
       if (this.enableDrag) {
         this.hasMovedSinceMouseDown = false;
@@ -72,20 +80,36 @@ export default {
     },
     next() {
       //下一首
-      const { musicList, active } = this.$store.state.music.videoUpload;
-      if (active === 0) return;
-      let index = active - 1;
-      this.SET_ACTIVE(index)
+      let index = "";
+      if (this.currentIndex === 0) {
+        index = this.musicList.length - 1;
+      } else {
+        index = this.currentIndex - 1;
+      }
+      if (typeof index === "string") return;
+      const currentMusic = { ...this.musicList[index] };
+      this.SET_MUSICLIST({ currentMusic });
+      //todo 判断元素不在可视区域再滚动
+      const dom = document.querySelector(`.music-list${index}`);
+      if (dom) dom.scrollIntoView();
     },
-    prev(){
+    prev() {
       //上一首
-      const { musicList, active } = this.$store.state.music.videoUpload;
-      if (active === musicList.length - 1) return;
-      let index = active + 1;
-      this.SET_ACTIVE(index)
+      let index = "";
+      if (this.currentIndex === this.musicList.length - 1) {
+        index = 0;
+      } else {
+        index = this.currentIndex + 1;
+      }
+      if (typeof index === "string") return;
+      const currentMusic = { ...this.musicList[index] };
+      this.SET_MUSICLIST({ currentMusic });
+      //todo 判断元素不在可视区域再滚动
+      const dom = document.querySelector(`.music-list${index}`);
+      if (dom) dom.scrollIntoView();
     },
     toCollection() {
-      console.log("收藏",);
+      console.log("收藏");
       //收藏按钮
       //sc-red.png
     },
@@ -107,7 +131,7 @@ export default {
   height: 60px;
   background-size: cover;
   transition: all 0.3s ease;
-  width: 200px;
+  width: 220px;
   display: flex;
   justify-content: space-between;
   align-items: center;

@@ -77,46 +77,64 @@
       </div>
     </div>
     <div class="music-body" v-show="pageActive === 0">
-      <div
-        v-for="(item, index) in menuItem.tracks"
-        :class="[
-          'item-box',
-          { playing: active === index && activeMenu === pageIndex },
-          { 'bg-white': activeItem === index },
-        ]"
-        :key="item.id"
-        v-show="item.check"
-        @dblclick="checkMusic(index, item.fee)"
-        @click="checkItem(index)"
-      >
+      <div v-if="menuItem.tracks">
         <div
-          class="item-index"
-          v-if="active === index && activeMenu === pageIndex"
-        ></div>
-        <div class="item-index" v-else>{{ index | indexFilter }}</div>
-        <div class="item-sc"></div>
-        <div class="item-download"></div>
-        <!-- <div :class="['item-name', item.fee === 0 ? 'gray-word' : '']"> -->
-
-        <div class="item-name">
-          <div class="name-box">
-            <span class="name" v-html="item.name"></span>
-            <span class="name-tip" v-if="item.alia.length > 0"
-              ><em>({{ item.alia.join("/") }})</em></span
-            >
+          v-for="(item, index) in menuItem.tracks"
+          :class="[
+            'item-box',
+            {
+              playing:
+                currentMusic &&
+                item.id === currentMusic.id &&
+                currentMusic.menuId === id,
+            },
+            { 'bg-white': activeItem === index },
+          ]"
+          :key="item.id+''+index"
+          v-show="item.check"
+          @dblclick="checkMusic(item)"
+          @click="checkItem(index)"
+        >
+          <div
+            class="item-index"
+            v-if="
+              currentMusic &&
+              item.id === currentMusic.id &&
+              currentMusic.menuId === id
+            "
+          ></div>
+          <div class="item-index" v-else>{{ index | indexFilter }}</div>
+          <div class="item-sc"></div>
+          <div class="item-download"></div>
+          <div
+            :class="[
+              'item-name',
+              !item.canUse && item.fee !== 1 ? 'gray-word' : '',
+            ]"
+          >
+            <!-- <div class="item-name"> -->
+            <div class="name-box">
+              <span class="name" v-html="item.name"></span>
+              <span class="name-tip" v-if="item.alia.length > 0"
+                ><em>({{ item.alia.join("/") }})</em></span
+              >
+            </div>
+            <span class="sq"></span>
+            <!-- v-if="item.h.vd <= 0 || item.l.vd <= 0 || item.m.vd <= 0" -->
+            <span class="mv" v-if="item.mv"></span>
+            <span class="more"></span>
           </div>
-          <span class="sq"></span>
-          <!-- v-if="item.h.vd <= 0 || item.l.vd <= 0 || item.m.vd <= 0" -->
-          <span class="mv" v-if="item.mv"></span>
-          <span class="more"></span>
+          <div
+            class="singer-name"
+            v-html="item.ar.map((el) => el.name).join('/')"
+          ></div>
+          <div class="item-zj" v-html="item.al.name"></div>
+          <div class="item-time">04:36</div>
+          <!-- <div class="item-time">{{ setTime(item.publishTime) }}</div> -->
         </div>
-        <div
-          class="singer-name"
-          v-html="item.ar.map((el) => el.name).join('/')"
-        ></div>
-        <div class="item-zj" v-html="item.al.name"></div>
-        <div class="item-time">04:30</div>
-        <!-- <div class="item-time">{{ setTime(item.publishTime) }}</div> -->
+      </div>
+      <div v-else class="list-loading">
+        <img src="@/assets/images/loading.gif" alt="" />
       </div>
     </div>
     <div v-show="pageActive === 1">评论</div>
@@ -138,7 +156,6 @@ export default {
   data() {
     return {
       id: "",
-      pageIndex: 0, //页面index
       pageActive: 0, //tab切换
       activeItem: "", //当前活动（未播放）歌曲
       titleShow: false,
@@ -150,19 +167,23 @@ export default {
     userInfo() {
       return this.$store.state.page.userInfo;
     },
-    active() {
-      return this.$store.state.music.videoUpload.active;
-    },
-    activeMenu() {
-      return this.$store.state.music.videoUpload.activeMenu;
+    currentMusic() {
+      return this.$store.state.music.videoUpload.currentMusic;
     },
     menuItem() {
-      return this.$store.state.page.playlist[this.pageIndex];
+      return this.$store.state.page.playlist.find((el) => el.id === this.id);
+    },
+    currentIndex() {
+      return this.$store.getters.currentIndex;
     },
   },
   methods: {
-    ...mapMutations(["SET_PLAYLIST", "SET_MUSICLIST"]),
-    ...mapActions(["musicDetail", "getMenuDetail"]),
+    ...mapMutations([
+      "SET_PLAYLIST",
+      "SET_MUSICLIST",
+      "SET_SET_PLAYLIST_TRACKS",
+    ]),
+    ...mapActions(["musicDetail", "getMenuDetail", "canUse", "musicUrl"]),
     add0(m) {
       return m < 10 ? "0" + m : m;
     },
@@ -175,22 +196,31 @@ export default {
       let mms = mm ? `${this.add0(mm)}:` : "";
       return hs + mms + this.add0(s);
     },
-    async checkMusic(index, fee) {
-      if (this.activeMenu === this.pageIndex && this.active === index) return;
-      // if (fee === 0) return this.$toast("因合作方要求，该资源暂时下架>_<");
-      else if (fee === 1) return this.$emit("vipPopShowFn");
-      const musicList = await this.musicDetail(
-        this.menuItem.tracks.map((el) => el.id)
-      );
-      this.activeItem = "";
-      this.SET_MUSICLIST({ musicList, index, activeMenu: this.pageIndex });
+    async checkMusic(item) {
+      if (
+        this.currentMusic &&
+        this.currentMusic.menuId === this.id &&
+        item.id === this.currentMusic.id
+      )
+        return;
+      if (item.fee === 1) return this.$emit("vipPopShowFn");
+      else if (!item.canUse)
+        return this.$toast("因合作方要求，该资源暂时下架>_<");
+      const musicList = [];
+      this.menuItem.tracks.forEach((el) => {
+        if (el.canUse && el.fee !== 1) {
+          el.menuId = this.menuItem.id;
+          musicList.push(el);
+        }
+      });
+      // this.activeItem = "";
+      this.SET_MUSICLIST({
+        musicList,
+        currentMusic: { ...item, menuId: this.menuItem.id },
+      });
     },
     checkItem(index) {
-      if (this.activeMenu === this.pageIndex) {
-        this.activeItem = "";
-      } else {
-        this.activeItem = index;
-      }
+      this.activeItem = index;
     },
     listScroll() {
       const scrollTop = document.querySelector(".main-body").scrollTop;
@@ -260,6 +290,53 @@ export default {
         }
       });
     },
+    test(id) {
+      return new Promise((resolve) => {
+        this.canUse(id)
+          .then((res) => {
+            if (res) {
+              resolve(true);
+            } else {
+              resolve(false);
+            }
+          })
+          .catch((err) => {
+            resolve(false);
+          });
+      });
+    },
+    async renderPage() {
+      this.pageActive = 0;
+      this.activeItem = "";
+      this.id = Number(this.$route.name.replace("ownMenu", ""));
+      try {
+        if (!this.menuItem.tracks) {
+          //无缓存数据，重新获取
+          const playlist = await this.getMenuDetail(this.id);
+          // const idArr = playlist.trackIds.map(el=>el.id)
+          // const urls = await this.musicUrl(idArr)
+          // console.log("urls",urls);
+          const arr = playlist.tracks.map((el) => {
+            return new Promise((resolve) => {
+              this.canUse(el.id).then((res) => {
+                el.canUse = res;
+                el.check = true;
+                el.url = `https://music.163.com/song/media/outer/url?id=${el.id}.mp3 `;
+                if (!res) console.log("不可用音乐", el.name);
+                resolve();
+              });
+            });
+          });
+          await Promise.all(arr);
+          this.SET_PLAYLIST(playlist);
+        } else {
+          //todo 有缓存数据先展示缓存，后台刷新列表？
+          // this.getMenuDetail(_this.id);
+        }
+      } catch (error) {
+        console.log("error", error);
+      }
+    },
   },
   filters: {
     indexFilter: (val) => {
@@ -282,10 +359,7 @@ export default {
     next(async (_this) => {
       const mainBody = document.querySelector(".main-body");
       mainBody.scrollTop = 0;
-      _this.pageActive = 0;
-      _this.pageIndex = _this.$route.meta.pageNav - 11;
-      _this.id = _this.$route.name.replace("ownMenu", "");
-      _this.getMenuDetail(_this.id);
+      _this.renderPage();
       mainBody.addEventListener("scroll", () => debounce(_this.listScroll()));
     });
   },
@@ -711,6 +785,14 @@ export default {
     }
     .bg-white {
       background: rgb(50, 50, 50) !important;
+    }
+    .list-loading {
+      img {
+        display: block;
+        width: 20px;
+        height: 20px;
+        margin: 40px auto;
+      }
     }
   }
 }

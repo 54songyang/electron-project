@@ -1,9 +1,9 @@
 import axios from 'axios'
 const state = {
   videoUpload: {
+    currentMusic: null,//当前播放音乐
     musicList: [], //播放列表
-    active: 0,//当前播放index
-    activeMenu: 0,//当前使用的歌单
+    // active: 0,//当前播放index
     mini: false, //迷你模式
     showLrcPop: false,//显示歌词窗口
     shuffle: false, //随机播放
@@ -11,20 +11,36 @@ const state = {
   },
   showMusicList: false//是否显示歌曲列表
 }
-
+const getters = {
+  currentIndex(state) {
+    const currentMusic = state.videoUpload.currentMusic
+    const musicList = state.videoUpload.musicList
+    let index = ""
+    for (let i = 0; i < musicList.length; i++) {
+      const el = musicList[i];
+      if (el.id === currentMusic.id && el.menuId === currentMusic.menuId) {
+        index = i
+        break
+      }
+    }
+    return index
+  }
+}
 const mutations = {
   SET_MUSIC(state, { url, lrc }) {
-    const active = state.videoUpload.active
-    state.videoUpload.musicList[active].src = url
-    state.videoUpload.musicList[active].lrc = lrc
+    if (url) state.videoUpload.currentMusic.src = url
+    if (lrc) {
+      state.videoUpload.currentMusic.lrc = lrc
+      //todo同时存musicList里的歌词
+    }
   },
   SET_ACTIVE(state, active) {
+    //!!!
     state.videoUpload.active = active
   },
-  SET_MUSICLIST(state, { musicList, index, activeMenu }) {
+  SET_MUSICLIST(state, { musicList, currentMusic }) {
     if (musicList) state.videoUpload.musicList = musicList
-    if (typeof index === "number" && !isNaN(index)) state.videoUpload.active = index
-    if (typeof index === "number" && !isNaN(index)) state.videoUpload.activeMenu = activeMenu
+    state.videoUpload.currentMusic = currentMusic
   },
   SET_SHOWMUSICLIST(state, val) {
     //歌曲列表显示隐藏
@@ -37,36 +53,45 @@ const mutations = {
   SET_videoUpload(state, val) {
     state.videoUpload = {};
   },
-  SET_CLEARMUSIC(state, val) {
+  SET_CLEARMUSIC(state) {
     state.videoUpload.musicList = []
-    state.videoUpload.active = 0
-    state.videoUpload.activeMenu = 0
+    state.videoUpload.currentMusic = null
     state.videoUpload.mini = false
     state.videoUpload.showLrcPop = false
     state.videoUpload.shuffle = false
     state.videoUpload.listFolded = false
     state.showMusicList = false//是否显示歌曲列表
+  },
+  SET_LIST(state) {
+    //清空播放列表
+    state.videoUpload.currentMusic = null
+    state.videoUpload.musicList = [];
   }
 }
 
 const actions = {
   canUse({ commit, state }, id) {
     //歌曲是否可用
-    return axios({
-      url: `/check/music?id=${id}&timerstamp=${Date.now()}`
-    }).then(res => {
-      console.log("歌曲是否可用", res);
-      const { success, message } = res
-      return success === true && message === "ok"
+    return new Promise((resolve, reject) => {
+      axios({
+        url: `/check/music?id=${id}&timerstamp=${Date.now()}`
+      }).then(res => {
+        const { success, message } = res
+        resolve(success === true && message === "ok")
+      }).catch(err => {
+        console.log("err", err);
+        resolve(false)
+      })
     })
   },
   musicUrl({ commit, state }, id) {
     //获取歌曲url
+    const aa = Array.isArray(id) ? id.join(',') : id;
     return axios({
-      url: `/song/url?id=${id}&timerstamp=${Date.now()}`
+      url: `/song/url?id=${aa}&timerstamp=${Date.now()}`
     }).then(res => {
       console.log("获取歌曲url", res);
-      return res.data[0]
+      return res.data
     })
   },
   musicLrc({ commit, state }, id) {
@@ -93,4 +118,5 @@ export default {
   state,
   mutations,
   actions,
+  getters
 }

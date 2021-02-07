@@ -37,7 +37,12 @@
         </template>
         <template v-if="item.id">
           <i class="item-icon music-icon"></i>
-          <div :class="['nav', { playing: activeMenu === index - 11 }]">
+          <div
+            :class="[
+              'nav',
+              { playing: currentMusic && item.id === currentMusic.menuId },
+            ]"
+          >
             {{ item.specialType ? "我喜欢的音乐" : item.name }}
           </div>
         </template>
@@ -135,8 +140,8 @@ export default {
     pageActive() {
       return this.$store.state.page.pageActive;
     },
-    activeMenu() {
-      return this.$store.state.music.videoUpload.activeMenu;
+    currentMusic() {
+      return this.$store.state.music.videoUpload.currentMusic;
     },
   },
   methods: {
@@ -262,7 +267,7 @@ export default {
         height: 25px;
         border-radius: 50%;
       }
-      .no-person{
+      .no-person {
         border-radius: 0;
       }
       .user-name {

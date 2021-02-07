@@ -19,7 +19,7 @@
     <div class="title-box" @mousewheel.prevent>
       <div class="total">总{{ musicList.length }}首</div>
       <div class="sc"><i></i>收藏全部</div>
-      <div class="delete"><i></i>清空</div>
+      <div class="delete" @click="clearList"><i></i>清空</div>
     </div>
     <div
       class="list-box"
@@ -28,10 +28,20 @@
     >
       <div class="scroll-box" ref="scrollBox">
         <div
-          :class="['list-item', { 'active-music': active === index }]"
+          :class="[
+            'list-item',
+            {
+              'active-music':
+                item.id === currentMusic.id &&
+                item.menuId === currentMusic.menuId,
+            },
+            { 'active-item': activeItem === index },
+            `music-list${index}`
+          ]"
           v-for="(item, index) in musicList"
-          :key="item.id"
+          :key="item.id + '' + index"
           @dblclick="selectsong(item, index)"
+          @click="selectItem(index)"
         >
           <div class="music-title ellipsis">
             <div class="name-box">
@@ -65,205 +75,40 @@ export default {
     return {
       tabActive: false,
       scrollTop: "",
+      activeItem: "",
     };
   },
   computed: {
     musicList() {
       return this.$store.state.music.videoUpload.musicList;
     },
-    active() {
-      return this.$store.state.music.videoUpload.active;
+    currentMusic() {
+      return this.$store.state.music.videoUpload.currentMusic;
     },
   },
   methods: {
-    ...mapMutations(["SET_MUSICLIST"]),
-    ...mapActions(["canUse", "musicDetail", "musicUrl", "musicLrc"]),
+    ...mapMutations(["SET_MUSICLIST", "SET_LIST"]),
+    ...mapActions(["canUse", "musicDetail"]),
     scrollFn(e) {
       this.scrollTop = e.target.scrollTop;
     },
-    async selectsong({ id }, index) {
-      // if (index === this.active) console.log("已开始播放！");
-      // try {
-      //   const canUse = await this.canUse(id);
-      //   const {
-      //     name: title,
-      //     al: { picUrl },
-      //     ar: [{ name: artist }],
-      //   } = await this.musicDetail(id);
-      //   const { url: src } = await this.musicUrl(id);
-      //   const lrc = await this.musicLrc(id);
-      //   const song = {
-      //     artist,
-      //     title,
-      //     pic: picUrl,
-      //     src,
-      //     lrc,
-      //   };
-      //   this.$emit("selectsong", song);
-      //   this.SET_MUSIC({ index, song });
-      //   console.log("song",song);
-      // } catch (error) {
-      //   console.log("error", error);
-      // }
+    clearList() {
+      //清空当前音乐,清空播放列表
+      this.SET_LIST();
+    },
+    selectItem(index) {
+      this.activeItem = index;
+    },
+    async selectsong(item, index) {
+      this.SET_MUSICLIST({
+        currentMusic: { ...item },
+      });
     },
   },
-  // mounted() {
-  //   this.SET_MUSICLIST([
-  //     {
-  //       name: "赤伶",
-  //       id: 1377748865,
-  //       pst: 0,
-  //       t: 0,
-  //       ar: [
-  //         {
-  //           id: 32674400,
-  //           name: "是二智呀",
-  //           tns: [],
-  //           alias: [],
-  //         },
-  //       ],
-  //       alia: [],
-  //       pop: 100,
-  //       st: 0,
-  //       rt: "",
-  //       fee: 8,
-  //       v: 17,
-  //       crbt: null,
-  //       cf: "",
-  //       al: {
-  //         id: 81406182,
-  //         name: "赤伶（民谣版）",
-  //         picUrl:
-  //           "https://p2.music.126.net/R9d4-eULOknTXf4fZz41Dg==/109951164346847770.jpg",
-  //         tns: [],
-  //         pic_str: "109951164346847770",
-  //         pic: 109951164346847780,
-  //       },
-  //       dt: 265588,
-  //       h: {
-  //         br: 320000,
-  //         fid: 0,
-  //         size: 10626285,
-  //         vd: -13769,
-  //       },
-  //       m: {
-  //         br: 192000,
-  //         fid: 0,
-  //         size: 6375789,
-  //         vd: -11159,
-  //       },
-  //       l: {
-  //         br: 128000,
-  //         fid: 0,
-  //         size: 4250541,
-  //         vd: -9469,
-  //       },
-  //       a: null,
-  //       cd: "01",
-  //       no: 1,
-  //       rtUrl: null,
-  //       ftype: 0,
-  //       rtUrls: [],
-  //       djId: 0,
-  //       copyright: 0,
-  //       s_id: 0,
-  //       mark: 64,
-  //       originCoverType: 2,
-  //       originSongSimpleData: {
-  //         songId: 1313118277,
-  //         name: "赤伶",
-  //         artists: [
-  //           {
-  //             id: 7898,
-  //             name: "HITA",
-  //           },
-  //         ],
-  //         albumMeta: {
-  //           id: 73611844,
-  //           name: "赤伶",
-  //         },
-  //       },
-  //       single: 0,
-  //       noCopyrightRcmd: null,
-  //       mv: 0,
-  //       rtype: 0,
-  //       rurl: null,
-  //       mst: 9,
-  //       cp: 0,
-  //       publishTime: 1562947200000,
-  //     },
-  //     {
-  //       name: "明月天涯",
-  //       id: 416388799,
-  //       pst: 0,
-  //       t: 0,
-  //       ar: [
-  //         {
-  //           id: 1047237,
-  //           name: "五音Jw",
-  //           tns: [],
-  //           alias: [],
-  //         },
-  //       ],
-  //       alia: [],
-  //       pop: 100,
-  //       st: 0,
-  //       rt: "",
-  //       fee: 8,
-  //       v: 83,
-  //       crbt: null,
-  //       cf: "",
-  //       al: {
-  //         id: 34729337,
-  //         name: "聆音",
-  //         picUrl:
-  //           "https://p2.music.126.net/m3E8aIuHCZ1qGg1WEN2VFA==/17981413160792921.jpg",
-  //         tns: [],
-  //         pic_str: "17981413160792921",
-  //         pic: 17981413160792920,
-  //       },
-  //       dt: 241793,
-  //       h: {
-  //         br: 320000,
-  //         fid: 0,
-  //         size: 9682068,
-  //         vd: -12300,
-  //       },
-  //       m: {
-  //         br: 192000,
-  //         fid: 0,
-  //         size: 5809258,
-  //         vd: -9900,
-  //       },
-  //       l: {
-  //         br: 128000,
-  //         fid: 0,
-  //         size: 3872853,
-  //         vd: -8600,
-  //       },
-  //       a: null,
-  //       cd: "1",
-  //       no: 1,
-  //       rtUrl: null,
-  //       ftype: 0,
-  //       rtUrls: [],
-  //       djId: 0,
-  //       copyright: 0,
-  //       s_id: 0,
-  //       mark: 0,
-  //       originCoverType: 1,
-  //       originSongSimpleData: null,
-  //       single: 0,
-  //       noCopyrightRcmd: null,
-  //       mv: 0,
-  //       rtype: 0,
-  //       rurl: null,
-  //       mst: 9,
-  //       cp: 0,
-  //       publishTime: 1465451119429,
-  //     },
-  //   ]);
-  // },
+  mounted() {
+    console.log("---", this.currentMusic);
+    console.log("---", this.musicList);
+  },
 };
 </script>
 <style lang="scss" scoped>
@@ -359,6 +204,9 @@ export default {
         overflow: hidden;
         word-break: break-all;
       }
+    }
+    .active-item {
+      background: rgb(51, 51, 51) !important;
     }
     .active-music {
       .music-title,
