@@ -28,6 +28,7 @@
           { active: $route.meta.pageNav === index },
         ]"
         @click="selectPage(item, index, item.id)"
+        @contextmenu.prevent="item.id && rightClick(item)"
       >
         <template v-if="!item.id">
           <i :class="['item-icon', `icon-${item.name}`]" v-if="item.nav"></i>
@@ -132,6 +133,8 @@
 
 <script>
 import { mapActions, mapMutations } from "vuex";
+import { remote } from "electron";
+const { Menu, MenuItem } = remote;
 export default {
   name: "leftNav",
   props: ["navList", "userInfo"],
@@ -200,6 +203,71 @@ export default {
         .catch((err) => {
           console.log("err", err);
         });
+    },
+    rightClick(item) {
+      const _this = this;
+      const arr = [
+        {
+          label: "播放",
+          click: function () {
+            console.log("播放");
+          },
+        },
+        {
+          label: "下一首播放",
+          click: function () {
+            console.log("下一首播放");
+          },
+        },
+        {
+          type: "separator", //checkbox,radio
+        },
+        {
+          label: "分享...",
+          click: function () {
+            console.log("分享...");
+          },
+        },
+        {
+          label: "复制链接",
+          click: function () {
+            console.log("复制链接");
+          },
+        },
+        {
+          label: "下载全部",
+          click: function () {
+            console.log("下载全部");
+          },
+        },
+        {
+          label: "复制已下载的MP3文件",
+          click: function () {
+            console.log("复制已下载的MP3文件");
+          },
+        },
+        {
+          type: "separator",
+        },
+        {
+          label: "编辑歌单信息",
+          click: function () {
+            console.log("编辑歌单信息");
+          },
+        },
+        {
+          label: "删除歌单",
+          click: function () {
+            console.log("删除歌单");
+          },
+        },
+      ];
+      const menu = new Menu();
+      arr.forEach((el) => {
+        menu.append(new MenuItem(el));
+      });
+      // 展示出来
+      menu.popup(remote.getCurrentWindow());
     },
     openDetail() {},
     beforeunloadFn() {
