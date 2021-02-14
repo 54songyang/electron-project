@@ -4,14 +4,15 @@
       :loadProgress="loadProgress"
       :playProgress="playProgress"
       :theme="theme"
-      @dragbegin="val => $emit('dragbegin', val)"
-      @dragend="val => $emit('dragend', val)"
-      @dragging="val => $emit('dragging', val)"
+      @dragbegin="(val) => $emit('dragbegin', val)"
+      @dragend="(val) => $emit('dragend', val)"
+      @dragging="(val) => $emit('dragging', val)"
     />
     <div class="aplayer-time">
       <div class="aplayer-time-inner">
-        <span class="aplayer-ptime">{{secondToTime(stat.playedTime)}}</span> /
-        <span class="aplayer-dtime">{{secondToTime(stat.duration)}}</span>
+        <span class="aplayer-ptime">{{ secondToTime(stat.playedTime) }}</span> /
+        <!-- <span class="aplayer-dtime">{{secondToTime(stat.duration)}}</span> -->
+        <span class="aplayer-dtime">{{ dt | durationFilter }}</span>
       </div>
     </div>
   </div>
@@ -26,7 +27,7 @@ export default {
     IconButton,
     VProgress,
   },
-  props: ["shuffle", "repeat", "stat", "theme", "muted"],
+  props: ["shuffle", "stat", "theme", "muted", "dt"],
   computed: {
     loadProgress() {
       if (this.stat.duration === 0) return 0;
@@ -35,14 +36,14 @@ export default {
     playProgress() {
       if (this.stat.duration === 0) return 0;
       return this.stat.playedTime / this.stat.duration;
-    }
+    },
   },
   methods: {
     secondToTime(second) {
       if (isNaN(second)) {
         return "00:00";
       }
-      const pad0 = num => {
+      const pad0 = (num) => {
         return num < 10 ? "0" + num : "" + num;
       };
 
@@ -55,8 +56,25 @@ export default {
       return second >= 3600
         ? pad0(hours) + ":" + pad0(minAdjust) + ":" + pad0(sec)
         : pad0(min) + ":" + pad0(sec);
-    }
-  }
+    },
+  },
+  filters: {
+    durationFilter(a) {
+      a = a / 1000;
+      let b = "";
+      let h = parseInt(a / 36000),
+        m = parseInt((a % 3600) / 60),
+        s = parseInt((a % 3600) % 60);
+      if (h > 0) {
+        h = h < 10 ? "0" + h : h;
+        b += h + ":";
+      }
+      m = m < 10 ? "0" + m : m;
+      s = s < 10 ? "0" + s : s;
+      b += m + ":" + s;
+      return b;
+    },
+  },
 };
 </script>
 

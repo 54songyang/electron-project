@@ -88,22 +88,23 @@
         ]"
       >
         <keep-alive>
-          <router-view :ref="$route.name" @vipPopShowFn="vipPopShowFn"></router-view>
+          <router-view
+            :ref="$route.name"
+            @vipPopShowFn="vipPopShowFn"
+          ></router-view>
         </keep-alive>
         <musicList v-show="showMusicList" @selectsong="selectsong" />
       </div>
       <div class="player-box">
-        <!-- :list="videoUpload.list" -->
-        <!-- :shuffle="typeData == 2" -->
-        <aplayer
-          :music="videoUpload.music"
-          :repeat="playRepeat"
-          ref="player"
-        ></aplayer>
+        <aplayer :repeat="playRepeat" ref="player"></aplayer>
       </div>
     </div>
-    <div class="vip-pop" v-show="vipPopShow" >
-      <img src="@/assets/images/vip-pop.png" @click="vipPopShow=false" alt="">
+    <div class="vip-pop" v-show="vipPopShow">
+      <img
+        src="@/assets/images/vip-pop.png"
+        @click="vipPopShow = false"
+        alt=""
+      />
     </div>
   </div>
 </template>
@@ -128,12 +129,12 @@ export default {
       creatData: null,
       mainOver: false,
       playRepeat: "no-repeat",
-      vipPopShow:false,
+      vipPopShow: false,
     };
   },
   computed: {
     showLrcPop() {
-      return this.$store.state.music.videoUpload.showLrcPop;
+      return this.$store.state.music.showLrcPop;
     },
     showMusicList() {
       return this.$store.state.music.showMusicList;
@@ -147,14 +148,6 @@ export default {
     },
     ownRoutes() {
       return this.$store.state.page.ownRoutes;
-    },
-    // playRepeat() {
-    //   if (this.typeData == 0) return "repeat-all";
-    //   if (this.typeData == 1) return "repeat-one";
-    //   return "no-repeat";
-    // },
-    videoUpload() {
-      return this.$store.state.music.videoUpload;
     },
   },
   methods: {
@@ -266,9 +259,9 @@ export default {
     selectsong(song) {
       this.$refs.player.onSelectSong(song);
     },
-    vipPopShowFn(){
-      this.vipPopShow = !this.vipPopShow
-    }
+    vipPopShowFn() {
+      this.vipPopShow = !this.vipPopShow;
+    },
   },
   updated() {
     this.player = this.$refs.player;
@@ -285,7 +278,6 @@ export default {
       this.SET_PLAYLIST([]);
       // this.SET_videoUpload()
     }
-    const { active, musicList, music } = this.videoUpload;
   },
 };
 </script>
@@ -577,9 +569,9 @@ body .player-box {
   align-items: center;
   justify-content: center;
   cursor: default;
-  img{
+  img {
     display: block;
-    width:280px;
+    width: 280px;
     height: 332px;
   }
 }

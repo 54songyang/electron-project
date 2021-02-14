@@ -40,7 +40,13 @@
           <div
             :class="[
               'nav',
-              { playing: currentMusic && item.id === currentMusic.menuId },
+              {
+                'playing-nav': currentMusic && item.id === currentMusic.menuId,
+                playing:
+                  currentMusic && item.id === currentMusic.menuId && isPlaying,
+                'no-playing':
+                  currentMusic && item.id === currentMusic.menuId && !isPlaying,
+              },
             ]"
           >
             {{ item.specialType ? "我喜欢的音乐" : item.name }}
@@ -141,7 +147,11 @@ export default {
       return this.$store.state.page.pageActive;
     },
     currentMusic() {
-      return this.$store.state.music.videoUpload.currentMusic;
+      return this.$store.state.music.currentMusic;
+    },
+    isPlaying() {
+      //是否在播放
+      return this.$store.state.music.isPlaying;
     },
   },
   methods: {
@@ -263,12 +273,14 @@ export default {
       height: 60px;
       img {
         display: block;
-        width: 29px;
-        height: 25px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
       }
       .no-person {
         border-radius: 0;
+        width: 29px;
+        height: 25px;
       }
       .user-name {
         font-size: 14px;
@@ -310,14 +322,23 @@ export default {
       overflow: hidden;
       word-break: break-all;
     }
-    .playing {
+    .playing-nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      &::after {
+      &.playing::after {
         content: "";
         display: inline-block;
         background: url(~@/assets/images/laba.png) no-repeat;
+        background-size: 100% 100%;
+        width: 12px;
+        height: 12px;
+        margin-right: 20px;
+      }
+      &.no-playing::after {
+        content: "";
+        display: inline-block;
+        background: url(~@/assets/images/laba1.png) no-repeat;
         background-size: 100% 100%;
         width: 12px;
         height: 12px;

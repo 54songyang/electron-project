@@ -77,23 +77,49 @@
       </div>
     </div>
     <div class="music-body" v-show="pageActive === 0">
-      <div v-if="menuItem.tracks">
+      <div class="sort-body">
+        <div class="as-no"></div>
+        <div class="as-title" @click="sortList('sortTitle')">
+          音乐标题<i :class="'sort' + sortTitle"></i>
+        </div>
+        <div class="as-singer" @click="sortList('sortSinger')">
+          歌手<i :class="'sort' + sortSinger"></i>
+        </div>
+        <div class="as-album" @click="sortList('sortAlbum')">
+          专辑<i :class="'sort' + sortAlbum"></i>
+        </div>
+        <div class="as-time" @click="sortList('sortTime')">
+          时长<i :class="'sort' + sortTime"></i>
+        </div>
+      </div>
+      <div v-if="tracks">
         <div
-          v-for="(item, index) in menuItem.tracks"
+          v-for="(item, index) in tracks"
           :class="[
             'item-box',
             {
               playing:
                 currentMusic &&
                 item.id === currentMusic.id &&
+                currentMusic.menuId === id &&
+                isPlaying,
+              'no-playing':
+                currentMusic &&
+                item.id === currentMusic.id &&
+                currentMusic.menuId === id &&
+                !isPlaying,
+              'playing-item':
+                currentMusic &&
+                item.id === currentMusic.id &&
                 currentMusic.menuId === id,
+              'bg-white': activeItem === index,
             },
-            { 'bg-white': activeItem === index },
           ]"
-          :key="item.id+''+index"
+          :key="item.id + '' + index"
           v-show="item.check"
           @dblclick="checkMusic(item)"
           @click="checkItem(index)"
+          @contextmenu.prevent="rightClick(item)"
         >
           <div
             class="item-index"
@@ -122,15 +148,14 @@
             <span class="sq"></span>
             <!-- v-if="item.h.vd <= 0 || item.l.vd <= 0 || item.m.vd <= 0" -->
             <span class="mv" v-if="item.mv"></span>
-            <span class="more"></span>
+            <span class="more" @click="rightClick(item)"></span>
           </div>
           <div
             class="singer-name"
             v-html="item.ar.map((el) => el.name).join('/')"
           ></div>
           <div class="item-zj" v-html="item.al.name"></div>
-          <div class="item-time">04:36</div>
-          <!-- <div class="item-time">{{ setTime(item.publishTime) }}</div> -->
+          <div class="item-time">{{ item.dt | durationFilter }}</div>
         </div>
       </div>
       <div v-else class="list-loading">
@@ -144,6 +169,9 @@
 
 <script>
 import { mapActions, mapMutations } from "vuex";
+import vPinyin from "@/assets/js/vue-py.js";
+import { remote } from "electron";
+const { Menu, MenuItem } = remote;
 const debounce = (() => {
   let timer = 0;
   return (callback, ms = 500) => {
@@ -160,6 +188,10 @@ export default {
       activeItem: "", //当前活动（未播放）歌曲
       titleShow: false,
       searchData: "",
+      sortTitle: 0, //音乐标题排序0：正常，1:从大到小，2：从小到大
+      sortSinger: 0, //歌手排序
+      sortAlbum: 0, //专辑排序
+      sortTime: 0, //时长排序
       imgError: require("@/assets/images/err-img3.png"),
     };
   },
@@ -168,13 +200,67 @@ export default {
       return this.$store.state.page.userInfo;
     },
     currentMusic() {
-      return this.$store.state.music.videoUpload.currentMusic;
+      return this.$store.state.music.currentMusic;
     },
     menuItem() {
       return this.$store.state.page.playlist.find((el) => el.id === this.id);
     },
+    tracks() {
+      if (!this.menuItem || !this.menuItem.tracks) return null;
+      const newTracks = [...this.menuItem.tracks];
+      if (this.sortTitle) {
+        if (this.sortTitle === 1) {
+          let arr = newTracks.sort((a, b) =>
+            a.sortTitle.localeCompare(b.sortTitle)
+          );
+          return arr;
+        } else {
+          let arr = newTracks.sort((a, b) =>
+            b.sortTitle.localeCompare(a.sortTitle)
+          );
+          return arr;
+        }
+      } else if (this.sortSinger) {
+        if (this.sortSinger === 1) {
+          let arr = newTracks.sort((a, b) =>
+            a.ar[0].sortSinger.localeCompare(b.ar[0].sortSinger)
+          );
+          return arr;
+        } else {
+          let arr = newTracks.sort((a, b) =>
+            b.ar[0].sortSinger.localeCompare(a.ar[0].sortSinger)
+          );
+          return arr;
+        }
+      } else if (this.sortAlbum) {
+        if (this.sortAlbum === 1) {
+          let arr = newTracks.sort((a, b) =>
+            a.al.sortAlbum.localeCompare(b.al.sortAlbum)
+          );
+          return arr;
+        } else {
+          let arr = newTracks.sort((a, b) =>
+            b.al.sortAlbum.localeCompare(a.al.sortAlbum)
+          );
+          return arr;
+        }
+      } else if (this.sortTime) {
+        if (this.sortTime === 1) {
+          let arr = newTracks.sort((a, b) => a.dt - b.dt);
+          return arr;
+        } else {
+          let arr = newTracks.sort((a, b) => b.dt - a.dt);
+          return arr;
+        }
+      }
+      return newTracks;
+    },
     currentIndex() {
       return this.$store.getters.currentIndex;
+    },
+    isPlaying() {
+      //是否在播放
+      return this.$store.state.music.isPlaying;
     },
   },
   methods: {
@@ -207,7 +293,7 @@ export default {
       else if (!item.canUse)
         return this.$toast("因合作方要求，该资源暂时下架>_<");
       const musicList = [];
-      this.menuItem.tracks.forEach((el) => {
+      this.tracks.forEach((el) => {
         if (el.canUse && el.fee !== 1) {
           el.menuId = this.menuItem.id;
           musicList.push(el);
@@ -218,6 +304,90 @@ export default {
         musicList,
         currentMusic: { ...item, menuId: this.menuItem.id },
       });
+    },
+    rightClick(item) {
+      const _this = this;
+      const arr = [
+        {
+          label: "播放",
+          click: function () {
+            _this.checkMusic(item);
+          },
+        },
+        {
+          label: "查看评论",
+          enabled: false, //false不可点击
+          click: function () {
+            console.log("查看评论");
+          },
+        },
+        {
+          label: "下一首播放",
+          click: function () {
+            console.log("下一首播放");
+          },
+        },
+        {
+          type: "separator", //checkbox,radio
+        },
+        {
+          label: "收藏",
+          submenu: [
+            {
+              label: "创建新歌单",
+              click: function () {
+                console.log("创建新歌单");
+              },
+            },
+            {
+              type: "separator", //checkbox,radio
+            },
+          ],
+        },
+        {
+          label: "分享...",
+          click: function () {
+            console.log("分享...");
+          },
+        },
+        {
+          label: "复制链接",
+          click: function () {
+            console.log("复制链接");
+          },
+        },
+        {
+          label: "下载",
+          click: function () {
+            console.log("下载");
+          },
+        },
+        {
+          type: "separator",
+        },
+        {
+          label: "重歌单中删除",
+          click: function () {
+            console.log("从歌单中删除");
+          },
+        },
+      ];
+      // 右键菜单
+      const list = this.$store.state.page.playlist;
+      const mm = list.map((el) => ({
+        el,
+        label: el.name,
+        click: function () {
+          console.log(el.name);
+        },
+      }));
+      arr[4].submenu = [...arr[4].submenu, ...mm];
+      const menu = new Menu();
+      arr.forEach((el) => {
+        menu.append(new MenuItem(el));
+      });
+      // 展示出来
+      menu.popup(remote.getCurrentWindow());
     },
     checkItem(index) {
       this.activeItem = index;
@@ -236,10 +406,32 @@ export default {
     clearInput() {
       this.searchData = "";
     },
+    timeSortFn(arr) {
+      for (let i = 0; i < arr.length - 1; i++) {
+        for (let j = 0; j < arr.length - 1 - i; j++) {
+          if (arr[j].al.id <= arr[j + 1].al.id) {
+            let temp = arr[j];
+            arr[j] = arr[j + 1];
+            arr[j + 1] = temp;
+          }
+        }
+      }
+      return arr;
+    },
+    sortList(type) {
+      const arr = ["sortTitle", "sortSinger", "sortAlbum", "sortTime"];
+      arr.forEach((el) => {
+        if (type === el) {
+          if (this[el] < 2) this[el]++;
+          else this[el] = 0;
+        } else {
+          this[el] = 0;
+        }
+      });
+    },
     searchFn() {
       const replaceReg = new RegExp(this.searchData, "g");
-      const tracks = this.menuItem.tracks;
-      tracks.forEach((el) => {
+      this.tracks.forEach((el) => {
         if (
           el.name.includes(this.searchData) &&
           !el.name.includes('<span class="blue-word">')
@@ -290,27 +482,12 @@ export default {
         }
       });
     },
-    test(id) {
-      return new Promise((resolve) => {
-        this.canUse(id)
-          .then((res) => {
-            if (res) {
-              resolve(true);
-            } else {
-              resolve(false);
-            }
-          })
-          .catch((err) => {
-            resolve(false);
-          });
-      });
-    },
     async renderPage() {
       this.pageActive = 0;
       this.activeItem = "";
       this.id = Number(this.$route.name.replace("ownMenu", ""));
       try {
-        if (!this.menuItem.tracks) {
+        if (!this.tracks) {
           //无缓存数据，重新获取
           const playlist = await this.getMenuDetail(this.id);
           // const idArr = playlist.trackIds.map(el=>el.id)
@@ -321,14 +498,22 @@ export default {
               this.canUse(el.id).then((res) => {
                 el.canUse = res;
                 el.check = true;
+                el.sortTitle = vPinyin.chineseToPinYin(el.name);
+                el.ar[0].sortSinger = vPinyin.chineseToPinYin(el.ar[0].name);
+                el.al.sortAlbum = vPinyin.chineseToPinYin(el.al.name);
                 el.url = `https://music.163.com/song/media/outer/url?id=${el.id}.mp3 `;
                 if (!res) console.log("不可用音乐", el.name);
                 resolve();
               });
             });
           });
-          await Promise.all(arr);
-          this.SET_PLAYLIST(playlist);
+          try {
+            await Promise.all(arr);
+            this.SET_PLAYLIST(playlist);
+          } catch (error) {
+            console.log("error", error);
+          }
+          console.log("playlist", playlist);
         } else {
           //todo 有缓存数据先展示缓存，后台刷新列表？
           // this.getMenuDetail(_this.id);
@@ -353,6 +538,21 @@ export default {
       let month = addZero(date.getMonth() + 1);
       let day = addZero(date.getDate());
       return year + "-" + month + "-" + day;
+    },
+    durationFilter(a) {
+      a = a / 1000;
+      let b = "";
+      let h = parseInt(a / 36000),
+        m = parseInt((a % 3600) / 60),
+        s = parseInt((a % 3600) % 60);
+      if (h > 0) {
+        h = h < 10 ? "0" + h : h;
+        b += h + ":";
+      }
+      m = m < 10 ? "0" + m : m;
+      s = s < 10 ? "0" + s : s;
+      b += m + ":" + s;
+      return b;
     },
   },
   beforeRouteEnter(to, from, next) {
@@ -664,10 +864,66 @@ export default {
     }
   }
   .music-body {
+    .sort-body {
+      display: flex;
+      font-size: 12px;
+      color: rgb(135, 135, 135);
+      line-height: 35px;
+      padding: 0 0 0 25px;
+      & > div:not(.as-no) {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        &:hover {
+          background: rgb(50, 50, 50);
+          i {
+            display: block;
+            margin-right: 13px;
+          }
+          .sort0 {
+            background: url(~@/assets/images/sort-a.png) no-repeat;
+            background-size: 100% 100%;
+            width: 6px;
+            height: 10px;
+          }
+          .sort1 {
+            background: url(~@/assets/images/sort-b.png) no-repeat;
+            background-size: 100% 100%;
+            width: 10px;
+            height: 6px;
+          }
+          .sort2 {
+            background: url(~@/assets/images/sort-c.png) no-repeat;
+            background-size: 100% 100%;
+            width: 10px;
+            height: 6px;
+          }
+        }
+      }
+      .as-no {
+        width: 85px;
+      }
+      .as-title {
+        width: 28%;
+        text-indent: 5px;
+      }
+      .as-singer {
+        flex: 1;
+        padding-left: 5px;
+      }
+      .as-album {
+        flex: 1;
+        padding-left: 5px;
+      }
+      .as-time {
+        width: 87px;
+        padding-left: 5px;
+      }
+    }
     .item-box {
       display: flex;
       align-items: center;
-      padding: 0 37px 0 25px;
+      padding: 0 0 0 25px;
       font-size: 12px;
       background: rgb(41, 41, 41);
       height: 34px;
@@ -677,8 +933,8 @@ export default {
       &:hover {
         background: rgb(50, 50, 50);
         .more {
-          background: url(~@/assets/images/more.png) no-repeat;
-          background-size: 100% 100%;
+          background: url(~@/assets/images/more.png) center center no-repeat;
+          background-size: 16px 4px;
         }
       }
       .item-index {
@@ -702,7 +958,6 @@ export default {
       }
       .item-name {
         color: rgb(179, 179, 179);
-        flex: 1;
         width: 28%;
         margin-left: 4px;
         display: flex;
@@ -746,7 +1001,7 @@ export default {
       .more {
         display: inline-block;
         width: 16px;
-        height: 4px;
+        height: 35px;
         min-width: 16px;
         margin: 0 4px 0 2px;
       }
@@ -767,20 +1022,31 @@ export default {
       }
       .item-time {
         color: rgb(89, 89, 89);
-        width: 30px;
+        width: 87px;
       }
     }
-    .playing {
+    .playing-item {
       background: rgb(50, 50, 50) !important;
       .item-name {
         color: rgb(187, 69, 57);
       }
-      .item-index {
-        display: inline-block;
-        background: url(~@/assets/images/laba.png) left center no-repeat;
-        background-size: 12px 12px;
-        width: 30px;
-        height: 34px;
+      &.playing {
+        .item-index {
+          display: inline-block;
+          background: url(~@/assets/images/laba.png) left center no-repeat;
+          background-size: 12px 12px;
+          width: 30px;
+          height: 34px;
+        }
+      }
+      &.no-playing {
+        .item-index {
+          display: inline-block;
+          background: url(~@/assets/images/laba1.png) left center no-repeat;
+          background-size: 12px 12px;
+          width: 30px;
+          height: 34px;
+        }
       }
     }
     .bg-white {

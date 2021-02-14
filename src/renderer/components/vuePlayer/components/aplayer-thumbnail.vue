@@ -1,16 +1,17 @@
 <template>
   <div class="aplayer-pic">
     <div class="collection" @click="toCollection"></div>
-    <div class="next" @click="next"></div>
+    <div class="next" @click="prev"></div>
     <div
       class="aplayer-button"
       :class="playing ? 'aplayer-pause' : 'aplayer-play'"
       @mousedown="onDragBegin"
       @click="onClick"
+      @keydown.space="onClick"
     >
       <div :class="playing ? 'aplayer-icon-pause' : 'aplayer-icon-play'"></div>
     </div>
-    <div class="prev" @click="prev"></div>
+    <div class="prev" @click="next"></div>
     <div class="share"></div>
   </div>
 </template>
@@ -31,7 +32,7 @@ export default {
     enableDrag: {
       type: Boolean,
       default: false,
-    },
+    }
   },
   data() {
     return {
@@ -45,7 +46,13 @@ export default {
       return this.$store.getters.currentIndex;
     },
     musicList() {
-      return this.$store.state.music.videoUpload.musicList;
+      return this.$store.state.music.musicList;
+    },
+    repeatType() {
+      return this.$store.state.music.repeatType;
+    },
+    playOrder() {
+      return this.$store.state.music.playOrder;
     },
   },
   methods: {
@@ -78,35 +85,62 @@ export default {
         this.$emit("toggleplay");
       }
     },
-    next() {
-      //下一首
-      let index = "";
-      if (this.currentIndex === 0) {
-        index = this.musicList.length - 1;
-      } else {
-        index = this.currentIndex - 1;
-      }
-      if (typeof index === "string") return;
-      const currentMusic = { ...this.musicList[index] };
-      this.SET_MUSICLIST({ currentMusic });
-      //todo 判断元素不在可视区域再滚动
-      const dom = document.querySelector(`.music-list${index}`);
-      if (dom) dom.scrollIntoView();
-    },
     prev() {
       //上一首
-      let index = "";
-      if (this.currentIndex === this.musicList.length - 1) {
-        index = 0;
+      console.log("this.repeatType",this.repeatType);
+      if (this.repeatType === "repeat-random") {
+        //随机播放
+        const list = this.playOrder;
+        const index = list.indexOf(this.currentIndex);
+        let num = 0;
+        if (index !== 0) {
+          num = index - 1;
+        }else{
+          num = list.length-1
+        }
+        const currentMusic = { ...this.musicList[list[num]] };
+        this.SET_MUSICLIST({ currentMusic });
       } else {
-        index = this.currentIndex + 1;
+        let index = "";
+        if (this.currentIndex === 0) {
+          index = this.musicList.length - 1;
+        } else {
+          index = this.currentIndex - 1;
+        }
+        if (typeof index === "string") return;
+        const currentMusic = { ...this.musicList[index] };
+        this.SET_MUSICLIST({ currentMusic });
+        //todo 判断元素不在可视区域再滚动
+        const dom = document.querySelector(`.music-list${index}`);
+        if (dom) dom.scrollIntoView();
       }
-      if (typeof index === "string") return;
-      const currentMusic = { ...this.musicList[index] };
-      this.SET_MUSICLIST({ currentMusic });
-      //todo 判断元素不在可视区域再滚动
-      const dom = document.querySelector(`.music-list${index}`);
-      if (dom) dom.scrollIntoView();
+    },
+    next() {
+      //下一首
+      if (this.repeatType === "repeat-random") {
+        //随机播放
+        const list = this.playOrder;
+        const index = list.indexOf(this.currentIndex);
+        let num = 0;
+        if (index !== list.length - 1) {
+          num = index + 1;
+        }
+        const currentMusic = { ...this.musicList[list[num]] };
+        this.SET_MUSICLIST({ currentMusic });
+      } else {
+        let index = "";
+        if (this.currentIndex === this.musicList.length - 1) {
+          index = 0;
+        } else {
+          index = this.currentIndex + 1;
+        }
+        if (typeof index === "string") return;
+        const currentMusic = { ...this.musicList[index] };
+        this.SET_MUSICLIST({ currentMusic });
+        //todo 判断元素不在可视区域再滚动
+        const dom = document.querySelector(`.music-list${index}`);
+        if (dom) dom.scrollIntoView();
+      }
     },
     toCollection() {
       console.log("收藏");

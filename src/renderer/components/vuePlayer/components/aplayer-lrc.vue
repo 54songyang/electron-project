@@ -54,13 +54,13 @@ export default {
       }
     },
     playIndex() {
-      return this.$store.state.music.videoUpload.active;
+      return this.$store.state.music.active;
     },
     currentMusic() {
-      return this.$store.state.music.videoUpload.currentMusic;
+      return this.$store.state.music.currentMusic;
     },
     showLrcPop() {
-      return this.$store.state.music.videoUpload.showLrcPop;
+      return this.$store.state.music.showLrcPop;
     },
   },
   mounted() {

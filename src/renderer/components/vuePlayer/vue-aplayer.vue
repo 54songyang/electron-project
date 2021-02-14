@@ -30,9 +30,9 @@
         <controls
           v-if="currentMusic"
           :shuffle="shouldShuffle"
-          :repeat="repeatMode"
           :stat="playStat"
           :muted="isAudioMuted"
+          :dt="currentMusic.dt"
           @toggleshuffle="shouldShuffle = !shouldShuffle"
           @setvolume="setAudioVolume"
           @dragbegin="onProgressDragBegin"
@@ -65,7 +65,7 @@
       <div class="controller-box">
         <div>
           <div class="play-btn play-tree"></div>
-          <div :class="['play-btn', internalRepeat]" @click="setNextMode"></div>
+          <div :class="['play-btn', repeatType]" @click="setNextMode"></div>
           <div
             :class="['play-btn', !showMusicList ? 'play-lb' : 'play-lb-red']"
             @click="changeList"
@@ -82,14 +82,6 @@
       </div>
     </div>
     <audio ref="audio"></audio>
-    <!-- <music-list
-      :show="showList && !isMiniMode"
-      :current-music="currentMusic"
-      :music-list="musicList"
-      :play-index="playIndex"
-      :listmaxheight="listmaxheight || listMaxHeight"
-      @selectsong="onSelectSong"
-    /> -->
     <div :class="['lyrics-box', { 'lyrics-top': showLrcPop }]">
       <div
         :class="['lyrics-player', isPlaying ? 'pointer-play' : 'pointer-end']"
@@ -145,23 +137,19 @@ import { mapActions, mapMutations } from "vuex";
 let versionBadgePrinted = false;
 const canUseSync = versionCompare(Vue.version, "2.3.0") >= 0;
 
-/**
- * memorize self-adapting theme for cover image urls
- * @type {Object.<url, rgb()>}
- */
-const picThemeCache = {};
 
 // mutex playing instance
 let activeMutex = null;
 
-const REPEAT = {
-  NONE: "none",
-  MUSIC: "music",
-  LIST: "list",
-  NO_REPEAT: "no-repeat",
-  REPEAT_ONE: "repeat-one",
-  REPEAT_ALL: "repeat-all",
-};
+// const REPEAT = {
+//   NONE: "none",
+//   MUSIC: "music",
+//   LIST: "list",
+//   NO_REPEAT: "no-repeat",
+//   REPEAT_ONE: "repeat-one",
+//   REPEAT_ALL: "repeat-all",
+//   REPEAT_RANDOM: "repeat-random",
+// };
 
 const VueAPlayer = {
   name: "APlayer",
@@ -174,25 +162,6 @@ const VueAPlayer = {
     Volume,
   },
   props: {
-    // music: {
-    //   type: Object,
-    //   required: true,
-    //   validator(song) {
-    //     if (song.url) {
-    //       deprecatedProp("music.url", "1.4.0", "music.src");
-    //     }
-    //     if (song.author) {
-    //       deprecatedProp("music.author", "1.4.1", "music.artist");
-    //     }
-    //     return song.src || song.url;
-    //   },
-    // },
-    // list: {
-    //   type: Array,
-    //   default() {
-    //     return [];
-    //   },
-    // },
     mini: {
       type: Boolean,
       default: false,
@@ -297,10 +266,10 @@ const VueAPlayer = {
      * @see https://support.apple.com/en-us/HT207230
      * twoWay
      */
-    repeat: {
-      type: String,
-      default: REPEAT.NO_REPEAT,
-    },
+    // repeat: {
+    //   type: String,
+    //   default: REPEAT.NO_REPEAT,
+    // },
 
     // deprecated props
 
@@ -342,24 +311,10 @@ const VueAPlayer = {
         return true;
       },
     },
-    /**
-     * @deprecated and REMOVED since 1.5.0
-     */
-    // mode: {
-    //   type: String,
-    //   default: 'circulation',
-    //   validator (value) {
-    //     if (value) {
-    //       deprecatedProp('mode', '1.5.0', 'shuffle and repeat')
-    //     }
-    //     return true
-    //   }
-    // },
   },
   data() {
     return {
       // internalMusic: this.music, //当前音乐？
-      isPlaying: false, //是否在播放
       isSeeking: false, //是否在寻找？
       wasPlayingBeforeSeeking: false, //是否在寻找之前播放？
       isMobile: /mobile/i.test(window.navigator.userAgent),
@@ -399,46 +354,36 @@ const VueAPlayer = {
       internalShuffle: this.shuffle,
       internalRepeat: this.repeat,
       // for shuffling
-      shuffledList: [], //随机列表？
     };
   },
   computed: {
-    videoUpload() {
-      return this.$store.state.music.videoUpload;
-    },
-    // playIndex() {
-    //   return this.$store.state.music.videoUpload.active;
-    // },
     currentMusic() {
-      return this.$store.state.music.videoUpload.currentMusic;
+      return this.$store.state.music.currentMusic;
+    },
+    repeatType() {
+      return this.$store.state.music.repeatType;
+    },
+    playOrder() {
+      return this.$store.state.music.playOrder;
+    },
+    isPlaying() {
+      //是否在播放
+      return this.$store.state.music.isPlaying;
     },
     musicList() {
       //播放列表
-      return this.$store.state.music.videoUpload.musicList;
+      return this.$store.state.music.musicList;
     },
     showMusicList() {
       return this.$store.state.music.showMusicList;
     },
     showLrcPop() {
-      return this.$store.state.music.videoUpload.showLrcPop;
+      return this.$store.state.music.showLrcPop;
     },
     // alias for $refs.audio
     audio() {
       return this.$refs.audio;
     },
-
-    // sync music
-    // currentMusic: {
-    //   //!!!当前播放音乐
-    //   get() {
-    //     return this.internalMusic;
-    //   },
-    //   set(val) {
-    //     //!!!重设当前音乐时，改变父组件传入的music值
-    //     // canUseSync && this.$emit("update:music", val);
-    //     // this.internalMusic = val;
-    //   },
-    // },
     // compatible for deprecated props
     isMiniMode() {
       // 迷你模式
@@ -450,9 +395,6 @@ const VueAPlayer = {
 
     // props wrappers
 
-    // currentTheme() {
-    //   return this.selfAdaptingTheme || this.currentMusic.theme || this.theme;
-    // },
     isFloatMode() {
       return this.float && !this.isMobile;
     },
@@ -494,19 +436,6 @@ const VueAPlayer = {
       if (this.playStat.duration === 0) return 0;
       return this.playStat.playedTime / this.playStat.duration;
     },
-    // playIndex: {
-    //   //当前播放的歌曲在播放列表的位置
-    //   get() {
-    //     return this.shuffledList.indexOf(this.currentMusic);
-    //   },
-    //   set(val) {
-    //     this.currentMusic = this.shuffledList[val % this.shuffledList.length];
-    //   },
-    // },
-    shouldRepeat() {
-      //可以重复播放
-      return this.repeatMode !== REPEAT.NO_REPEAT;
-    },
 
     // since 1.4.0
     // sync muted, volume
@@ -542,33 +471,35 @@ const VueAPlayer = {
         this.internalShuffle = val;
       },
     },
-    repeatMode: {
-      //播放模式
-      get() {
-        switch (this.internalRepeat) {
-          case REPEAT.NONE:
-          case REPEAT.NO_REPEAT:
-            return REPEAT.NO_REPEAT;
-          case REPEAT.MUSIC:
-          case REPEAT.REPEAT_ONE:
-            return REPEAT.REPEAT_ONE;
-          default:
-            return REPEAT.REPEAT_ALL;
-        }
-      },
-      set(val) {
-        canUseSync && this.$emit("update:repeat", val);
-        this.internalRepeat = val;
-      },
-    },
+    // repeatMode: {
+    //   //播放模式
+    //   get() {
+    //     switch (this.internalRepeat) {
+    //       case REPEAT.NONE:
+    //       case REPEAT.NO_REPEAT:
+    //         return REPEAT.NO_REPEAT;
+    //       case REPEAT.REPEAT_RANDOM:
+    //         return REPEAT.REPEAT_RANDOM;
+    //       case REPEAT.MUSIC:
+    //       case REPEAT.REPEAT_ONE:
+    //         return REPEAT.REPEAT_ONE;
+    //       default:
+    //         return REPEAT.REPEAT_ALL;
+    //     }
+    //   },
+    //   set(val) {
+    //     canUseSync && this.$emit("update:repeat", val);
+    //     this.internalRepeat = val;
+    //   },
+    // },
     currentIndex() {
       return this.$store.getters.currentIndex;
     },
   },
   methods: {
-    ...mapActions(["getMusicData", "canUse", "musicUrl", "musicLrc"]),
+    ...mapActions(["getMusicData", "canUse", "musicUrl", "musicLrc","setRepeatType"]),
     // Float mode
-    ...mapMutations(["SET_SHOWMUSICLIST", "SET_MUSICLIST"]),
+    ...mapMutations(["SET_SHOWMUSICLIST", "SET_MUSICLIST", "SET_PLAYING"]),
     onDragBegin() {
       this.floatOriginX = this.floatOffsetLeft;
       this.floatOriginY = this.floatOffsetTop;
@@ -577,19 +508,44 @@ const VueAPlayer = {
       this.floatOffsetLeft = this.floatOriginX + offsetLeft;
       this.floatOffsetTop = this.floatOriginY + offsetTop;
     },
-
+    durationFilter(a) {
+      a = a / 1000;
+      let b = "";
+      let h = parseInt(a / 36000),
+        m = parseInt((a % 3600) / 60),
+        s = parseInt((a % 3600) % 60);
+      if (h > 0) {
+        h = h < 10 ? "0" + h : h;
+        b += h + ":";
+      }
+      m = m < 10 ? "0" + m : m;
+      s = s < 10 ? "0" + s : s;
+      b += m + ":" + s;
+      return b;
+    },
     // functions
-
+    selectRandom(max) {
+      let arr = [];
+      for (let i = 0; i < max; i++) {
+        let arrNum = parseInt(Math.random() * max);
+        let flag = true;
+        for (let j = 0; j <= arr.length; j++) {
+          if (arrNum == arr[j]) {
+            flag = false;
+            break;
+          }
+        }
+        if (flag) {
+          arr.push(arrNum);
+        } else {
+          i--;
+        }
+      }
+      return arr;
+    },
     setNextMode() {
       //设置播放模式
-      if (this.repeatMode === REPEAT.REPEAT_ALL) {
-        this.internalRepeat = REPEAT.REPEAT_ONE;
-      } else if (this.repeatMode === REPEAT.REPEAT_ONE) {
-        this.internalRepeat = REPEAT.NO_REPEAT;
-      } else {
-        this.internalRepeat = REPEAT.REPEAT_ALL;
-      }
-      console.log("000", this.internalRepeat);
+      this.setRepeatType();
     },
     thenPlay() {
       //异步开始播放
@@ -693,66 +649,46 @@ const VueAPlayer = {
       }
     },
 
-    // playlist
-
-    getShuffledList() {
-      let unshuffled = JSON.parse(JSON.stringify(this.musicList));
-      // if (!this.internalShuffle || unshuffled.length <= 1) {
-      //   return unshuffled;
-      // }
-
-      // let indexOfCurrentMusic = unshuffled.indexOf(this.currentMusic);
-      // if (unshuffled.length === 2 && indexOfCurrentMusic !== -1) {
-      //   if (indexOfCurrentMusic === 0) {
-      //     return unshuffled;
-      //   } else {
-      //     return [this.currentMusic, unshuffled[0]];
-      //   }
-      // }
-      // // shuffle list
-      // // @see https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array
-      // for (let i = unshuffled.length - 1; i > 0; i--) {
-      //   const j = Math.floor(Math.random() * (i + 1));
-      //   const tmp = unshuffled[i];
-      //   unshuffled[i] = unshuffled[j];
-      //   unshuffled[j] = tmp;
-      // }
-
-      // // take currentMusic to first
-      // if (indexOfCurrentMusic !== -1) {
-      //   indexOfCurrentMusic = unshuffled.indexOf(this.currentMusic);
-      //   if (indexOfCurrentMusic !== 0) {
-      //     [unshuffled[0], unshuffled[indexOfCurrentMusic]] = [
-      //       unshuffled[indexOfCurrentMusic],
-      //       unshuffled[0],
-      //     ];
-      //   }
-      // }
-
-      return unshuffled;
-    },
-
-    // onSelectSong(song) {
-    //   //选择音乐
-    //   if (this.currentMusic === song) {
-    //     this.toggle();
-    //   } else {
-    //     this.currentMusic = song;
-    //     this.thenPlay();
-    //   }
-    // },
-
     // event handlers
     // for keeping up with audio states
 
     onAudioPlay() {
-      this.isPlaying = true;
+      this.SET_PLAYING(true);
     },
     onAudioPause() {
-      this.isPlaying = false;
+      this.SET_PLAYING(false);
     },
     onAudioWaiting() {
-      this.isLoading = true;
+      this.SET_PLAYING(true);
+    },
+    onAudioError(e) {
+      const error = e.target.error;
+      let msg = "";
+      switch (error.code) {
+        case 1:
+          msg = "取回过程被用户中止。";
+          break;
+        case 2:
+          msg = "当下载时发生错误。";
+          break;
+        case 3:
+          msg = "当解码时发生错误。";
+          break;
+        case 4:
+          msg = "媒体不可用或者不支持音频/视频。";
+          break;
+      }
+      this.$toast(msg);
+      setTimeout(() => {
+        if (this.currentIndex < this.musicList.length - 1) {
+          let index = this.currentIndex + 1;
+          if (typeof index === "string") return;
+          const currentMusic = { ...this.musicList[index] };
+          this.SET_MUSICLIST({ currentMusic });
+        }else{
+          this.SET_MUSICLIST({ currentMusic:null });
+        }
+      }, 1000);
     },
     onAudioCanplay() {
       this.isLoading = false;
@@ -790,48 +726,45 @@ const VueAPlayer = {
     onAudioEnded() {
       // determine next song according to shuffle and repeat
       //播放完成
-      //***列表循环
-      let index = "";
-      if (this.currentIndex === this.musicList.length - 1) {
-        index = 0;
-      } else {
-        index = this.currentIndex + 1;
+      if (this.repeatMode === REPEAT.NONE) {
+        //无循环（顺序播放）
+        if (this.currentIndex === this.musicList.length - 1) {
+          //播放到最后一首
+          this.pause()
+        } else {
+          let index = this.currentIndex + 1;
+          const currentMusic = { ...this.musicList[index] };
+          this.SET_MUSICLIST({ currentMusic });
+        }
+      } else if (this.repeatMode === REPEAT.REPEAT_ONE) {
+        //单曲循环
+        this.thenPlay();
+      } else if (this.repeatMode === REPEAT.REPEAT_ALL) {
+        //列表循环
+        let index = "";
+        if (this.currentIndex === this.musicList.length - 1) {
+          index = 0;
+        } else {
+          index = this.currentIndex + 1;
+        }
+        if (typeof index === "string") return;
+        const currentMusic = { ...this.musicList[index] };
+        this.SET_MUSICLIST({ currentMusic });
+      } else if (this.repeatMode === REPEAT.REPEAT_RANDOM) {
+        //随机播放
+        const list = this.playOrder;
+        const index = list.indexOf(this.currentIndex);
+        let num = 0;
+        if (index !== list.length - 1) {
+          num = index + 1;
+        }
+        const currentMusic = { ...this.musicList[list[num]] };
+        this.SET_MUSICLIST({ currentMusic });
       }
-      if (typeof index === "string") return;
-      const currentMusic = { ...this.musicList[index] };
-      this.SET_MUSICLIST({ currentMusic });
       //todo 判断元素不在可视区域再滚动
-      const dom = document.querySelector(`.music-list${index}`);
-      if (dom) dom.scrollIntoView();
-      // if (this.repeatMode === REPEAT.REPEAT_ALL) {
-      //   // 列表重复
-      //   if (
-      //     this.shouldShuffle &&
-      //     this.playIndex === this.shuffledList.length - 1
-      //   ) {
-      //     this.shuffledList = this.getShuffledList();
-      //   }
-      //   console.log("2");
-      //   console.log("this.playIndex", this.playIndex);
-      //   this.SET_ACTIVE(this.playIndex + 1);
-      //   // this.$nextTick(()=>{
-      //   //   this.thenPlay();
-      //   // })
-      // } else if (this.repeatMode === REPEAT.REPEAT_ONE) {
-      //   // 单个重复
-      //   this.thenPlay();
-      // } else {
-      //   // 随机播放
-      //   console.log("4");
-      //   this.SET_ACTIVE(this.playIndex + 1);
-      //   if (this.playIndex !== 0) {
-      //     this.thenPlay();
-      //   } else if (this.shuffledList.length === 1) {
-      //     this.audio.currentTime = 0;
-      //   }
-      // }
+      //todo const dom = document.querySelector(`.music-list${index}`);
+      //todo if (dom) dom.scrollIntoView();
     },
-
     async initAudio() {
       // since 1.4.0 Audio attributes as props
 
@@ -882,6 +815,7 @@ const VueAPlayer = {
       this.audio.addEventListener("pause", this.onAudioPause);
       this.audio.addEventListener("abort", this.onAudioPause);
       this.audio.addEventListener("waiting", this.onAudioWaiting);
+      this.audio.addEventListener("error", this.onAudioError);
       this.audio.addEventListener("canplay", this.onAudioCanplay);
       this.audio.addEventListener("progress", this.onAudioProgress);
       this.audio.addEventListener("durationchange", this.onAudioDurationChange);
@@ -896,27 +830,6 @@ const VueAPlayer = {
       }
     },
 
-    // setSelfAdaptingTheme() {
-    //   // auto theme according to current music cover image
-    //   if ((this.currentMusic.theme || this.theme) === "pic") {
-    //     const pic = this.currentMusic.pic;
-    //     // use cache
-    //     if (picThemeCache[pic]) {
-    //       this.selfAdaptingTheme = picThemeCache[pic];
-    //     } else {
-    //       try {
-    //         new ColorThief().getColorAsync(pic, ([r, g, b]) => {
-    //           picThemeCache[pic] = `rgb(${r}, ${g}, ${b})`;
-    //           this.selfAdaptingTheme = `rgb(${r}, ${g}, ${b})`;
-    //         });
-    //       } catch (e) {
-    //         warn("color-thief is required to support self-adapting theme");
-    //       }
-    //     }
-    //   } else {
-    //     this.selfAdaptingTheme = null;
-    //   }
-    // },
     changeList() {
       this.SET_SHOWMUSICLIST(!this.showMusicList);
       //todo 判断元素不在可视区域再滚动
@@ -925,17 +838,11 @@ const VueAPlayer = {
     },
   },
   watch: {
-    // music(music) {
-    //   this.internalMusic = music;
-    // },
-
     currentMusic: {
       async handler(newVal, oldVal) {
         // async
-        // this.setSelfAdaptingTheme();
         if (!newVal || (oldVal && newVal.id === oldVal.id)) return;
         let src = this.currentMusic.url;
-
         // HLS support
         if (/\.m3u8(?=(#|\?|$))/.test(src)) {
           if (
@@ -998,28 +905,18 @@ const VueAPlayer = {
     shuffle(val) {
       this.internalShuffle = val;
     },
-    repeat(val) {
-      this.internalRepeat = val;
-    },
+    // repeat(val) {
+    //   this.internalRepeat = val;
+    // },
   },
   beforeCreate() {
     if (!VueAPlayer.disableVersionBadge && !versionBadgePrinted) {
-      // version badge
-      // console.log(
-      //   `\n\n %c Vue-APlayer ${VERSION} %c vue-aplayer.js.org \n`,
-      //   "color: #fff; background:#41b883; padding:5px 0;",
-      //   "color: #fff; background: #35495e; padding:5px 0;"
-      // );
       versionBadgePrinted = true;
     }
-  },
-  created() {
-    this.shuffledList = this.getShuffledList();
   },
   mounted() {
     //初始化并播放
     this.initAudio();
-    // this.setSelfAdaptingTheme();
     if (this.autoplay) this.play();
   },
   beforeDestroy() {
@@ -1419,6 +1316,11 @@ export default VueAPlayer;
       }
       .repeat-one {
         background: url(~@/assets/images/dq.png) no-repeat;
+        background-size: 100% 100%;
+        height: 14px;
+      }
+      .repeat-random {
+        background: url(~@/assets/images/suiji.png) no-repeat;
         background-size: 100% 100%;
         height: 14px;
       }

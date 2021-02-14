@@ -32,18 +32,21 @@
             'list-item',
             {
               'active-music':
+                currentMusic &&
                 item.id === currentMusic.id &&
                 item.menuId === currentMusic.menuId,
             },
             { 'active-item': activeItem === index },
-            `music-list${index}`
+            `music-list${index}`,
           ]"
           v-for="(item, index) in musicList"
           :key="item.id + '' + index"
           @dblclick="selectsong(item, index)"
           @click="selectItem(index)"
+          @contextmenu.prevent="rightClick(item)"
         >
           <div class="music-title ellipsis">
+            <div :class="['music-type', isPlaying ? 'playing' : 'pause']"></div>
             <div class="name-box">
               <span>{{ item.name }}</span>
               <span class="name-tip" v-if="item.alia.length > 0"
@@ -61,7 +64,7 @@
             {{ item.ar.map((el) => el.name).join("/") }}
           </div>
           <div class="music-link"></div>
-          <div class="music-time">04:36</div>
+          <div class="music-time">{{ item.dt | durationFilter }}</div>
         </div>
       </div>
     </div>
@@ -69,6 +72,8 @@
 </template>
 <script>
 import { mapActions, mapMutations } from "vuex";
+import { remote } from "electron";
+const { Menu, MenuItem } = remote;
 export default {
   name: "musicList",
   data() {
@@ -80,10 +85,14 @@ export default {
   },
   computed: {
     musicList() {
-      return this.$store.state.music.videoUpload.musicList;
+      return this.$store.state.music.musicList;
     },
     currentMusic() {
-      return this.$store.state.music.videoUpload.currentMusic;
+      return this.$store.state.music.currentMusic;
+    },
+    isPlaying() {
+      //是否在播放
+      return this.$store.state.music.isPlaying;
     },
   },
   methods: {
@@ -96,6 +105,90 @@ export default {
       //清空当前音乐,清空播放列表
       this.SET_LIST();
     },
+    rightClick(item) {
+      const _this = this;
+      const arr = [
+        {
+          label: "播放",
+          click: function () {
+            _this.selectsong(item);
+          },
+        },
+        {
+          label: "查看评论",
+          enabled: false, //false不可点击
+          click: function () {
+            console.log("查看评论");
+          },
+        },
+        {
+          label: "下一首播放",
+          click: function () {
+            console.log("下一首播放");
+          },
+        },
+        {
+          type: "separator", //checkbox,radio
+        },
+        {
+          label: "收藏",
+          submenu: [
+            {
+              label: "创建新歌单",
+              click: function () {
+                console.log("创建新歌单");
+              },
+            },
+            {
+              type: "separator", //checkbox,radio
+            },
+          ],
+        },
+        {
+          label: "分享...",
+          click: function () {
+            console.log("分享...");
+          },
+        },
+        {
+          label: "复制链接",
+          click: function () {
+            console.log("复制链接");
+          },
+        },
+        {
+          label: "下载",
+          click: function () {
+            console.log("下载");
+          },
+        },
+        {
+          type: "separator",
+        },
+        {
+          label: "重歌单中删除",
+          click: function () {
+            console.log("从歌单中删除");
+          },
+        },
+      ];
+      // 右键菜单
+      const list = this.$store.state.page.playlist;
+      const mm = list.map((el) => ({
+        el,
+        label: el.name,
+        click: function () {
+          console.log(el.name);
+        },
+      }));
+      arr[4].submenu = [...arr[4].submenu, ...mm];
+      const menu = new Menu();
+      arr.forEach((el) => {
+        menu.append(new MenuItem(el));
+      });
+      // 展示出来
+      menu.popup(remote.getCurrentWindow());
+    },
     selectItem(index) {
       this.activeItem = index;
     },
@@ -103,6 +196,23 @@ export default {
       this.SET_MUSICLIST({
         currentMusic: { ...item },
       });
+    },
+  },
+  filters: {
+    durationFilter(a) {
+      a = a / 1000;
+      let b = "";
+      let h = parseInt(a / 36000),
+        m = parseInt((a % 3600) / 60),
+        s = parseInt((a % 3600) % 60);
+      if (h > 0) {
+        h = h < 10 ? "0" + h : h;
+        b += h + ":";
+      }
+      m = m < 10 ? "0" + m : m;
+      s = s < 10 ? "0" + s : s;
+      b += m + ":" + s;
+      return b;
     },
   },
   mounted() {
@@ -131,7 +241,7 @@ export default {
       align-items: center;
       font-size: 12px;
       color: rgb(185, 185, 185);
-      padding: 0 47px 0 20px;
+      padding: 0 47px 0 0px;
       line-height: 33px;
       height: 33px;
       background: rgb(54, 54, 54);
@@ -150,6 +260,11 @@ export default {
         flex: 1;
         display: flex;
         align-items: center;
+        .music-type {
+          width: 20px;
+          min-width: 20px;
+          height: 33px;
+        }
         .name-box {
           white-space: nowrap;
           text-overflow: ellipsis;
@@ -209,7 +324,19 @@ export default {
       background: rgb(51, 51, 51) !important;
     }
     .active-music {
-      .music-title,
+      .music-title {
+        color: rgb(187, 69, 57);
+        .music-type {
+          &.playing {
+            background: url(~@/assets/images/play-l.png) center center no-repeat;
+            background-size: 7px 7px;
+          }
+          &.pause {
+            background: url(~@/assets/images/zt-l.png) center center no-repeat;
+            background-size: 7px 7px;
+          }
+        }
+      }
       .music-singer {
         color: rgb(187, 69, 57);
       }
