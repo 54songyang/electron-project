@@ -209,7 +209,9 @@ export default {
       this.SET_OWNROUTES(arr);
       routes[0].children = [...this.ownRoutes];
       this.$router.addRoutes([routes[0]]);
-      this.$router.push("mainPage");
+      if (this.$route.name !== "mainPage") {
+        this.$router.push("mainPage");
+      }
       //!!!
       this.$router.backFlag = false;
       this.$router.historyRecord._history = [];

@@ -58,6 +58,8 @@
   "dependencies": {
     "@clampy-js/vue-clampy": "^1.0.6",
     "axios": "^0.18.0",
+    "electron-builder": "^22.9.1",
+    "electron-store": "^7.0.2",
     "hls.js": "^0.13.3-canary.5470",
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
@@ -86,8 +88,7 @@
     "css-loader": "^0.28.11",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "electron": "^2.0.4",
-    "electron-builder": "^22.4.1",
+    "electron": "^11.2.3",
     "electron-debug": "^1.5.0",
     "electron-devtools-installer": "^2.2.4",
     "eslint": "^4.19.1",

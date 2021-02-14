@@ -30,7 +30,8 @@ function createWindow() {
     resizable: true,
     movable: true,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      enableRemoteModule: true,
     },
   })
   mainWindow.loadURL(winURL)
@@ -58,7 +59,8 @@ function openMiniWin() {
     movable: true,
     backgroundColor: 'rgb(43,43,43)',
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      enableRemoteModule: true,
     }
   });
   miniWindow.loadURL(winURL + "#/miniPage")
@@ -86,7 +88,8 @@ function openLogin() {
     movable: true, //窗口是否可移动
     backgroundColor: "#FFF",
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      enableRemoteModule: true,
     }
   });
   loginWindow.loadURL(winURL + "#/login")
