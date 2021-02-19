@@ -1,5 +1,5 @@
 <template>
-  <div class="own-body" v-if="personalFm.length > 0 && currentMusic">
+  <div class="own-body" v-if="personalFm.length > 0">
     <div class="own-box">
       <div class="own-left">
         <div class="img-box">
@@ -24,7 +24,7 @@
           <div class="own-more" @click="rightClick"></div>
         </div>
       </div>
-      <div class="own-right">
+      <div class="own-right" v-if="currentMusic">
         <div class="music-name">{{ currentMusic.name }}<em>标准音质</em></div>
         <div class="tip-box">
           <div>
@@ -93,7 +93,6 @@ export default {
           console.log("获取私人FM", res);
           if (res.code === 200) {
             this.personalFm = [...this.personalFm, ...res.data];
-            // console.log("this.btn-box", this.personalFm);
             return true;
           } else {
             throw new Error("请求失败");

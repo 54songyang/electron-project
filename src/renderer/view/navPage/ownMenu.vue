@@ -646,6 +646,7 @@ export default {
         display: flex;
         align-items: center;
         margin-bottom: 16px;
+        font-family: PingFangSC-Medium;
         span {
           display: block;
           border: 1px solid rgb(176, 66, 55);

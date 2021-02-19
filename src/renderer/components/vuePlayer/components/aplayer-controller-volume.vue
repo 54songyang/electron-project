@@ -1,6 +1,9 @@
 <template>
   <div class="aplayer-volume-wrap">
-    <div :class="`aplayer-icon-${volumeIcon}`" @click="$emit('togglemute')"></div>
+    <div
+      :class="`aplayer-icon-${volumeIcon}`"
+      @click="$emit('togglemute')"
+    ></div>
     <!-- <icon-button
       :class="`aplayer-icon-${volumeIcon}`"
       :icon="volumeIcon"
@@ -12,7 +15,7 @@
           class="aplayer-volume"
           :style="{
             height: muted ? 0 : `${Math.trunc(volume * 100)}%`,
-            background: theme
+            background: theme,
           }"
         ></div>
       </div>
@@ -28,7 +31,7 @@ const barHeight = 77;
 
 export default {
   components: {
-    IconButton
+    IconButton,
   },
   props: ["volume", "muted", "theme"],
   computed: {
@@ -36,7 +39,7 @@ export default {
       if (this.muted || this.volume <= 0) return "volume-off";
       if (this.volume >= 1) return "volume-up";
       return "volume-down";
-    }
+    },
   },
   methods: {
     adjustVolume(e) {
@@ -66,8 +69,8 @@ export default {
       percentage = percentage > 0 ? percentage : 0;
       percentage = percentage < 1 ? percentage : 1;
       this.$emit("setvolume", percentage);
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -76,11 +79,12 @@ export default {
   position: relative;
   cursor: pointer;
   z-index: 0;
-  top:-5px;
+  top: -5px;
 
   &:hover .aplayer-volume-bar-wrap {
     display: block;
   }
+  .aplayer-icon-volume-up,
   .aplayer-icon-volume-down {
     width: 20px;
     height: 30px;
@@ -104,16 +108,15 @@ export default {
     width: 30px;
     background-color: rgb(54, 54, 54);
     transition: all 0.2s ease;
-    border-radius:4px;
+    border-radius: 4px;
     .aplayer-volume-bar {
       position: absolute;
       bottom: 11px;
-      left: 13px;
-      width: 5px;
+      left: 14px;
+      width: 3px;
       height: 77px;
-      background: #aaa;
+      background: rgb(74, 74, 74);
       border-radius: 2.5px;
-      overflow: hidden;
       z-index: 100000;
 
       .aplayer-volume {
@@ -124,6 +127,18 @@ export default {
         transition: height 0.1s ease, background-color 0.3s;
         will-change: height;
         background: rgb(195, 70, 58);
+        &::before {
+          position: absolute;
+          top:-5px;
+          left: -3px;
+          content: "";
+          width: 10px;
+          height: 10px;
+          background: rgb(195, 70, 58);
+          border-radius: 50%;
+          z-index: 1000;
+          
+        }
       }
     }
   }

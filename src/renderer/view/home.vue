@@ -292,7 +292,7 @@ export default {
 //   border-radius: 50%;
 // }
 body {
-  font-family: PingFangSC-Semibold, sans-serif;
+  font-family: PingFangSC-Regular, PingFang SC, sans-serif;
   cursor: pointer;
 }
 </style>

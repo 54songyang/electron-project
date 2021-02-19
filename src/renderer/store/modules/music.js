@@ -11,6 +11,7 @@ const state = {
   playOrder: [],//播放顺序
   repeatType: 'no-repeat',//随机模式:no-repeat,repeat-one,repeat-all,repeat-random
   listFolded: false, //播放列表
+  volume: 0.5,//音量 value >= 0 && value <= 1;
   showMusicList: false//是否显示歌曲列表
 }
 const getters = {
@@ -27,6 +28,11 @@ const getters = {
       }
     }
     return index
+  },
+  internalVolume(state) {
+    if (state.volume < 0) return 0;
+    else if (state.volume > 1) return 1;
+    else return state.volume
   }
 }
 const mutations = {
@@ -36,6 +42,9 @@ const mutations = {
       state.currentMusic.lrc = lrc
       //todo同时存musicList里的歌词
     }
+  },
+  SET_VOLUUME(state, val) {
+    state.volume = val;
   },
   SET_PLAYING(state, val) {
     state.isPlaying = val
@@ -56,10 +65,6 @@ const mutations = {
   SET_SHOWLRCPOP(state, val) {
     state.showLrcPop = val;
   },
-
-  SET_videoUpload(state, val) {
-    state = {};
-  },
   SET_CLEARMUSIC(state) {
     state.musicList = []
     // state.currentMusic = null
@@ -68,6 +73,9 @@ const mutations = {
     state.shuffle = false
     state.listFolded = false
     state.showMusicList = false//是否显示歌曲列表
+    state.volume = 0.5
+    state.playOrder = []
+    state.musicList = [];
   },
   SET_LIST(state) {
     //清空播放列表

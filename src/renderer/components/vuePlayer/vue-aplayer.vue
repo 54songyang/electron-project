@@ -73,7 +73,7 @@
           <div class="play-btn play-gc"></div>
           <volume
             v-if="!isMobile"
-            :volume="audioVolume"
+            :volume="internalVolume"
             :muted="isAudioMuted"
             @togglemute="toggleMute"
             @setvolume="(v) => setAudioVolume(v)"
@@ -237,17 +237,6 @@ const VueAPlayer = {
      */
     preload: String,
 
-    /**
-     * @since 1.4.0
-     * observable, sync
-     */
-    volume: {
-      type: Number,
-      default: 0.8,
-      validator(value) {
-        return value >= 0 && value <= 1;
-      },
-    },
 
     // play order control
     // since 1.5.0
@@ -343,7 +332,6 @@ const VueAPlayer = {
       // sync muted, volume
 
       internalMuted: this.muted,
-      internalVolume: this.volume,
 
       // @since 1.4.1
       // Loading indicator
@@ -450,15 +438,6 @@ const VueAPlayer = {
         this.internalMuted = val;
       },
     },
-    audioVolume: {
-      get() {
-        return this.internalVolume;
-      },
-      set(val) {
-        canUseSync && this.$emit("update:volume", val);
-        this.internalVolume = val;
-      },
-    },
 
     // since 1.5.0
     // sync shuffle, repeat
@@ -495,11 +474,14 @@ const VueAPlayer = {
     currentIndex() {
       return this.$store.getters.currentIndex;
     },
+    internalVolume() {
+      return this.$store.getters.internalVolume;
+    },
   },
   methods: {
     ...mapActions(["getMusicData", "canUse", "musicUrl", "musicLrc","setRepeatType"]),
     // Float mode
-    ...mapMutations(["SET_SHOWMUSICLIST", "SET_MUSICLIST", "SET_PLAYING"]),
+    ...mapMutations(["SET_SHOWMUSICLIST", "SET_MUSICLIST", "SET_PLAYING","SET_VOLUUME"]),
     onDragBegin() {
       this.floatOriginX = this.floatOffsetLeft;
       this.floatOriginY = this.floatOffsetTop;
@@ -717,7 +699,7 @@ const VueAPlayer = {
       this.playStat.playedTime = this.audio.currentTime;
     },
     onAudioVolumeChange() {
-      this.audioVolume = this.audio.volume;
+      this.SET_VOLUUME(this.audio.volume)
       this.isAudioMuted = this.audio.muted;
     },
     /**
@@ -771,7 +753,7 @@ const VueAPlayer = {
       this.audio.controls = this.shouldShowNativeControls;
       this.audio.muted = this.muted;
       this.audio.preload = this.preload;
-      this.audio.volume = this.volume;
+      this.audio.volume = this.internalVolume;
 
       // since 1.4.0 Emit as many native audio events
       // @see https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Media_events
@@ -888,17 +870,11 @@ const VueAPlayer = {
     preload(val) {
       this.audio.preload = val;
     },
-    audioVolume(val) {
-      this.audio.volume = val;
-    },
 
     // sync muted, volume
 
     muted(val) {
       this.internalMuted = val;
-    },
-    volume(val) {
-      this.internalVolume = val;
     },
 
     // sync shuffle, repeat
@@ -1252,7 +1228,7 @@ export default VueAPlayer;
       flex: 1;
       display: flex;
       flex-direction: column;
-      max-width: 33vw;
+      max-width: 39vw;
       padding-right: 5vw;
       text-align: start;
       height: $aplayer-height;

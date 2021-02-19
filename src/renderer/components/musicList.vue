@@ -47,17 +47,11 @@
         >
           <div class="music-title ellipsis">
             <div :class="['music-type', isPlaying ? 'playing' : 'pause']"></div>
-            <div class="name-box">
-              <span>{{ item.name }}</span>
-              <span class="name-tip" v-if="item.alia.length > 0"
-                ><em>({{ item.alia.join("/") }})</em></span
-              >
-            </div>
+            <span>{{ item.name }}</span>
+            <span class="name-tip ellipsis" v-if="item.alia.length > 0"
+              ><em>({{ item.alia.join("/") }})</em></span
+            >
             <span class="sq"></span>
-            <!-- <span
-              v-if="item.h.vd <= 0 || item.l.vd <= 0 || item.m.vd <= 0"
-              class="sq"
-            ></span> -->
             <span class="mv" v-if="item.mv"></span>
           </div>
           <div class="music-singer ellipsis">
@@ -260,22 +254,19 @@ export default {
         flex: 1;
         display: flex;
         align-items: center;
+        padding-right: 10px;
         .music-type {
           width: 20px;
           min-width: 20px;
           height: 33px;
         }
-        .name-box {
-          white-space: nowrap;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          word-break: break-all;
-        }
         .name-tip {
           display: inline-block;
-          color: #b9b9b9;
+          color: rgb(172, 172, 172);
+          font-size: 10px;
           margin-left: 4px;
           em {
+            font-size: 12px;
             color: rgb(90, 90, 90);
           }
         }
@@ -309,7 +300,7 @@ export default {
         width: 94px;
       }
       .music-time {
-        color: rgb(145, 145, 145);
+        color: rgb(91, 91, 91);
         text-align: right;
         width: 47px;
       }
