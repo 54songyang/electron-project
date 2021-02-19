@@ -501,18 +501,14 @@ export default {
                 el.sortTitle = vPinyin.chineseToPinYin(el.name);
                 el.ar[0].sortSinger = vPinyin.chineseToPinYin(el.ar[0].name);
                 el.al.sortAlbum = vPinyin.chineseToPinYin(el.al.name);
-                el.url = `https://music.163.com/song/media/outer/url?id=${el.id}.mp3 `;
+                el.url = `https://music.163.com/song/media/outer/url?id=${el.id}.mp3`;
                 if (!res) console.log("不可用音乐", el.name);
                 resolve();
               });
             });
           });
-          try {
-            await Promise.all(arr);
-            this.SET_PLAYLIST(playlist);
-          } catch (error) {
-            console.log("error", error);
-          }
+          await Promise.all(arr);
+          this.SET_PLAYLIST(playlist);
           console.log("playlist", playlist);
         } else {
           //todo 有缓存数据先展示缓存，后台刷新列表？
@@ -557,10 +553,12 @@ export default {
   },
   beforeRouteEnter(to, from, next) {
     next(async (_this) => {
-      const mainBody = document.querySelector(".main-body");
-      mainBody.scrollTop = 0;
+      if (from.name) {
+        const mainBody = document.querySelector(".main-body");
+        mainBody.scrollTop = 0;
+        mainBody.addEventListener("scroll", () => debounce(_this.listScroll()));
+      }
       _this.renderPage();
-      mainBody.addEventListener("scroll", () => debounce(_this.listScroll()));
     });
   },
   beforeRouteLeave(to, from, next) {

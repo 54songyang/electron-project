@@ -148,7 +148,7 @@ export default {
       left: 0;
       top: 0;
       bottom: 0;
-      height: 3px;
+      height: 2px;
       transition: background-color 0.3s;
       will-change: width;
       background: rgb(195, 70, 58);

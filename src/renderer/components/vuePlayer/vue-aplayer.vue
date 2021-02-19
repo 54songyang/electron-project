@@ -11,7 +11,7 @@
     }"
     :style="floatStyleObj"
   >
-    <div class="img-box" @click="$refs.lyrics.lyricsChannel()">
+    <div v-show="currentMusic" class="img-box" @click="$refs.lyrics.lyricsChannel()">
       <i :class="[showLrcPop ? 'retract-pop' : 'open-pop']"></i>
       <div class="blur-box">
         <img v-if="currentMusic" :src="currentMusic.al.picUrl" alt />
@@ -726,7 +726,7 @@ const VueAPlayer = {
     onAudioEnded() {
       // determine next song according to shuffle and repeat
       //播放完成
-      if (this.repeatMode === REPEAT.NONE) {
+      if (this.repeatType === "no-repeat") {
         //无循环（顺序播放）
         if (this.currentIndex === this.musicList.length - 1) {
           //播放到最后一首
@@ -736,10 +736,10 @@ const VueAPlayer = {
           const currentMusic = { ...this.musicList[index] };
           this.SET_MUSICLIST({ currentMusic });
         }
-      } else if (this.repeatMode === REPEAT.REPEAT_ONE) {
+      } else if (this.repeatType === "repeat-one") {
         //单曲循环
         this.thenPlay();
-      } else if (this.repeatMode === REPEAT.REPEAT_ALL) {
+      } else if (this.repeatType === "repeat-all") {
         //列表循环
         let index = "";
         if (this.currentIndex === this.musicList.length - 1) {
@@ -750,7 +750,7 @@ const VueAPlayer = {
         if (typeof index === "string") return;
         const currentMusic = { ...this.musicList[index] };
         this.SET_MUSICLIST({ currentMusic });
-      } else if (this.repeatMode === REPEAT.REPEAT_RANDOM) {
+      } else if (this.repeatType === "repeat-random") {
         //随机播放
         const list = this.playOrder;
         const index = list.indexOf(this.currentIndex);

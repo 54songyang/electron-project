@@ -37,7 +37,12 @@
           </div>
         </template>
         <template v-if="item.id">
-          <i class="item-icon music-icon"></i>
+          <i
+            :class="[
+              'item-icon',
+              item.specialType ? 'like-music' : 'music-icon',
+            ]"
+          ></i>
           <div
             :class="[
               'nav',
@@ -461,6 +466,11 @@ export default {
     }
     .music-icon {
       background-image: url(~@/assets/images/music-icon.png);
+      background-size: 14px 15px;
+    }
+    .like-music {
+      background-image: url(~@/assets/images/heart.png);
+      background-size: 17px 18px;
     }
   }
   .active {
@@ -498,6 +508,11 @@ export default {
     }
     .music-icon {
       background-image: url(~@/assets/images/music-red.png);
+      background-size: 14px 15px;
+    }
+    .like-music {
+      background-image: url(~@/assets/images/heart1.png);
+      background-size: 17px 18px;
     }
   }
   .item-hover:hover {

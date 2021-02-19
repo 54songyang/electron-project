@@ -1,5 +1,5 @@
 <template>
-  <div class="own-body" v-if="personalFm.length > 0">
+  <div class="own-body" v-if="personalFm.length > 0 && currentMusic">
     <div class="own-box">
       <div class="own-left">
         <div class="img-box">
@@ -15,32 +15,57 @@
               :src="item.album.picUrl"
             />
           </div>
-          <i :class="{ 'play-i': playType }" @click="ownPlay"></i>
+          <i :class="{ 'play-i': isPlaying }" @click="ownPlay"></i>
         </div>
         <div class="btn-box">
           <div class="own-collection"></div>
           <div class="own-delete"></div>
           <div class="own-next" @click="ownNext"></div>
-          <div class="own-more"></div>
+          <div class="own-more" @click="rightClick"></div>
         </div>
       </div>
-      <div class="own-right"></div>
+      <div class="own-right">
+        <div class="music-name">{{ currentMusic.name }}<em>标准音质</em></div>
+        <div class="tip-box">
+          <div>
+            专辑：<span>{{ currentMusic.al.name }}</span>
+          </div>
+          <div>
+            歌手：<span>{{
+              currentMusic.ar.map((el) => el.name).join("/")
+            }}</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { mapActions, mapState } from "vuex";
+import { remote } from "electron";
+import { mapMutations } from "vuex";
+const { Menu, MenuItem } = remote;
 export default {
   name: "ownFm",
   data() {
     return {
-      playType: false,
       personalFm: [], //私人FM
       activeIndex: 0,
     };
   },
+  computed: {
+    isPlaying() {
+      return this.$store.state.music.isPlaying;
+    },
+    playType() {
+      return this.$store.state.music.playType;
+    },
+    currentMusic() {
+      return this.$store.state.music.currentMusic;
+    },
+  },
   methods: {
+    ...mapMutations(["SET_MUSICLIST", "SET_PLAYING"]),
     imgLazy(src, error) {
       return {
         src,
@@ -48,7 +73,15 @@ export default {
       };
     },
     ownPlay() {
-      this.playType = !this.playType;
+      if (!this.isPlaying) {
+        const currentMusic = { ...this.personalFm[this.activeIndex] };
+        currentMusic.al = currentMusic.album;
+        currentMusic.ar = currentMusic.artists;
+        currentMusic.dt = currentMusic.duration;
+        currentMusic.url = `https://music.163.com/song/media/outer/url?id=${currentMusic.id}.mp3`;
+        console.log("currentMusic", currentMusic);
+        this.SET_MUSICLIST({ currentMusic });
+      }
     },
     //私人FM
     getPersonalFm() {
@@ -86,7 +119,7 @@ export default {
       try {
         if (this.personalFm.length === this.activeIndex + 2) {
           this.activeIndex++;
-          const res = await this.getPersonalFm();
+          await this.getPersonalFm();
         } else if (this.personalFm.length === this.activeIndex + 1) {
           const res = await this.getPersonalFm();
           if (!res) throw "";
@@ -100,6 +133,59 @@ export default {
     },
     checkImg(index) {
       this.activeIndex = index;
+    },
+    rightClick() {
+      const _this = this;
+      const arr = [
+        {
+          label: "收藏",
+          click: function () {
+            console.log("收藏");
+          },
+        },
+        {
+          label: "分享...",
+          click: function () {
+            console.log("分享...");
+          },
+        },
+        {
+          label: "复制链接",
+          click: function () {
+            console.log("复制链接");
+          },
+        },
+        {
+          label: "下载",
+          click: function () {
+            console.log("下载");
+          },
+        },
+        {
+          type: "separator",
+        },
+        {
+          label: "跳转到垃圾桶列表",
+          click: function () {
+            console.log("跳转到垃圾桶列表");
+          },
+        },
+      ];
+      // 右键菜单
+      const menu = new Menu();
+      arr.forEach((el) => {
+        menu.append(new MenuItem(el));
+      });
+      // 展示出来
+      menu.popup(remote.getCurrentWindow());
+    },
+    selectItem(index) {
+      this.activeItem = index;
+    },
+    async selectsong(item, index) {
+      this.SET_MUSICLIST({
+        currentMusic: { ...item },
+      });
     },
   },
   mounted() {
@@ -215,6 +301,36 @@ export default {
     }
     .own-right {
       flex: 1;
+      margin-top: 46px;
+      .music-name {
+        font-size: 21px;
+        em {
+          display: inline-block;
+          font-size: 13px;
+          word-break: keep-all;
+          border: 1px solid rgb(132, 57, 50);
+          border-radius: 2px;
+          color: rgb(132, 57, 50);
+          line-height: 20px;
+          width: 63px;
+          height: 20px;
+          text-align: center;
+          vertical-align: 2px;
+          margin-left: 6px;
+        }
+      }
+      .tip-box {
+        display: flex;
+        font-size: 12px;
+        margin-top: 13px;
+        justify-content: space-around;
+        div {
+          flex: 1;
+          span {
+            color: rgb(144, 184, 266);
+          }
+        }
+      }
     }
   }
 }

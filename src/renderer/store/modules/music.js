@@ -40,9 +40,11 @@ const mutations = {
   SET_PLAYING(state, val) {
     state.isPlaying = val
   },
-  SET_MUSICLIST(state, { musicList, currentMusic }) {
-    if (musicList) {
-      state.musicList = musicList
+  SET_MUSICLIST(state, { musicList, currentMusic, playType }) {
+    if (musicList) state.musicList = musicList
+    if (playType === "OWN_FM") {
+      state.playType = "OWN_FM"
+    } else {
       state.playType = "PLAY_LIST" //***播放歌曲列表模式
     }
     state.currentMusic = currentMusic

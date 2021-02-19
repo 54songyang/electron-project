@@ -62,6 +62,9 @@ export default {
     showLrcPop() {
       return this.$store.state.music.showLrcPop;
     },
+    playType() {
+      return this.$store.state.music.playType;
+    },
   },
   mounted() {
     document
@@ -79,8 +82,8 @@ export default {
       .removeEventListener("scroll", this.debounce(this.turnBack, 1000));
   },
   methods: {
-    ...mapMutations(["SET_SHOWLRCPOP","SET_MUSIC"]),
-    ...mapActions(['musicLrc']),
+    ...mapMutations(["SET_SHOWLRCPOP", "SET_MUSIC"]),
+    ...mapActions(["musicLrc"]),
     applyLrc(lrc) {
       if (/^https?:\/\//.test(lrc)) {
         this.fetchLrc(lrc);
@@ -122,15 +125,16 @@ export default {
       }, 5000);
     },
     async lyricsChannel() {
+      if (this.playType !== "PLAY_LIST") return;
       this.currentLineIndex = 0;
       const lrc = this.currentMusic.lrc;
       this.SET_SHOWLRCPOP(!this.showLrcPop);
-      if(!lrc){
-        const res = await this.musicLrc(this.currentMusic.id)
-        this.SET_MUSIC({lrc:res})
-        console.log("this.currentMusic.lrc",this.currentMusic.lrc);
+      if (!lrc) {
+        const res = await this.musicLrc(this.currentMusic.id);
+        this.SET_MUSIC({ lrc: res });
+        console.log("this.currentMusic.lrc", this.currentMusic.lrc);
         this.applyLrc(res);
-      }else{
+      } else {
         this.applyLrc(lrc);
       }
       // if (lrc) {
