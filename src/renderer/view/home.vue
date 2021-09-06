@@ -293,7 +293,6 @@ export default {
 // }
 body {
   font-family: PingFangSC-Regular, PingFang SC, sans-serif;
-  cursor: pointer;
 }
 </style>
 <style lang="scss" scoped>

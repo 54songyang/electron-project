@@ -1,5 +1,10 @@
 <template>
-  <div class="slider-container" ref="slider" @mouseover="pause()" @mouseout="play()">
+  <div
+    class="slider-container"
+    ref="slider"
+    @mouseover="pause()"
+    @mouseout="play()"
+  >
     <div class="slider-content" :class="mask ? 'mask' : ''">
       <div
         class="slider"
@@ -10,7 +15,12 @@
       >
         <!-- :style="{backgroundImage: 'url(' + item.imageUrl + ')' }" -->
         <img :src="item.imageUrl" alt />
-        <div class="banner-tag">{{item.typeTitle}}</div>
+        <div
+          class="banner-tag"
+          :style="`background: ${backgroundFn(item.titleColor)}`"
+        >
+          {{ item.typeTitle }}
+        </div>
       </div>
       <i v-show="arrow" class="iconfont icon-left" @click="prev()"></i>
       <i v-show="arrow" class="iconfont icon-right" @click="next()"></i>
@@ -23,6 +33,8 @@
         @mouseover="currentIndex = index"
       ></span>
     </div>
+    <i class="left-btn"></i>
+    <i class="right-btn"></i>
   </div>
 </template>
 
@@ -33,7 +45,7 @@ export default {
     return {
       currentIndex: 0,
       sliderDomList: [],
-      timer: null
+      timer: null,
     };
   },
   props: {
@@ -42,32 +54,32 @@ export default {
       type: Array,
       default() {
         return [];
-      }
+      },
     },
     autoPlay: {
       type: Boolean,
-      default: true
+      default: true,
     },
     mask: {
       type: Boolean,
-      default: true
+      default: true,
     },
     interval: {
       type: Number,
-      default: 4000
+      default: 4000,
     },
     dots: {
       type: Boolean,
-      default: true
+      default: true,
     },
     arrow: {
       type: Boolean,
-      default: true
+      default: true,
     },
     color: {
       type: String,
-      default: "#e03938"
-    }
+      default: "#e03938",
+    },
   },
   mounted() {
     this.sliderDomList = this.$refs.slider.querySelectorAll("div.slider");
@@ -93,10 +105,10 @@ export default {
     setActiveDot(index) {
       return index === this.currentIndex
         ? {
-            backgroundColor: this.color
+            backgroundColor: this.color,
           }
         : {
-            backgroundColor: "#3a3a3a"
+            backgroundColor: "#3a3a3a",
           };
     },
     play() {
@@ -117,13 +129,22 @@ export default {
       this.currentIndex =
         this.currentIndex === 0 ? this.list.length - 1 : this.currentIndex - 1;
     },
+    backgroundFn(e) {
+      switch (e) {
+        case "red":
+          return `rgb(198, 83, 89)`;
+        case "blue":
+          return `rgb(84, 121, 198)`;
+        default:
+          return `rgb(198, 83, 89)`;
+      }
+    },
     onClick(i) {
       if (i === this.currentIndex) {
         this.$emit("sliderClick", i);
       } else {
-        let currentClickClassName = this.sliderDomList[i].className.split(
-          " "
-        )[1];
+        let currentClickClassName =
+          this.sliderDomList[i].className.split(" ")[1];
         console.log(currentClickClassName);
         if (currentClickClassName === "next") {
           this.next();
@@ -131,8 +152,8 @@ export default {
           this.prev();
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -179,6 +200,7 @@ export default {
         overflow: hidden;
         background-color: rgb(30, 30, 30);
         -webkit-user-drag: none;
+        cursor: pointer;
 
         &::after {
           content: url(~@/assets/images/sing.png);
@@ -186,7 +208,7 @@ export default {
           z-index: 2;
           top: 50%;
           left: 50%;
-          transform: translate(-50%,-50%);
+          transform: translate(-50%, -50%);
           width: 120px;
           height: 120px;
           background-size: 100% 100%;
@@ -204,7 +226,7 @@ export default {
         background-color: rgba(0, 0, 0, 0);
         transition-delay: 100ms !important;
         transition: all 500ms;
-        cursor: pointer;
+        // cursor: pointer;
       }
 
       &.active {
@@ -214,13 +236,13 @@ export default {
       }
 
       &.prev {
-        opacity: 1;
+        opacity: 0.6;
         transform: scale(0.85) translate3d(-90%, 0, 100px);
         z-index: 19;
       }
 
       &.next {
-        opacity: 1;
+        opacity: 0.6;
         transform: scale(0.85) translate3d(-25%, 0, -100px);
         z-index: 18;
       }
@@ -234,7 +256,7 @@ export default {
       font-size: 22px;
       color: rgba(255, 255, 255, 0.5);
       text-shadow: 0 0 24px rgba(0, 0, 0, 0.3);
-      cursor: pointer;
+      // cursor: pointer;
       z-index: 21;
 
       &:first-child {
@@ -266,7 +288,6 @@ export default {
           right: 0;
           bottom: 0;
           padding: 0 10px;
-          background: rgb(198, 83, 89);
           font-size: 12px;
           color: #fff;
           border-radius: 8px 0;
@@ -286,8 +307,30 @@ export default {
       height: 6px;
       margin: 1px 5px;
       border-radius: 50%;
-      cursor: pointer;
+      // cursor: pointer;
     }
+  }
+  & > i {
+    display: none;
+    position: absolute;
+    width: 23px;
+    height: 23px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    cursor: pointer;
+    pointer-events: none;
+  }
+  &:hover > i {
+    display: block;
+  }
+  .left-btn {
+    left: 20px;
+    background: url(~@/assets/images/next1.png) center/100% no-repeat;
+  }
+  .right-btn {
+    right: 10px;
+    background: url(~@/assets/images/prev1.png) center/100% no-repeat;
   }
 }
 </style>

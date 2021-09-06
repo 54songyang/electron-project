@@ -4,12 +4,21 @@
       <div class="mini-close" @click="channelWin('closeMini')"></div>
       <div class="mini-big" @click="channelWin('showMain')"></div>
     </div>
+    <aplayer :repeat="playRepeat" ref="player"></aplayer>
   </div>
 </template>
 
 <script>
+import aplayer from "@/components/vuePlayer/mini-aplayer";
 export default {
   name: "miniPage",
+  components: { aplayer },
+  data() {
+    return {
+      playRepeat: "no-repeat",
+      
+    }
+  },
   methods: {
     channelWin(val) {
       this.$electron.ipcRenderer.send(val);
@@ -24,14 +33,15 @@ export default {
   -webkit-app-region: drag;
   background: rgb(47, 47, 47);
   height: 100vh;
+  overflow: hidden;
+  display: flex;
   .mini-set-box {
-    position: absolute;
-    left: 0;
-    top: 5px;
+    // position: absolute;
+    // left: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 0 5px;
+    margin: 5px 5px 0 5px;
     div:hover {
       filter: brightness(2.3);
     }

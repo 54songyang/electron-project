@@ -217,11 +217,41 @@
             </div>
           </div>
         </template>
+
+        <template #lookLive>
+          <div class="recommend-title" style="marginTop:30px">
+            <span class="hover-bright" @click="$router.push('djprogram')"
+              >LOOK直播</span
+            >
+          </div>
+          <div class="main-item">
+            <!-- 暂未找到接口 -->
+            <!-- <div
+              class="list-item djprogram-item"
+              v-for="item in djprogram"
+              :key="item.id"
+            >
+              <div class="djprogram-box">
+                <div class="img-box">
+                  <img v-lazy="imgLazy(item.picUrl, 0)" />
+                </div>
+                <div class="djprogram-detail">
+                  <div class="djprogram-name hover-bright vertical-word-1">
+                    {{ item.name }}
+                  </div>
+                  <div class="hover-bright vertical-word-1">
+                    {{ item.copywriter }}
+                  </div>
+                </div>
+              </div>
+            </div> -->
+          </div>
+        </template>
       </mainList>
     </div>
 
     <div class="change-index">
-      <p>现在可以根据个人喜好,自由调整首页栏目顺序啦～</p>
+      <div>现在可以根据个人喜好,自由调整首页栏目顺序啦～</div>
       <div class="change-btn" @click="changIndex">调整栏目顺序</div>
     </div>
     <div class="shelter" v-show="changeShow"></div>
@@ -271,6 +301,7 @@ export default {
         { name: "最新音乐", id: "newsong", index: 2 },
         { name: "推荐MV", id: "personalizedMv", index: 3 },
         { name: "主播电台", id: "djprogram", index: 4 },
+        { name: "LOOK直播", id: "lookLive", index: 5 },
       ],
       changeArr: [
         { name: "推荐歌单", id: "songSheet", index: 0 },
@@ -278,6 +309,7 @@ export default {
         { name: "最新音乐", id: "newsong", index: 2 },
         { name: "推荐MV", id: "personalizedMv", index: 3 },
         { name: "主播电台", id: "djprogram", index: 4 },
+        { name: "LOOK直播", id: "lookLive", index: 5 },
       ],
     };
   },
@@ -378,6 +410,7 @@ export default {
         { name: "最新音乐", id: "newsong", index: 2 },
         { name: "推荐MV", id: "personalizedMv", index: 3 },
         { name: "主播电台", id: "djprogram", index: 4 },
+        { name: "LOOK直播", id: "lookLive", index: 5 },
       ];
     },
   },
@@ -433,6 +466,9 @@ export default {
       padding-right: 30px;
       margin-bottom: 3px;
       font-weight: normal;
+      &>.hover-bright{
+        cursor: pointer;
+      }
       & span::after {
         content: "";
         display: inline-block;
@@ -449,6 +485,7 @@ export default {
       flex-wrap: wrap;
       .list-item {
         margin: 0 20px 40px 0;
+        cursor: pointer;
         .newsong-box {
           display: flex;
           align-items: center;
@@ -565,7 +602,7 @@ export default {
             background-image: url(~@/assets/images/recommend-play.png);
             background-color: rgba(209, 209, 209, 0.7);
             background-repeat: no-repeat;
-            background-position: center center;
+            background-position: 9.5px 9px;
             background-size: 45% 45%;
             border-radius: 50%;
             width: 30px;
@@ -693,6 +730,7 @@ export default {
         padding: 10px 0 10px 10px;
         border-radius: 4px;
         margin-bottom: 0px;
+        width: 90%;
         &:hover {
           background: rgb(46, 46, 46);
         }
@@ -701,6 +739,7 @@ export default {
     .main-newsong-item {
       width: calc((100% - 20px) / 2);
       flex-direction: column;
+      overflow: hidden;
     }
   }
   .change-index {
@@ -723,7 +762,7 @@ export default {
   .change-box {
     position: fixed;
     background: rgb(54, 54, 54);
-    height: 395px;
+    height: 430px;
     width: 330px;
     top: 20px;
     left: 100px;
@@ -746,6 +785,7 @@ export default {
         background-size: 100% 100%;
         width: 22px;
         height: 22px;
+        cursor: auto;
       }
     }
     .change-tip {
@@ -863,6 +903,6 @@ export default {
     -webkit-box-orient: vertical;
   }
 }
-img[lazy="error"] {
-}
+// img[lazy="error"] {
+// }
 </style>

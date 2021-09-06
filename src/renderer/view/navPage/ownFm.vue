@@ -87,7 +87,7 @@ export default {
     getPersonalFm() {
       return this.$axios({
         type: "get",
-        url: "/personal_fm",
+        url: `/personal_fm?timestamp=${new Date().valueOf()}`, //时间戳去除缓存
       })
         .then((res) => {
           console.log("获取私人FM", res);
@@ -322,9 +322,15 @@ export default {
         display: flex;
         font-size: 12px;
         margin-top: 13px;
+        padding-right: 20px;
         justify-content: space-around;
         div {
           flex: 1;
+          flex: 1;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          word-break: break-all;
           span {
             color: rgb(144, 184, 266);
           }
