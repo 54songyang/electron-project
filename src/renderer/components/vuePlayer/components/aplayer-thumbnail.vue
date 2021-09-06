@@ -1,18 +1,22 @@
 <template>
-  <div class="aplayer-pic">
-    <div class="collection" @click="toCollection"></div>
-    <div class="next" @click="prev"></div>
-    <div
-      class="aplayer-button"
-      :class="playing ? 'aplayer-pause' : 'aplayer-play'"
-      @mousedown="onDragBegin"
-      @click="onClick"
-      @keydown.space="onClick"
-    >
-      <div :class="playing ? 'aplayer-icon-pause' : 'aplayer-icon-play'"></div>
+  <div :class="isMini && 'mini-pic-body'">
+    <div :class="['aplayer-pic', isMini && 'mini-aplayer-pic']">
+      <div v-if="!isMini" class="collection" @click="toCollection"></div>
+      <div class="next" @click="prev"></div>
+      <div
+        class="aplayer-button"
+        :class="playing ? 'aplayer-pause' : 'aplayer-play'"
+        @mousedown="onDragBegin"
+        @click="onClick"
+        @keydown.space="onClick"
+      >
+        <div
+          :class="playing ? 'aplayer-icon-pause' : 'aplayer-icon-play'"
+        ></div>
+      </div>
+      <div class="prev" @click="next"></div>
+      <div class="share" v-if="!isMini"></div>
     </div>
-    <div class="prev" @click="next"></div>
-    <div class="share"></div>
   </div>
 </template>
 <script>
@@ -25,6 +29,11 @@ export default {
   },
   props: {
     theme: String,
+    isMini: {
+      //是否是迷你模式
+      type: Boolean,
+      default: false,
+    },
     playing: {
       type: Boolean,
       default: false,
@@ -32,7 +41,7 @@ export default {
     enableDrag: {
       type: Boolean,
       default: false,
-    }
+    },
   },
   data() {
     return {
@@ -87,7 +96,7 @@ export default {
     },
     prev() {
       //上一首
-      console.log("this.repeatType",this.repeatType);
+      console.log("this.repeatType", this.repeatType);
       if (this.repeatType === "repeat-random") {
         //随机播放
         const list = this.playOrder;
@@ -95,8 +104,8 @@ export default {
         let num = 0;
         if (index !== 0) {
           num = index - 1;
-        }else{
-          num = list.length-1
+        } else {
+          num = list.length - 1;
         }
         const currentMusic = { ...this.musicList[list[num]] };
         this.SET_MUSICLIST({ currentMusic });
@@ -186,6 +195,7 @@ export default {
   }
   .next,
   .prev {
+    -webkit-app-region: no-drag;
     background: url(~@/assets/images/change-red.png) no-repeat;
     background-size: 100% 100%;
     width: 14px;
@@ -212,6 +222,7 @@ export default {
     width: 40px;
     height: 40px;
     background-color: rgb(195, 70, 58);
+    -webkit-app-region: no-drag;
     .aplayer-icon-play {
       width: 100%;
       height: 100%;
@@ -225,6 +236,30 @@ export default {
       background: url(~@/assets/images/end-btn.png) center center no-repeat;
       background-size: 22px 22px;
     }
+  }
+}
+.mini-pic-body {
+  display: none;
+}
+.mini-aplayer-pic {
+  max-width: 91px;
+  height: 38px;
+  margin-left: 30px;
+  .aplayer-play,
+  .aplayer-pause {
+    width: 28px;
+    height: 28px;
+    .aplayer-icon-play {
+      background-size: 18px;
+    }
+    .aplayer-icon-pause {
+      background-size: 18px;
+    }
+  }
+  .next,
+  .prev {
+    width: 10px;
+    height: 10px;
   }
 }
 </style>

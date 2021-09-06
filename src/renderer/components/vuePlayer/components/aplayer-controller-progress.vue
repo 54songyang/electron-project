@@ -1,6 +1,6 @@
 <template>
   <div
-    class="aplayer-bar-wrap"
+    :class="['aplayer-bar-wrap',isMini&&'mini-bar-wrap']"
     @mousedown="onThumbMouseDown"
     @touchstart="onThumbTouchStart"
     ref="barWrap"
@@ -41,7 +41,7 @@ export default {
   components: {
     Icon,
   },
-  props: ["loadProgress", "playProgress", "theme"],
+  props: ["isMini","loadProgress", "playProgress", "theme"],
   data() {
     return {
       thumbHovered: false,
@@ -185,6 +185,26 @@ export default {
             fill: #ffffff;
           }
         }
+      }
+    }
+  }
+}
+.mini-bar-wrap{
+  cursor: default;
+  left: 44px;
+  background: rgb(87, 85, 87);
+  height: 2px;
+  width: 77vw;
+  margin-top:4px;
+  border-radius: 1px;
+  .aplayer-bar{
+  -webkit-app-region: no-drag;
+    .aplayer-played{
+      background: rgb(138, 135, 138);
+      .aplayer-thumb{
+        background: #fff;
+        width: 9px;
+        height: 9px;
       }
     }
   }

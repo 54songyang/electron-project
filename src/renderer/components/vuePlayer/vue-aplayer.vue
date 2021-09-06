@@ -1,6 +1,6 @@
 <template>
   <div
-    class="aplayer"
+    class="aplayer main-aplayer"
     :class="{
       'aplayer-narrow': isMiniMode,
       'aplayer-withlist':
@@ -911,7 +911,7 @@ export default VueAPlayer;
 <style lang="scss">
 @import "./scss/variables.scss";
 
-.aplayer {
+.aplayer.main-aplayer {
   background: rgb(37, 37, 37);
   display: flex;
   .img-box {

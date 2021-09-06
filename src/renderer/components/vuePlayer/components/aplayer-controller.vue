@@ -1,6 +1,7 @@
 <template>
-  <div class="aplayer-controller">
+   <div class="aplayer-controller">
     <v-progress
+      :isMini="isMini"
       :loadProgress="loadProgress"
       :playProgress="playProgress"
       :theme="theme"
@@ -8,7 +9,7 @@
       @dragend="(val) => $emit('dragend', val)"
       @dragging="(val) => $emit('dragging', val)"
     />
-    <div class="aplayer-time">
+    <div v-if="!isMini" class="aplayer-time">
       <div class="aplayer-time-inner">
         <span class="aplayer-ptime">{{ secondToTime(stat.playedTime) }}</span> /
         <!-- <span class="aplayer-dtime">{{secondToTime(stat.duration)}}</span> -->
@@ -27,7 +28,7 @@ export default {
     IconButton,
     VProgress,
   },
-  props: ["shuffle", "stat", "theme", "muted", "dt"],
+  props: ["isMini", "shuffle", "stat", "theme", "muted", "dt"],
   computed: {
     loadProgress() {
       if (this.stat.duration === 0) return 0;

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="aplayer"
+    class="aplayer mini-aplayer"
     :class="{
       'aplayer-narrow': isMiniMode,
       'aplayer-withlist':
@@ -14,12 +14,39 @@
     <div class="img-box" @click="$refs.lyrics.lyricsChannel()">
       <i :class="[showLrcPop ? 'retract-pop' : 'open-pop']"></i>
       <div class="blur-box">
-        <img v-if="currentMusic" :src="currentMusic.al.picUrl" alt />
+        <img
+          v-lazy="{
+            src: currentMusic ? currentMusic.al.picUrl : '',
+            error: defaultImg,
+          }"
+          alt
+        />
       </div>
     </div>
     <div class="aplayer-body">
-      <!-- <div class="aplayer-info" v-show="!isMiniMode">
+      <div class="aplayer-info" v-show="!isMiniMode">
+        <div class="aplayer-music" v-if="currentMusic">
+          <span class="aplayer-title">{{
+            currentMusic ? currentMusic.name : "Untitled"
+          }}</span>
+          <span class="aplayer-author hover-bright"
+            >{{
+              currentMusic
+                ? currentMusic.ar.map((el) => el.name).join("/")
+                : "Unknown"
+            }}<i>--</i>{{ currentMusic.al.name }}</span
+          >
+        </div>
+        <thumbnail
+          :isMini="true"
+          :playing="isPlaying"
+          :enable-drag="isFloatMode"
+          @toggleplay="toggle"
+          @dragbegin="onDragBegin"
+          @dragging="onDragAround"
+        />
         <controls
+          :isMini="true"
           v-if="currentMusic"
           :shuffle="shouldShuffle"
           :stat="playStat"
@@ -31,26 +58,8 @@
           @dragend="onProgressDragEnd"
           @dragging="onProgressDragging"
         />
-        <div class="aplayer-music" v-if="currentMusic">
-          <span class="aplayer-title">{{
-            currentMusic ? currentMusic.name : "Untitled"
-          }}</span>
-          <span class="aplayer-author hover-bright"
-            >-{{
-              currentMusic
-                ? currentMusic.ar.map((el) => el.name).join("/")
-                : "Unknown"
-            }}</span
-          >
-        </div>
-      </div> -->
-      <thumbnail
-        :playing="isPlaying"
-        :enable-drag="isFloatMode"
-        @toggleplay="toggle"
-        @dragbegin="onDragBegin"
-        @dragging="onDragAround"
-      />
+      </div>
+
       <div class="controller-box">
         <div>
           <div class="play-btn play-tree"></div>
@@ -120,6 +129,7 @@ import MusicList from "./components/aplayer-list.vue";
 import Controls from "./components/aplayer-controller.vue";
 import Lyrics from "./components/aplayer-lrc.vue";
 import Volume from "./components/aplayer-controller-volume";
+import defaultImg from "@/assets/images/mini/mini-1.png";
 import { deprecatedProp, versionCompare, warn } from "./js/utils";
 import { mapActions, mapMutations } from "vuex";
 
@@ -329,6 +339,8 @@ const VueAPlayer = {
       internalShuffle: this.shuffle,
       internalRepeat: this.repeat,
       // for shuffling
+
+      defaultImg,
     };
   },
   computed: {
@@ -909,53 +921,43 @@ export default VueAPlayer;
 <style lang="scss">
 @import "./scss/variables.scss";
 
-.aplayer {
+.aplayer.mini-aplayer {
   display: flex;
   background: rgb(47, 47, 47);
   .img-box {
     position: relative;
     z-index: 101;
-    display: flex;
-    width: 60px;
-    min-width: 60px;
-    height: 60px;
-    justify-content: center;
-    align-items: center;
-    background: rgb(47, 47, 47);
+    padding: 8px 4px 0 4px;
     .blur-box {
       overflow: hidden;
+      -webkit-app-region: no-drag;
       img {
         display: block;
-        width: 40px;
-        height: 40px;
+        width: 33px;
+        height: 33px;
         border-radius: 4px;
       }
     }
     &:hover {
       .open-pop {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: url(~@/assets/images/open.png) no-repeat;
+        top: 8px;
+        left: 4px;
+        background: url(~@/assets/images/mini/mini-2.png) no-repeat;
         background-size: 100% 100%;
-        width: 30px;
-        height: 30px;
+        width: 33px;
+        height: 33px;
         z-index: 1;
       }
       .retract-pop {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: url(~@/assets/images/retract.png) no-repeat;
+        top: 8px;
+        left: 4px;
+        background: url(~@/assets/images/mini/mini-3.png) no-repeat;
         background-size: 100% 100%;
-        width: 30px;
-        height: 30px;
+        width: 33px;
+        height: 33px;
         z-index: 1;
-      }
-      img {
-        filter: blur(2px);
       }
     }
   }
@@ -1215,48 +1217,34 @@ export default VueAPlayer;
   }
 
   .aplayer-body {
-    flex: 1;
-    display: flex;
-    position: relative;
-    z-index: 101;
-    justify-content: space-between;
-    cursor: default;
-    background: rgb(47, 47, 47);
     .aplayer-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      max-width: 39vw;
-      padding-right: 5vw;
-      text-align: start;
-      height: $aplayer-height;
-      box-sizing: border-box;
-      // overflow: hidden;
-
+      // display: none;
       .aplayer-music {
-        display: flex;
         cursor: default;
         margin: 6px 0 0 0px;
+        height: 32px;
         .aplayer-title {
           display: block;
           color: rgb(190, 190, 190);
-          font-size: 14px;
+          font-size: 13px;
           white-space: nowrap;
           text-overflow: ellipsis;
           overflow: hidden;
           word-break: break-all;
-          max-width: 50%;
+          height: 18px;
         }
 
         .aplayer-author {
           display: block;
-          font-size: 12px;
+          font-size: 10px;
           color: rgb(146, 146, 146);
-          white-space: nowrap;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          word-break: break-all;
-          max-width: 50%;
+          i {
+            display: inline-block;
+            font-size: 8px;
+            font-family: PingFangSC-Medium, PingFang SC;
+            vertical-align: 1px;
+            margin: 0 4px;
+          }
         }
       }
 
@@ -1358,10 +1346,6 @@ export default VueAPlayer;
 
   &.aplayer-withlist {
     .aplayer-body {
-      .aplayer-info {
-        border-bottom: 1px solid #e9e9e9;
-      }
-
       .aplayer-controller .aplayer-time .aplayer-icon.aplayer-icon-menu {
         display: block;
       }

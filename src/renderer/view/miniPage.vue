@@ -16,18 +16,17 @@ export default {
   data() {
     return {
       playRepeat: "no-repeat",
-      
-    }
+    };
   },
   methods: {
     channelWin(val) {
       this.$electron.ipcRenderer.send(val);
-    }
-  }
+    },
+  },
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .mini-body {
   position: relative;
   -webkit-app-region: drag;
@@ -35,6 +34,16 @@ export default {
   height: 100vh;
   overflow: hidden;
   display: flex;
+  &:hover {
+    .mini-pic-body {
+      display: block;
+    }
+    .aplayer-info {
+      .aplayer-music {
+        display: none !important;
+      }
+    }
+  }
   .mini-set-box {
     // position: absolute;
     // left: 0;
@@ -46,12 +55,14 @@ export default {
       filter: brightness(2.3);
     }
     .mini-close {
+      -webkit-app-region: no-drag;
       background: url(~@/assets/images/close1.png) no-repeat;
       background-size: 100% 100%;
       width: 12px;
       height: 12px;
     }
     .mini-big {
+      -webkit-app-region: no-drag;
       background: url(~@/assets/images/mini-big.png) no-repeat;
       background-size: 100% 100%;
       width: 9px;
