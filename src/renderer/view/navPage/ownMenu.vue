@@ -489,6 +489,8 @@ export default {
       try {
         if (!this.tracks) {
           //无缓存数据，重新获取
+          // this.$store.dispatch('someAsyncTask')
+          // console.log("00",this.$store.state.Counter.main);
           const playlist = await this.getMenuDetail(this.id);
           // const idArr = playlist.trackIds.map(el=>el.id)
           // const urls = await this.musicUrl(idArr)
