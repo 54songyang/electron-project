@@ -20,7 +20,7 @@
   </div>
 </template>
 <script>
-import { mapMutations } from "vuex";
+import { mapActions } from "vuex";
 import IconButton from "../components/aplayer-iconbutton.vue";
 
 export default {
@@ -65,7 +65,7 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(["SET_MUSICLIST"]),
+    ...mapActions(['setMusicList']),
     onDragBegin(e) {
       if (this.enableDrag) {
         this.hasMovedSinceMouseDown = false;
@@ -108,7 +108,7 @@ export default {
           num = list.length - 1;
         }
         const currentMusic = { ...this.musicList[list[num]] };
-        this.SET_MUSICLIST({ currentMusic });
+        this.setMusicList({ currentMusic });
       } else {
         let index = "";
         if (this.currentIndex === 0) {
@@ -118,7 +118,7 @@ export default {
         }
         if (typeof index === "string") return;
         const currentMusic = { ...this.musicList[index] };
-        this.SET_MUSICLIST({ currentMusic });
+        this.setMusicList({ currentMusic });
         //todo 判断元素不在可视区域再滚动
         const dom = document.querySelector(`.music-list${index}`);
         if (dom) dom.scrollIntoView();
@@ -135,7 +135,7 @@ export default {
           num = index + 1;
         }
         const currentMusic = { ...this.musicList[list[num]] };
-        this.SET_MUSICLIST({ currentMusic });
+        this.setMusicList({ currentMusic });
       } else {
         let index = "";
         if (this.currentIndex === this.musicList.length - 1) {
@@ -145,7 +145,7 @@ export default {
         }
         if (typeof index === "string") return;
         const currentMusic = { ...this.musicList[index] };
-        this.SET_MUSICLIST({ currentMusic });
+        this.setMusicList({ currentMusic });
         //todo 判断元素不在可视区域再滚动
         const dom = document.querySelector(`.music-list${index}`);
         if (dom) dom.scrollIntoView();

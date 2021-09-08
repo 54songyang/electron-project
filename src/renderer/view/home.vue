@@ -30,7 +30,7 @@
         <div
           v-show="showLrcPop"
           class="close-lrc"
-          @click="SET_SHOWLRCPOP(false)"
+          @click="setShowLrcPop(false)"
         ></div>
         <div class="top-tool-box">
           <div class="top-tool" v-show="!showLrcPop">
@@ -115,7 +115,7 @@ import musicList from "@/components/musicList";
 import mainPageTop from "@/components/mainPageTop";
 import aplayer from "@/components/vuePlayer/vue-aplayer";
 
-import { mapActions, mapMutations } from "vuex";
+import { mapActions } from "vuex";
 export default {
   name: "home",
   components: { leftNav, aplayer, mainPageTop, musicList },
@@ -147,75 +147,74 @@ export default {
       return this.$store.state.page.userInfo;
     },
     ownRoutes() {
-      return this.$store.state.page.ownRoutes;
+      const arr = localStorage.getItem("ownRoutes");
+      if (arr.length)
+        return JSON.parse(localStorage.getItem("ownRoutes"));
+      else return [];
     },
   },
   methods: {
-    ...mapActions(["clearData", "logout", "loginStatus", "getUserPlaylist"]),
-    ...mapMutations([
-      "SET_SHOWMUSICLIST",
-      "SET_USERINFO",
-      "SET_PLAYLIST",
-      "SET_OWNROUTES",
-      "SET_SHOWLRCPOP",
-      "SET_videoUpload",
+    ...mapActions([
+      "setShowLrcPop",
+      "setShowMusicList",
+      "setPlayList",
+      "setClearMusic",
+      "setUserInfo",
+      "setClearState",
     ]),
     channel(val) {
       this.$electron.ipcRenderer.send(val);
     },
-    logoutFn() {
-      this.logout()
-        .then((res) => {
-          if (res.code == 200) {
-            this.SET_OWNROUTES([]);
-            this.removeOwnRoute();
-            console.log(
-              "this.$router.historyRecord",
-              this.$router.historyRecord
-            );
-          }
-        })
-        .catch((err) => {
-          console.log("err", err);
-        });
+    async logoutFn() {
+      const { code } = await this.$utils.logout();
+      if (code != 200) return;
+      this.setClearState();
+      this.setClearMusic();
+      localStorage.setItem("ownRoutes", []);
+      this.removeOwnRoute();
+      delete this.$store.state.Counter;
+      delete this.$store.state.test;
     },
     async toLogin() {
       try {
-        await this.loginStatus();
-        const playlist = await this.getUserPlaylist(this.userInfo.account.id);
+        const userRes = await this.$utils.loginStatus();
+        await this.setUserInfo(userRes);
+        const playlist = await this.$utils.getUserPlaylist(userRes.account.id);
+        this.setPlayList(playlist);
         this.$refs.leftNav.showLogin = false;
         const navList = this.creatData.navList;
         this.creatData.navList = [...navList, ...playlist];
-        if (!this.ownRoutes.length) this.addOwnRoute();
+        if (!this.ownRoutes.length)
+          this.addOwnRoute(playlist);
       } catch (error) {
         console.log("error", error);
       }
     },
-    addOwnRoute() {
-      const routes = this.$router.options.routes.map((el) => ({ ...el }));
-      const newList = this.playlist.filter((el) =>
-        routes[0].children.every((el1) => el1.path !== el.path)
-      );
-      const arr = newList.map((el, index) => {
-        return {
-          path: `/ownMenu${el.id}`,
-          name: `ownMenu${el.id}`,
-          component: require("@/view/navPage/ownMenu").default,
-          meta: {
-            pageNav: index + 11,
-          },
-        };
-      });
-      this.SET_OWNROUTES(arr);
-      routes[0].children = [...this.ownRoutes];
-      this.$router.addRoutes([routes[0]]);
-      if (this.$route.name !== "mainPage") {
-        this.$router.push("mainPage");
-      }
-      //!!!
-      this.$router.backFlag = false;
-      this.$router.historyRecord._history = [];
-      this.$router.historyRecord._index = -1;
+    async addOwnRoute(playlist) {
+        const routes = this.$router.options.routes.map((el) => ({ ...el }));
+        const newList = playlist.filter((el) =>
+          routes[0].children.every((el1) => el1.path !== el.path)
+        );
+        const arr = newList.map((el, index) => {
+          return {
+            path: `/ownMenu${el.id}`,
+            name: `ownMenu${el.id}`,
+            component: require("@/view/navPage/ownMenu").default,
+            meta: {
+              pageNav: index + 11,
+            },
+          };
+        });
+        window.localStorage.setItem("ownRoutes", JSON.stringify(arr));
+        routes[0].children = [...arr];
+        this.$router.addRoutes([routes[0]]);
+        if (this.$route.name !== "mainPage") {
+          this.$router.push("mainPage");
+        }
+        //!!!
+        this.$router.backFlag = false;
+        this.$router.historyRecord._history = [];
+        this.$router.historyRecord._index = -1;
     },
     async removeOwnRoute() {
       //清除客户路由
@@ -237,7 +236,7 @@ export default {
       const listBody = document.querySelector(".list-body");
       const playerBox = document.querySelector(".player-box");
       if (!listBody.contains(e.target) && !playerBox.contains(e.target)) {
-        this.SET_SHOWMUSICLIST(false);
+        this.setShowMusicList(false);
       }
     },
     toMini() {
@@ -276,9 +275,8 @@ export default {
   async mounted() {
     this.$electron.ipcRenderer.on("toLogin", (e, message) => this.toLogin());
     if (!this.userInfo.profile) {
-      this.SET_USERINFO("");
-      this.SET_PLAYLIST([]);
-      // this.SET_videoUpload()
+      this.setUserInfo("");
+      this.setPlayList([]);
     }
   },
 };

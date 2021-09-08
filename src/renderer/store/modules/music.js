@@ -94,48 +94,32 @@ const mutations = {
 }
 
 const actions = {
-  canUse({ commit, state }, id) {
-    //歌曲是否可用
-    return new Promise((resolve, reject) => {
-      axios({
-        url: `/check/music?id=${id}&timerstamp=${Date.now()}`
-      }).then(res => {
-        const { success, message } = res
-        resolve(success === true && message === "ok")
-      }).catch(err => {
-        console.log("err", err);
-        resolve(false)
-      })
-    })
+  setMusic({ commit }, val) {
+    commit('SET_MUSIC', val)
   },
-  musicUrl({ commit, state }, id) {
-    //获取歌曲url
-    const aa = Array.isArray(id) ? id.join(',') : id;
-    return axios({
-      url: `/song/url?id=${aa}&timerstamp=${Date.now()}`
-    }).then(res => {
-      console.log("获取歌曲url", res);
-      return res.data
-    })
+  setVoluume({ commit }, val) {
+    commit('SET_VOLUUME', val)
   },
-  musicLrc({ commit, state }, id) {
-    //获取歌词
-    return axios({
-      url: `/lyric?id=${id}&timerstamp=${Date.now()}`
-    }).then(res => {
-      console.log("获取歌词", res);
-      return res.lrc.lyric
-    })
+  setPlaying({ commit }, val) {
+    commit('SET_PLAYING', val)
   },
-  musicDetail({ commit, state }, ids) {
-    return axios({
-      url: `/song/detail?ids=${ids.join(',')}&timerstamp=${Date.now()}`,
-      withCredentials: true,
-    }).then(res => {
-      console.log("歌曲详情", res.songs);
-      return res.songs
-    })
+  setMusicList({ commit }, val) {
+    commit('SET_MUSICLIST', val)
   },
+  setShowMusicList({ commit }, val) {
+    commit('SET_SHOWMUSICLIST', val)
+  },
+  setShowLrcPop({ commit }, val) {
+    commit('SET_SHOWLRCPOP', val)
+  },
+  setList({ commit }, val) {
+    commit('SET_LIST', val)
+  },
+  setClearMusic({ commit }, val) {
+    console.log("3",);
+    commit('SET_CLEARMUSIC', val)
+  },
+
   setRepeatType({ state, commit, getters }) {
     let arr = [];
     if (state.repeatType === 'no-repeat') {

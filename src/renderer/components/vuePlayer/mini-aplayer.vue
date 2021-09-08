@@ -131,7 +131,7 @@ import Lyrics from "./components/aplayer-lrc.vue";
 import Volume from "./components/aplayer-controller-volume";
 import defaultImg from "@/assets/images/mini/mini-1.png";
 import { deprecatedProp, versionCompare, warn } from "./js/utils";
-import { mapActions, mapMutations } from "vuex";
+import { mapActions } from "vuex";
 
 let versionBadgePrinted = false;
 const canUseSync = versionCompare(Vue.version, "2.3.0") >= 0;
@@ -480,18 +480,13 @@ const VueAPlayer = {
   methods: {
     ...mapActions([
       "getMusicData",
-      "canUse",
-      "musicUrl",
-      "musicLrc",
       "setRepeatType",
+      "setVoluume",
+      "setPlaying",
+      'setMusicList',
+      'setShowMusicList'
     ]),
     // Float mode
-    ...mapMutations([
-      "SET_SHOWMUSICLIST",
-      "SET_MUSICLIST",
-      "SET_PLAYING",
-      "SET_VOLUUME",
-    ]),
     onDragBegin() {
       this.floatOriginX = this.floatOffsetLeft;
       this.floatOriginY = this.floatOffsetTop;
@@ -645,13 +640,13 @@ const VueAPlayer = {
     // for keeping up with audio states
 
     onAudioPlay() {
-      this.SET_PLAYING(true);
+      this.setPlaying(true);
     },
     onAudioPause() {
-      this.SET_PLAYING(false);
+      this.setPlaying(false);
     },
     onAudioWaiting() {
-      this.SET_PLAYING(true);
+      this.setPlaying(true);
     },
     onAudioError(e) {
       const error = e.target.error;
@@ -676,9 +671,9 @@ const VueAPlayer = {
           let index = this.currentIndex + 1;
           if (typeof index === "string") return;
           const currentMusic = { ...this.musicList[index] };
-          this.SET_MUSICLIST({ currentMusic });
+          this.setMusicList({ currentMusic });
         } else {
-          this.SET_MUSICLIST({ currentMusic: null });
+          this.setMusicList({ currentMusic: null });
         }
       }, 1000);
     },
@@ -709,7 +704,7 @@ const VueAPlayer = {
       this.playStat.playedTime = this.audio.currentTime;
     },
     onAudioVolumeChange() {
-      this.SET_VOLUUME(this.audio.volume);
+      this.setVoluume(this.audio.volume);
       this.isAudioMuted = this.audio.muted;
     },
     /**
@@ -726,7 +721,7 @@ const VueAPlayer = {
         } else {
           let index = this.currentIndex + 1;
           const currentMusic = { ...this.musicList[index] };
-          this.SET_MUSICLIST({ currentMusic });
+          this.setMusicList({ currentMusic });
         }
       } else if (this.repeatType === "repeat-one") {
         //单曲循环
@@ -741,7 +736,7 @@ const VueAPlayer = {
         }
         if (typeof index === "string") return;
         const currentMusic = { ...this.musicList[index] };
-        this.SET_MUSICLIST({ currentMusic });
+        this.setMusicList({ currentMusic });
       } else if (this.repeatType === "repeat-random") {
         //随机播放
         const list = this.playOrder;
@@ -751,7 +746,7 @@ const VueAPlayer = {
           num = index + 1;
         }
         const currentMusic = { ...this.musicList[list[num]] };
-        this.SET_MUSICLIST({ currentMusic });
+        this.setMusicList({ currentMusic });
       }
       //todo 判断元素不在可视区域再滚动
       //todo const dom = document.querySelector(`.music-list${index}`);
@@ -823,7 +818,7 @@ const VueAPlayer = {
     },
 
     changeList() {
-      this.SET_SHOWMUSICLIST(!this.showMusicList);
+      this.setShowMusicList(!this.showMusicList);
       //todo 判断元素不在可视区域再滚动
       const dom = document.querySelector(`.music-list${this.currentIndex}`);
       if (dom) dom.scrollIntoView();

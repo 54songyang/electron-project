@@ -157,19 +157,14 @@ export default {
     },
   },
   methods: {
-    ...mapActions([
-      "getQrKey",
-      "getQrcode",
-      "loginStatus",
-      "getQrCheck",
-      "userLogin",
-    ]),
+    ...mapActions(["setUserInfo"]),
     async qrLogin() {
       try {
-        this.loginStatus();
-        const unikey = await this.getQrKey();
+        const res = await this.$utils.loginStatus();
+        // this.setUserInfo(res);
+        const unikey = await this.$utils.getQrKey();
         this.unikey = unikey;
-        const baseUrl = await this.getQrcode(this.unikey);
+        const baseUrl = await this.$utils.getQrcode(this.unikey);
         this.baseUrl = baseUrl;
         this.overdue = false;
         if (this.timer) {
@@ -177,7 +172,7 @@ export default {
           this.timer = null;
         }
         this.timer = setInterval(async () => {
-          const statusRes = await this.getQrCheck(this.unikey);
+          const statusRes = await this.$utils.getQrCheck(this.unikey);
           if (statusRes.code === 800) {
             this.overdue = true;
             clearInterval(this.timer);
@@ -195,10 +190,11 @@ export default {
       }
     },
     async phoneLogin() {
-      const res = await this.userLogin({
+      const res = await this.$utils.userLogin({
         account: this.phoneNum,
         password: this.password,
       });
+      // this.setUserInfo(res);
       if (res.code === 200) {
         this.$electron.ipcRenderer.send("toLogin");
       }

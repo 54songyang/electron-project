@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { mapActions, mapMutations } from "vuex";
+import { mapActions } from "vuex";
 import { parseLrc } from "../js/utils";
 export default {
   props: {
@@ -82,8 +82,7 @@ export default {
       .removeEventListener("scroll", this.debounce(this.turnBack, 1000));
   },
   methods: {
-    ...mapMutations(["SET_SHOWLRCPOP", "SET_MUSIC"]),
-    ...mapActions(["musicLrc"]),
+    ...mapActions(["setMusic",'setShowLrcPop']),
     applyLrc(lrc) {
       if (/^https?:\/\//.test(lrc)) {
         this.fetchLrc(lrc);
@@ -128,10 +127,10 @@ export default {
       if (this.playType !== "PLAY_LIST") return;
       this.currentLineIndex = 0;
       const lrc = this.currentMusic.lrc;
-      this.SET_SHOWLRCPOP(!this.showLrcPop);
+      this.setShowLrcPop(!this.showLrcPop);
       if (!lrc) {
-        const res = await this.musicLrc(this.currentMusic.id);
-        this.SET_MUSIC({ lrc: res });
+        const res = await this.$utils.musicLrc(this.currentMusic.id);
+        this.setMusic({ lrc: res });
         console.log("this.currentMusic.lrc", this.currentMusic.lrc);
         this.applyLrc(res);
       } else {

@@ -168,7 +168,7 @@
 </template>
 
 <script>
-import { mapActions, mapMutations } from "vuex";
+import { mapActions } from "vuex";
 import vPinyin from "@/assets/js/vue-py.js";
 import { remote } from "electron";
 const { Menu, MenuItem } = remote;
@@ -264,12 +264,10 @@ export default {
     },
   },
   methods: {
-    ...mapMutations([
-      "SET_PLAYLIST",
-      "SET_MUSICLIST",
-      "SET_SET_PLAYLIST_TRACKS",
+    ...mapActions([
+      "setMusicList",
+      "setPlayList",
     ]),
-    ...mapActions(["musicDetail", "getMenuDetail", "canUse", "musicUrl"]),
     add0(m) {
       return m < 10 ? "0" + m : m;
     },
@@ -300,7 +298,7 @@ export default {
         }
       });
       // this.activeItem = "";
-      this.SET_MUSICLIST({
+      this.setMusicList({
         musicList,
         currentMusic: { ...item, menuId: this.menuItem.id },
       });
@@ -482,6 +480,17 @@ export default {
         }
       });
     },
+    getMenuDetail(id) {
+      return this.$axios({
+        type: "get",
+        url: `/playlist/detail?id=${id}`,
+      }).then(async ({code,playlist}) => {
+        if (code === 200) {
+          console.log("获取歌单详情", playlist);
+          return playlist;
+        }
+      });
+    },
     async renderPage() {
       this.pageActive = 0;
       this.activeItem = "";
@@ -489,15 +498,10 @@ export default {
       try {
         if (!this.tracks) {
           //无缓存数据，重新获取
-          // this.$store.dispatch('someAsyncTask')
-          // console.log("00",this.$store.state.Counter.main);
           const playlist = await this.getMenuDetail(this.id);
-          // const idArr = playlist.trackIds.map(el=>el.id)
-          // const urls = await this.musicUrl(idArr)
-          // console.log("urls",urls);
           const arr = playlist.tracks.map((el) => {
             return new Promise((resolve) => {
-              this.canUse(el.id).then((res) => {
+              this.$utils.canUse(el.id).then((res) => {
                 el.canUse = res;
                 el.check = true;
                 el.sortTitle = vPinyin.chineseToPinYin(el.name);
@@ -510,8 +514,7 @@ export default {
             });
           });
           await Promise.all(arr);
-          this.SET_PLAYLIST(playlist);
-          console.log("playlist", playlist);
+          this.setPlayList(playlist);
         } else {
           //todo 有缓存数据先展示缓存，后台刷新列表？
           // this.getMenuDetail(_this.id);

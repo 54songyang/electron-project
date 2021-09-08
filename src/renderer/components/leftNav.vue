@@ -137,7 +137,7 @@
 </template>
 
 <script>
-import { mapActions, mapMutations } from "vuex";
+import { mapActions } from "vuex";
 import { remote } from "electron";
 const { Menu, MenuItem } = remote;
 export default {
@@ -163,11 +163,11 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(["SET_PAGEACTIVE"]),
-    ...mapActions(["getUserDetail"]),
-    selectPage(item, index, id) {
-      this.SET_PAGEACTIVE(index);
+    ...mapActions(["getUserDetail","setPageActive"]),
+    async selectPage(item, index, id) {
+      await this.setPageActive(index);
       if (id) {
+        console.log("route",this.$router);
         this.$router.push(`/ownMenu${item.id}?id=${item.id}`);
       } else {
         this.$router.push(item.name);
@@ -319,7 +319,7 @@ export default {
     const pageNav = this.$route.meta.pageNav;
     window.addEventListener("beforeunload", (e) => this.beforeunloadFn(e));
     const oldActive = localStorage.getItem("active");
-    this.SET_PAGEACTIVE(pageNav <= 11 ? pageNav : Number(oldActive) || 0);
+    this.setPageActive(pageNav <= 11 ? pageNav : Number(oldActive) || 0);
   },
 };
 </script>

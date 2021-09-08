@@ -43,7 +43,7 @@
 
 <script>
 import { remote } from "electron";
-import { mapMutations } from "vuex";
+import { mapActions } from "vuex";
 const { Menu, MenuItem } = remote;
 export default {
   name: "ownFm",
@@ -65,7 +65,7 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(["SET_MUSICLIST", "SET_PLAYING"]),
+    ...mapActions(['setMusicList']),
     imgLazy(src, error) {
       return {
         src,
@@ -80,7 +80,7 @@ export default {
         currentMusic.dt = currentMusic.duration;
         currentMusic.url = `https://music.163.com/song/media/outer/url?id=${currentMusic.id}.mp3`;
         console.log("currentMusic", currentMusic);
-        this.SET_MUSICLIST({ currentMusic });
+        this.setMusicList({ currentMusic });
       }
     },
     //私人FM
@@ -182,7 +182,7 @@ export default {
       this.activeItem = index;
     },
     async selectsong(item, index) {
-      this.SET_MUSICLIST({
+      this.setMusicList({
         currentMusic: { ...item },
       });
     },

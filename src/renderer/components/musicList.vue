@@ -65,7 +65,7 @@
   </div>
 </template>
 <script>
-import { mapActions, mapMutations } from "vuex";
+import { mapActions } from "vuex";
 import { remote } from "electron";
 const { Menu, MenuItem } = remote;
 export default {
@@ -90,14 +90,13 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(["SET_MUSICLIST", "SET_LIST"]),
-    ...mapActions(["canUse", "musicDetail"]),
+    ...mapActions(["setList",'setMusicList']),
     scrollFn(e) {
       this.scrollTop = e.target.scrollTop;
     },
     clearList() {
       //清空当前音乐,清空播放列表
-      this.SET_LIST();
+      this.setList();
     },
     rightClick(item) {
       const _this = this;
@@ -187,7 +186,7 @@ export default {
       this.activeItem = index;
     },
     async selectsong(item, index) {
-      this.SET_MUSICLIST({
+      this.setMusicList({
         currentMusic: { ...item },
       });
     },

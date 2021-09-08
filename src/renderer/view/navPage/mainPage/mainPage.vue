@@ -219,7 +219,7 @@
         </template>
 
         <template #lookLive>
-          <div class="recommend-title" style="marginTop:30px">
+          <div class="recommend-title" style="margintop: 30px">
             <span class="hover-bright" @click="$router.push('djprogram')"
               >LOOK直播</span
             >
@@ -283,7 +283,7 @@
 import mySwiper from "@/components/my-swiper";
 import draggable from "vuedraggable";
 import mainList from "./mainList";
-import { mapActions, mapMutations } from "vuex";
+import { mapActions } from "vuex";
 export default {
   name: "mainPage",
   components: {
@@ -336,13 +336,15 @@ export default {
   methods: {
     ...mapActions([
       "getBanner",
-      "recommendList",
       "privatecontentList",
       "mvtList",
       "newsongList",
       "djprogramList",
+      "setDjProgram",
+      "setRecommendList",
+      "setPrivatecontentList",
+      "setMvData"
     ]),
-    ...mapMutations(["SET_DJPROGRAM"]),
     testff(val) {
       return val
         .map((el, i) => {
@@ -413,6 +415,43 @@ export default {
         { name: "LOOK直播", id: "lookLive", index: 5 },
       ];
     },
+  //推荐歌单
+    recommendList() {
+      return this.$axios({
+        url: "/personalized?limit=9",
+      }).then((res) => {
+        // console.log("推荐歌单", res);
+        if (res.code === 200) {
+          this.setRecommendList(res.result);
+        }
+      });
+    },
+    //独家放送
+  privatecontentList() {
+    return this.$axios({
+      url:
+        "/personalized/privatecontent?limit=4"
+    })
+      .then(res => {
+        // console.log("独家放送", res);
+        if (res.code === 200) {
+          this.setPrivatecontentList(res.result)
+        }
+      })
+  },
+  //推荐MV
+  mvtList() {
+    return this.$axios({
+      url:
+        "/personalized/mv"
+    })
+      .then(res => {
+        // console.log("推荐MV", res);
+        if (res.code === 200) {
+          this.setMvData(res.result)
+        }
+      })
+  },
   },
   filters: {
     numberFormat(val) {
@@ -428,7 +467,6 @@ export default {
     },
   },
   async mounted() {
-    // this.SET_DJPROGRAM([])
     try {
       await this.getBanner();
       await this.recommendList();
@@ -466,7 +504,7 @@ export default {
       padding-right: 30px;
       margin-bottom: 3px;
       font-weight: normal;
-      &>.hover-bright{
+      & > .hover-bright {
         cursor: pointer;
       }
       & span::after {

@@ -195,7 +195,8 @@ export const constantRoutes = [
   }
 ]
 const playlist = store.state.page.playlist
-const userRoute = store.state.page.ownRoutes;
+const arr = localStorage.getItem("ownRoutes");
+const userRoute = arr||[];
 const obj = {...constantRoutes[0]}
 const children = obj.children
 const createRouter = (type) => {
