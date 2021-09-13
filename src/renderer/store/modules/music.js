@@ -1,4 +1,3 @@
-import axios from 'axios'
 import utils from '../utils'
 const state = {
   currentMusic: null,//当前播放音乐
@@ -12,6 +11,11 @@ const state = {
   repeatType: 'no-repeat',//随机模式:no-repeat,repeat-one,repeat-all,repeat-random
   listFolded: false, //播放列表
   volume: 0.5,//音量 value >= 0 && value <= 1;
+  playStat: {
+    duration: 0,
+    loadedTime: 0,
+    playedTime: 0,
+  }, //播放统计
   showMusicList: false//是否显示歌曲列表
 }
 const getters = {
@@ -45,6 +49,9 @@ const mutations = {
   },
   SET_VOLUUME(state, val) {
     state.volume = val;
+  },
+  SET_PLAY_STAT(state,val){
+    state.playStat = val;
   },
   SET_PLAYING(state, val) {
     state.isPlaying = val
@@ -100,6 +107,9 @@ const actions = {
   setVoluume({ commit }, val) {
     commit('SET_VOLUUME', val)
   },
+  setPlayStat({ commit }, val) {
+    commit('SET_PLAY_STAT', val)
+  },
   setPlaying({ commit }, val) {
     commit('SET_PLAYING', val)
   },
@@ -116,9 +126,9 @@ const actions = {
     commit('SET_LIST', val)
   },
   setClearMusic({ commit }, val) {
-    console.log("3",);
     commit('SET_CLEARMUSIC', val)
   },
+  
 
   setRepeatType({ state, commit, getters }) {
     let arr = [];

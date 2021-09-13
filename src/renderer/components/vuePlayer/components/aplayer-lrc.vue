@@ -21,6 +21,10 @@ export default {
       type: Object,
       required: true,
     },
+    isMini: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -40,17 +44,32 @@ export default {
       return this.lrcLines[this.currentLineIndex];
     },
     transformStyle() {
-      if (this.currentLineIndex < 7) {
-        return {
-          transform: `translateY(${-this.currentLineIndex * 20}px)`,
-        };
+      if (this.isMini) {
+        if (this.currentLineIndex < 6) {
+          return {
+            transform: `translateY(${-this.currentLineIndex * 20}px)`,
+          };
+        } else {
+          return {
+            transform: `translateY(${-(
+              140 +
+              (this.currentLineIndex - 6) * 30
+            )}px)`,
+          };
+        }
       } else {
-        return {
-          transform: `translateY(${-(
-            140 +
-            (this.currentLineIndex - 7) * 40
-          )}px)`,
-        };
+        if (this.currentLineIndex < 7) {
+          return {
+            transform: `translateY(${-this.currentLineIndex * 20}px)`,
+          };
+        } else {
+          return {
+            transform: `translateY(${-(
+              140 +
+              (this.currentLineIndex - 7) * 40
+            )}px)`,
+          };
+        }
       }
     },
     playIndex() {
@@ -82,7 +101,7 @@ export default {
       .removeEventListener("scroll", this.debounce(this.turnBack, 1000));
   },
   methods: {
-    ...mapActions(["setMusic",'setShowLrcPop']),
+    ...mapActions(["setMusic", "setShowLrcPop"]),
     applyLrc(lrc) {
       if (/^https?:\/\//.test(lrc)) {
         this.fetchLrc(lrc);
@@ -131,7 +150,6 @@ export default {
       if (!lrc) {
         const res = await this.$utils.musicLrc(this.currentMusic.id);
         this.setMusic({ lrc: res });
-        console.log("this.currentMusic.lrc", this.currentMusic.lrc);
         this.applyLrc(res);
       } else {
         this.applyLrc(lrc);

@@ -1,7 +1,7 @@
 <template>
-  <div :class="isMini && 'mini-pic-body'">
-    <div :class="['aplayer-pic', isMini && 'mini-aplayer-pic']">
-      <div v-if="!isMini" class="collection" @click="toCollection"></div>
+  <div>
+    <div class="aplayer-pic">
+      <div class="collection" @click="toCollection"></div>
       <div class="next" @click="prev"></div>
       <div
         class="aplayer-button"
@@ -15,7 +15,7 @@
         ></div>
       </div>
       <div class="prev" @click="next"></div>
-      <div class="share" v-if="!isMini"></div>
+      <div class="share"></div>
     </div>
   </div>
 </template>
@@ -29,11 +29,6 @@ export default {
   },
   props: {
     theme: String,
-    isMini: {
-      //是否是迷你模式
-      type: Boolean,
-      default: false,
-    },
     playing: {
       type: Boolean,
       default: false,
@@ -90,6 +85,7 @@ export default {
       this.$emit("dragend");
     },
     onClick() {
+      //todo 配置键盘快捷键
       if (!this.hasMovedSinceMouseDown) {
         this.$emit("toggleplay");
       }
@@ -236,30 +232,6 @@ export default {
       background: url(~@/assets/images/end-btn.png) center center no-repeat;
       background-size: 22px 22px;
     }
-  }
-}
-.mini-pic-body {
-  display: none;
-}
-.mini-aplayer-pic {
-  max-width: 91px;
-  height: 38px;
-  margin-left: 30px;
-  .aplayer-play,
-  .aplayer-pause {
-    width: 28px;
-    height: 28px;
-    .aplayer-icon-play {
-      background-size: 18px;
-    }
-    .aplayer-icon-pause {
-      background-size: 18px;
-    }
-  }
-  .next,
-  .prev {
-    width: 10px;
-    height: 10px;
   }
 }
 </style>

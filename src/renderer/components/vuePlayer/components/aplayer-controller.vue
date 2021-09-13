@@ -1,7 +1,6 @@
 <template>
    <div class="aplayer-controller">
     <v-progress
-      :isMini="isMini"
       :loadProgress="loadProgress"
       :playProgress="playProgress"
       :theme="theme"
@@ -9,7 +8,7 @@
       @dragend="(val) => $emit('dragend', val)"
       @dragging="(val) => $emit('dragging', val)"
     />
-    <div v-if="!isMini" class="aplayer-time">
+    <div class="aplayer-time">
       <div class="aplayer-time-inner">
         <span class="aplayer-ptime">{{ secondToTime(stat.playedTime) }}</span> /
         <!-- <span class="aplayer-dtime">{{secondToTime(stat.duration)}}</span> -->
@@ -22,13 +21,14 @@
 <script>
 import IconButton from "../components/aplayer-iconbutton.vue";
 import VProgress from "../components/aplayer-controller-progress.vue";
+import { mapActions } from 'vuex';
 
 export default {
   components: {
     IconButton,
     VProgress,
   },
-  props: ["isMini", "shuffle", "stat", "theme", "muted", "dt"],
+  props: ["shuffle", "stat", "theme", "muted", "dt"],
   computed: {
     loadProgress() {
       if (this.stat.duration === 0) return 0;
@@ -40,6 +40,7 @@ export default {
     },
   },
   methods: {
+    ...mapActions(['setLoadProgress','setPlayProgress']),
     secondToTime(second) {
       if (isNaN(second)) {
         return "00:00";

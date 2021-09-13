@@ -44,7 +44,7 @@ function createWindow() {
 //开启小窗口
 function openMiniWin() {
   miniWindow = new BrowserWindow({
-    width: 334,
+    width: 335,
     height: 50,
     x: 1002,
     y: 100,
@@ -146,6 +146,21 @@ ipcMain.on('closeLogin', () => {
 ipcMain.on('toLogin', (e, message) => {
   mainWindow.webContents.send('toLogin', message);
 })
+
+//todo 播放器事件
+ipcMain.on('toggleplay', (e, message) => {
+  mainWindow.webContents.send('toggleplay', message);
+})
+ipcMain.on('onProgressDragBegin', (e, message) => {
+  mainWindow.webContents.send('onProgressDragBegin', message);
+})
+ipcMain.on('onProgressDragging', (e, message) => {
+  mainWindow.webContents.send('onProgressDragging', message);
+})
+ipcMain.on('onProgressDragEnd', (e, message) => {
+  mainWindow.webContents.send('onProgressDragEnd', message);
+})
+//todo
 
 app.on('ready', () => {
   createWindow();

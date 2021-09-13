@@ -18,7 +18,11 @@
     >
       <i :class="[showLrcPop ? 'retract-pop' : 'open-pop']"></i>
       <div class="blur-box">
-        <img v-if="currentMusic" :src="currentMusic.al.picUrl" alt />
+        <img
+          v-if="currentMusic && currentMusic.al"
+          :src="currentMusic.al.picUrl"
+          alt
+        />
       </div>
     </div>
     <div class="aplayer-body">
@@ -49,7 +53,7 @@
           }}</span>
           <span class="aplayer-author hover-bright"
             >-{{
-              currentMusic
+              currentMusic && currentMusic.ar
                 ? currentMusic.ar.map((el) => el.name).join("/")
                 : "Unknown"
             }}</span
@@ -95,7 +99,10 @@
           <img src="@/assets/images/pointer.png" alt />
         </div>
         <div class="dish">
-          <img v-if="currentMusic" :src="currentMusic.al.picUrl" />
+          <img
+            v-if="currentMusic && currentMusic.al"
+            :src="currentMusic.al.picUrl"
+          />
         </div>
         <div class="lyrics-btn-box">
           <div class="sc"></div>
@@ -105,7 +112,7 @@
         </div>
       </div>
       <div class="lyrics-info">
-        <div class="head-box" v-if="currentMusic">
+        <div class="head-box" v-if="currentMusic && currentMusic.name">
           <div class="lyrics-name">{{ currentMusic.name }}</div>
           <div class="info-box">
             <div>
@@ -418,14 +425,6 @@ const VueAPlayer = {
       }
       return {};
     },
-    loadProgress() {
-      if (this.playStat.duration === 0) return 0;
-      return this.playStat.loadedTime / this.playStat.duration;
-    },
-    playProgress() {
-      if (this.playStat.duration === 0) return 0;
-      return this.playStat.playedTime / this.playStat.duration;
-    },
 
     // since 1.4.0
     // sync muted, volume
@@ -487,7 +486,8 @@ const VueAPlayer = {
       "setVoluume",
       "setPlaying",
       "setMusicList",
-      "setShowMusicList"
+      "setShowMusicList",
+      "setPlayStat",
     ]),
     // Float mode
     onDragBegin() {
@@ -865,6 +865,12 @@ const VueAPlayer = {
         // self-adapting theme color
       },
     },
+    playStat: {
+      handler(val) {
+        this.setPlayStat(val);
+      },
+      deep: true,
+    },
 
     // since 1.4.0
     // observe controls, muted, preload, volume
@@ -902,6 +908,18 @@ const VueAPlayer = {
     //初始化并播放
     this.initAudio();
     if (this.autoplay) this.play();
+    this.$electron.ipcRenderer.on("toggleplay", (e, message) => {
+      this.toggle();
+    });
+    this.$electron.ipcRenderer.on("onProgressDragBegin", (e, message) => {
+      this.onProgressDragBegin(message);
+    });
+    this.$electron.ipcRenderer.on("onProgressDragging", (e, message) => {
+      this.onProgressDragging(message);
+    });
+    this.$electron.ipcRenderer.on("onProgressDragEnd", (e, message) => {
+      this.onProgressDragEnd(message);
+    });
   },
   beforeDestroy() {
     if (activeMutex === this) {
