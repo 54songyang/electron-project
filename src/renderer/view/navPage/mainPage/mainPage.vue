@@ -217,36 +217,6 @@
             </div>
           </div>
         </template>
-
-        <template #lookLive>
-          <div class="recommend-title" style="margintop: 30px">
-            <span class="hover-bright" @click="$router.push('djprogram')"
-              >LOOK直播</span
-            >
-          </div>
-          <div class="main-item">
-            <!-- 暂未找到接口 -->
-            <!-- <div
-              class="list-item djprogram-item"
-              v-for="item in djprogram"
-              :key="item.id"
-            >
-              <div class="djprogram-box">
-                <div class="img-box">
-                  <img v-lazy="imgLazy(item.picUrl, 0)" />
-                </div>
-                <div class="djprogram-detail">
-                  <div class="djprogram-name hover-bright vertical-word-1">
-                    {{ item.name }}
-                  </div>
-                  <div class="hover-bright vertical-word-1">
-                    {{ item.copywriter }}
-                  </div>
-                </div>
-              </div>
-            </div> -->
-          </div>
-        </template>
       </mainList>
     </div>
 
@@ -301,7 +271,6 @@ export default {
         { name: "最新音乐", id: "newsong", index: 2 },
         { name: "推荐MV", id: "personalizedMv", index: 3 },
         { name: "主播电台", id: "djprogram", index: 4 },
-        { name: "LOOK直播", id: "lookLive", index: 5 },
       ],
       changeArr: [
         { name: "推荐歌单", id: "songSheet", index: 0 },
@@ -309,7 +278,6 @@ export default {
         { name: "最新音乐", id: "newsong", index: 2 },
         { name: "推荐MV", id: "personalizedMv", index: 3 },
         { name: "主播电台", id: "djprogram", index: 4 },
-        { name: "LOOK直播", id: "lookLive", index: 5 },
       ],
     };
   },
@@ -412,7 +380,6 @@ export default {
         { name: "最新音乐", id: "newsong", index: 2 },
         { name: "推荐MV", id: "personalizedMv", index: 3 },
         { name: "主播电台", id: "djprogram", index: 4 },
-        { name: "LOOK直播", id: "lookLive", index: 5 },
       ];
     },
   //推荐歌单

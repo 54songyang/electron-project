@@ -85,7 +85,7 @@
               <div class="sc"></div>
               <div class="tj" @click="showListFn"></div>
               <div :class="showLrc ? 'red' : 'xz'" @click="showLrcFn"></div>
-              <div class="fx"></div>
+              <div class="fx" @click="adjustVolume"></div>
             </div>
           </div>
           <div
@@ -115,15 +115,27 @@
         </div>
       </div>
       <div class="aplayer-big-box" v-show="miniSpread">
-        <img
-          v-lazy="{
-            src: currentMusic && currentMusic.al ? currentMusic.al.picUrl : '',
-            error: defaultImg2,
-          }"
-          alt
-        />
+        <div class="bg-img-box">
+          <img
+            :class="showLrc && 'show-lrc-img'"
+            v-lazy="{
+              src:
+                currentMusic && currentMusic.al ? currentMusic.al.picUrl : '',
+              error: defaultImg2,
+            }"
+            alt
+          />
+        </div>
         <div class="music-lrc" v-show="showLrc">
-          <lyrics ref="lyrics" :play-stat="playStat" :isMini='true' />
+          <lyrics
+            ref="lyrics"
+            v-show="currentMusic && currentMusic.lrc"
+            :play-stat="playStat"
+            :isMini="true"
+          />
+          <div class="no-lrc" v-show="currentMusic && !currentMusic.lrc">
+            网易云音乐
+          </div>
         </div>
       </div>
     </div>
@@ -205,8 +217,8 @@ export default {
     playOrder() {
       return this.$store.state.music.playOrder;
     },
-    playStat(){
-      return this.$store.state.music.playStat
+    playStat() {
+      return this.$store.state.music.playStat;
     },
     playProgress() {
       if (this.playStat.duration === 0) return 0;
@@ -234,6 +246,7 @@ export default {
           remote.getCurrentWindow().setSize(335, 535);
         } else {
           remote.getCurrentWindow().setSize(335, 335);
+          // remote.getCurrentWindow().setPosition(0,0,335,0)
         }
       }
       this.miniSpread = !this.miniSpread;
@@ -256,9 +269,14 @@ export default {
     },
     showLrcFn() {
       //开关歌词
-      this.$refs.lyrics.lyricsChannel()
+      this.$refs.lyrics.lyricsChannel();
+      if (this.showList) {
+        remote.getCurrentWindow().setSize(335, 535);
+      } else {
+        remote.getCurrentWindow().setSize(335, 335);
+      }
+      this.miniSpread = true;
       this.showLrc = !this.showLrc;
-      // console.log("000",this.);
     },
     onClick() {
       if (!this.hasMovedSinceMouseDown) {
@@ -483,6 +501,9 @@ export default {
       // 展示出来
       menu.popup(remote.getCurrentWindow());
     },
+    adjustVolume() {
+      
+    },
     async selectsong(item, index) {
       this.setMusicList({
         currentMusic: { ...item },
@@ -493,20 +514,20 @@ export default {
     },
   },
   created() {
-    const [x, y] = remote.getCurrentWindow().getSize();
-    if (x === 335 && y === 50) {
+    const [w, h] = remote.getCurrentWindow().getSize();
+    if (w === 335 && h === 50) {
       //原窗口
       this.miniSpread = false;
       this.showList = false;
-    } else if (y === 250) {
+    } else if (h === 250) {
       //仅显示列表
       this.miniSpread = false;
       this.showList = true;
-    } else if (y === 335) {
+    } else if (h === 335) {
       //仅显示歌词
       this.miniSpread = true;
       this.showList = false;
-    } else if (y === 585) {
+    } else if (h === 535) {
       //开启歌词和列表
       this.miniSpread = true;
       this.showList = true;
@@ -545,13 +566,20 @@ export default {
       }
     }
     .aplayer-big-box {
-      img {
+      .bg-img-box {
         position: fixed;
         top: 0;
         left: 0;
         z-index: 1000;
-        display: block;
-        width: 335px;
+        overflow: hidden;
+        img {
+          display: block;
+          width: 335px;
+          height: 335px;
+        }
+      }
+      .show-lrc-img {
+        filter: blur(20px);
       }
       .music-lrc {
         position: fixed;
@@ -561,16 +589,22 @@ export default {
         display: block;
         width: 335px;
         height: 335px;
-        background: rgba(66, 66, 66, 0.9);
-        .aplayer-lrc{
+        background: rgba(44, 44, 44, 0.6);
+        .aplayer-lrc {
           width: 100%;
           height: 100%;
           text-align: center;
           font-size: 13.5px;
           line-height: 30px;
-          .aplayer-lrc-contents{
-            margin-top:110px;
+          .aplayer-lrc-contents {
+            margin-top: 110px;
           }
+        }
+        .no-lrc {
+          font-size: 16px;
+          text-align: center;
+          line-height: 335px;
+          color: rgb(128, 128, 128);
         }
       }
     }

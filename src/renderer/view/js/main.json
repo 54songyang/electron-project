@@ -28,12 +28,12 @@
       "name":"downLoadNav"
     },
     {
-      "nav": "我的音乐云盘",
-      "name":"cloudNav"
+      "nav": "最近播放",
+      "name":"radioNav"
     },
     {
-      "nav": "我的电台",
-      "name":"radioNav"
+      "nav": "我的音乐云盘",
+      "name":"cloudNav"
     },
     {
       "nav": "我的收藏",

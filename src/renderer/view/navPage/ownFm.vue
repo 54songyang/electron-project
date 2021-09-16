@@ -28,11 +28,13 @@
         <div class="music-name">{{ currentMusic.name }}<em>标准音质</em></div>
         <div class="tip-box">
           <div>
-            专辑：<span>{{ currentMusic.al.name }}</span>
+            专辑：<span>{{ currentMusic.al ? currentMusic.al.name : "" }}</span>
           </div>
           <div>
             歌手：<span>{{
-              currentMusic.ar.map((el) => el.name).join("/")
+              currentMusic.ar
+                ? currentMusic.ar.map((el) => el.name).join("/")
+                : ""
             }}</span>
           </div>
         </div>
@@ -65,7 +67,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['setMusicList']),
+    ...mapActions(["setMusicList"]),
     imgLazy(src, error) {
       return {
         src,

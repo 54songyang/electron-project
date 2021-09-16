@@ -90,7 +90,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(["setList",'setMusicList']),
+    ...mapActions(["setList", "setMusicList"]),
     scrollFn(e) {
       this.scrollTop = e.target.scrollTop;
     },

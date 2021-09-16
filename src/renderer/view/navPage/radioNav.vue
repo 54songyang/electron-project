@@ -1,5 +1,5 @@
 <template>
-  <div>我的电台</div>
+  <div>最近播放</div>
 </template>
 
 <script>

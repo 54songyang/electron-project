@@ -61,21 +61,21 @@ export const constantRoutes = [
         }
       },
       {
-        path: '/cloudNav',
-        name: 'cloudNav',
-        component: require('@/view/navPage/cloudNav').default,
-        meta: {
-          pageNav: 7,
-          pageTitle: '我的音乐云盘'
-        }
-      },
-      {
         path: '/radioNav',
         name: 'radioNav',
         component: require('@/view/navPage/radioNav').default,
         meta: {
+          pageNav: 7,
+          pageTitle: '最近播放'
+        }
+      },
+      {
+        path: '/cloudNav',
+        name: 'cloudNav',
+        component: require('@/view/navPage/cloudNav').default,
+        meta: {
           pageNav: 8,
-          pageTitle: '我的电台'
+          pageTitle: '我的音乐云盘'
         }
       },
       {

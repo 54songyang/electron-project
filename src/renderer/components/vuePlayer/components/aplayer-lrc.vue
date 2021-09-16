@@ -145,10 +145,11 @@ export default {
     async lyricsChannel() {
       if (this.playType !== "PLAY_LIST") return;
       this.currentLineIndex = 0;
-      const lrc = this.currentMusic.lrc;
+      const { lrc = null, id = null } = this.currentMusic || {};
       this.setShowLrcPop(!this.showLrcPop);
       if (!lrc) {
-        const res = await this.$utils.musicLrc(this.currentMusic.id);
+        if (!id) return;
+        const res = await this.$utils.musicLrc(id);
         this.setMusic({ lrc: res });
         this.applyLrc(res);
       } else {

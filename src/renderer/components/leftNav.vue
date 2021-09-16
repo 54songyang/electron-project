@@ -167,7 +167,6 @@ export default {
     async selectPage(item, index, id) {
       await this.setPageActive(index);
       if (id) {
-        console.log("route",this.$router);
         this.$router.push(`/ownMenu${item.id}?id=${item.id}`);
       } else {
         this.$router.push(item.name);
