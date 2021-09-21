@@ -695,6 +695,7 @@ export default {
             cursor: default;
             margin: 6px 0 0 0px;
             height: 32px;
+            max-width: 44vw;
             .aplayer-title {
               display: block;
               color: rgb(190, 190, 190);
@@ -710,6 +711,10 @@ export default {
               display: block;
               font-size: 10px;
               color: rgb(146, 146, 146);
+              white-space: nowrap;
+              text-overflow: ellipsis;
+              overflow: hidden;
+              word-break: break-all;
               i {
                 display: inline-block;
                 font-size: 8px;

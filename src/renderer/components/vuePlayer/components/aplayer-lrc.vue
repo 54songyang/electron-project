@@ -45,7 +45,7 @@ export default {
     },
     transformStyle() {
       if (this.isMini) {
-        if (this.currentLineIndex < 6) {
+        if (this.currentLineIndex < 7) {
           return {
             transform: `translateY(${-this.currentLineIndex * 20}px)`,
           };
@@ -53,7 +53,7 @@ export default {
           return {
             transform: `translateY(${-(
               140 +
-              (this.currentLineIndex - 6) * 30
+              (this.currentLineIndex - 7) * 30
             )}px)`,
           };
         }
