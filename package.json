@@ -57,7 +57,7 @@
   },
   "dependencies": {
     "@clampy-js/vue-clampy": "^1.0.6",
-    "axios": "^0.18.0",
+    "axios": "^0.21.2",
     "electron-store": "^7.0.2",
     "hls.js": "^0.13.3-canary.5470",
     "vue": "^2.5.16",
