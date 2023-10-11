@@ -1,5 +1,6 @@
 import axios from 'axios'
-axios.defaults.baseURL = "http://www.await.site/music/";
+// axios.defaults.baseURL = "http://www.await.site/music/";
+axios.defaults.baseURL = "http://localhost:3000";
 axios.defaults.withCredentials = true// 允许跨域设置，不然可能因为拿不到cookie而报错
 /*请求拦截*/
 axios.interceptors.request.use(

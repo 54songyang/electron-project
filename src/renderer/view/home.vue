@@ -496,6 +496,19 @@ body {
   overflow-x: hidden;
   z-index: 0;
   margin: 51px 0 0 196px;
+  &::-webkit-scrollbar{
+    width:5px;
+    height:16px;
+    background-color:#202020;;
+  }
+  &::-webkit-scrollbar-track{
+    background-color:#252525;
+  }
+  &::-webkit-scrollbar-thumb{
+    border-radius:10px;
+    box-shadow:inset 0 0 6px rgba(0,0,0,.3);
+    background-color:#555;
+  }
 }
 .main-over {
   overflow-y: hidden;

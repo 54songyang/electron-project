@@ -381,6 +381,19 @@ export default {
     height: calc(100% - 66px);
     min-height: calc(100% - 66px);
     flex: 1;
+    &::-webkit-scrollbar{
+      width:5px;
+      height:16px;
+      background-color:#202020;;
+    }
+    &::-webkit-scrollbar-track{
+      background-color:#202020;
+    }
+    &::-webkit-scrollbar-thumb{
+      border-radius:10px;
+      box-shadow:inset 0 0 6px rgba(0,0,0,.3);
+      background-color:#555;
+    }
     & > div {
       display: flex;
       align-items: center;
